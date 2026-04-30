@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { updateTeacherProfile, type ProfileData } from "@/lib/actions/profile";
+import { updateTeacherProfile, uploadTeacherCover, type ProfileData } from "@/lib/actions/profile";
 import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 import type { TeacherDetail } from "@/lib/database.types";
 import Link from "next/link";
@@ -221,20 +221,54 @@ export default function ProfileEditForm({
             />
           </div>
 
-          {/* Cover Image */}
+          {/* Cover Image Upload */}
           <div>
-            <label htmlFor="cover_image" className="mb-1.5 block text-sm font-medium text-foreground/80">
+            <label className="mb-1.5 block text-sm font-medium text-foreground/80">
               Foto de Portada (Opcional)
             </label>
-            <p className="mb-2 text-xs text-foreground/50">
-              Copiá y pegá el link de una imagen. Se mostrará en tu perfil público.
+            <p className="mb-4 text-xs text-foreground/50">
+              Subí una foto para tu cabecera. Se recomienda una imagen horizontal.
             </p>
-            <input
-              type="text" id="cover_image"
-              {...register("cover_image")}
-              placeholder="https://ejemplo.com/tu-foto.jpg"
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
+            
+            <div className="flex flex-col gap-4">
+              {watch("cover_image") && (
+                <div className="relative aspect-[16/5] w-full overflow-hidden rounded-xl border border-brand-100 bg-brand-50 shadow-inner dark:border-surface-dark-alt dark:bg-surface-dark/50">
+                  <img
+                    src={watch("cover_image")}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+              
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  
+                  setErrorMsg("");
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  
+                  const result = await uploadTeacherCover(formData);
+                  if (result.error) {
+                    setErrorMsg(result.error);
+                  } else if (result.url) {
+                    setValue("cover_image", result.url);
+                  }
+                }}
+                className="block w-full text-sm text-foreground/50
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-brand-50 file:text-brand-700
+                  hover:file:bg-brand-100
+                  dark:file:bg-brand-900/20 dark:file:text-brand-300"
+              />
+              <input type="hidden" {...register("cover_image")} />
+            </div>
           </div>
 
           {/* Specialties */}

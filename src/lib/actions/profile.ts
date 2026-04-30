@@ -111,17 +111,36 @@ export async function updateStudentProfile(data: StudentProfileData) {
   redirect("/dashboard");
 }
 
-export async function updateTeacherCover(coverUrl: string | null) {
+export async function uploadTeacherCover(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: "No estás autenticado." };
 
-  const { error } = await supabase
+  const file = formData.get("file") as File;
+  if (!file || file.size === 0) return { error: "No se seleccionó ningún archivo." };
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${user.id}/cover-${Date.now()}.${fileExt}`;
+
+  // Upload to 'teacher-covers' bucket
+  const { error: uploadError } = await supabase.storage
+    .from("teacher-covers")
+    .upload(fileName, file, { upsert: true });
+
+  if (uploadError) return { error: `Error al subir: ${uploadError.message}` };
+
+  const { data: { publicUrl } } = supabase.storage
+    .from("teacher-covers")
+    .getPublicUrl(fileName);
+
+  // Update teacher_details
+  const { error: updateError } = await supabase
     .from("teacher_details")
-    .update({ cover_image: coverUrl })
+    .update({ cover_image: publicUrl })
     .eq("id", user.id);
 
-  if (error) return { error: error.message };
-  return { success: true };
+  if (updateError) return { error: updateError.message };
+
+  return { url: publicUrl };
 }
