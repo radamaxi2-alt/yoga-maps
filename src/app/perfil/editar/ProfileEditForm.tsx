@@ -65,6 +65,7 @@ type FormValues = {
   specialties: string[];
   average_price: number | "";
   address: string;
+  cover_image: string;
 };
 
 export default function ProfileEditForm({
@@ -95,6 +96,7 @@ export default function ProfileEditForm({
       specialties: details?.specialties || [],
       average_price: details?.average_price || "",
       address: details?.address || "",
+      cover_image: details?.cover_image || "",
     },
   });
 
@@ -121,6 +123,7 @@ export default function ProfileEditForm({
         address: data.address || null,
         latitude: lat || null,
         longitude: lng || null,
+        cover_image: data.cover_image || null,
       };
 
       const result = await updateTeacherProfile(payload);
@@ -215,6 +218,22 @@ export default function ProfileEditForm({
               {...register("bio")}
               placeholder={selectedType === "escuela" ? "Contá sobre la historia del centro, enfoque..." : "Contá sobre tu experiencia y formación..."}
               className="w-full resize-none rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            />
+          </div>
+
+          {/* Cover Image */}
+          <div>
+            <label htmlFor="cover_image" className="mb-1.5 block text-sm font-medium text-foreground/80">
+              Foto de Portada (Opcional)
+            </label>
+            <p className="mb-2 text-xs text-foreground/50">
+              Copiá y pegá el link de una imagen. Se mostrará en tu perfil público.
+            </p>
+            <input
+              type="text" id="cover_image"
+              {...register("cover_image")}
+              placeholder="https://ejemplo.com/tu-foto.jpg"
+              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
             />
           </div>
 

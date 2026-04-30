@@ -118,12 +118,14 @@ export default async function ClasesPage() {
                         👨‍🏫 {cls.instructor_name}
                       </span>
                     )}
-                    <CalendarButton 
-                      title={cls.title} 
-                      scheduledAt={cls.scheduled_at} 
-                      description={cls.description || ""} 
-                      location={cls.jitsi_room_link || cls.address || ""} 
-                    />
+                    {hasReserved && (
+                      <CalendarButton 
+                        title={cls.title} 
+                        scheduledAt={cls.scheduled_at} 
+                        description={cls.description || ""} 
+                        location={cls.jitsi_room_link || cls.address || ""} 
+                      />
+                    )}
                   </div>
 
                   {cls.is_full && !hasReserved && (

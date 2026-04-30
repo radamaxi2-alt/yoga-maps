@@ -2,10 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import ProfileEditForm from "./ProfileEditForm";
+import StudentProfileForm from "./StudentProfileForm";
 
 export const metadata: Metadata = {
   title: "Editar Perfil",
-  description: "Editá tu perfil de profesor en Yoga Maps.",
+  description: "Editá tu perfil en Yoga Maps.",
 };
 
 export default async function PerfilEditarPage() {
@@ -22,18 +23,35 @@ export default async function PerfilEditarPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "profesor") redirect("/");
+  if (!profile) redirect("/");
 
-  const { data: details } = await supabase
-    .from("teacher_details")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  if (profile.role === "profesor") {
+    const { data: details } = await supabase
+      .from("teacher_details")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-  return (
-    <ProfileEditForm
-      fullName={profile.full_name || ""}
-      details={details}
-    />
-  );
+    return (
+      <ProfileEditForm
+        fullName={profile.full_name || ""}
+        details={details}
+      />
+    );
+  } else if (profile.role === "alumno") {
+    const { data: details } = await supabase
+      .from("student_details")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    return (
+      <StudentProfileForm
+        fullName={profile.full_name || ""}
+        details={details}
+      />
+    );
+  }
+
+  redirect("/");
 }

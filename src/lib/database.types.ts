@@ -55,6 +55,7 @@ export interface Database {
           address: string | null;
           average_price: number | null;
           teacher_type: string | null;
+          cover_image: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -67,6 +68,7 @@ export interface Database {
           address?: string | null;
           average_price?: number | null;
           teacher_type?: string | null;
+          cover_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -79,6 +81,7 @@ export interface Database {
           address?: string | null;
           average_price?: number | null;
           teacher_type?: string | null;
+          cover_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -157,6 +160,104 @@ export interface Database {
           }
         ];
       };
+      student_details: {
+        Row: {
+          id: string;
+          bio: string | null;
+          health_info: string | null;
+        };
+        Insert: {
+          id: string;
+          bio?: string | null;
+          health_info?: string | null;
+        };
+        Update: {
+          id?: string;
+          bio?: string | null;
+          health_info?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_details_id_fkey";
+            columns: ["id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      class_reservations: {
+        Row: {
+          id: string;
+          class_id: string;
+          student_id: string;
+          status: "confirmed" | "cancelled";
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          class_id: string;
+          student_id: string;
+          status?: "confirmed" | "cancelled";
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          class_id?: string;
+          student_id?: string;
+          status?: "confirmed" | "cancelled";
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "class_reservations_class_id_fkey";
+            columns: ["class_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "class_reservations_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      post_likes: {
+        Row: {
+          post_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          post_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          post_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "post_likes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       posts: {
         Row: {
           id: string;
@@ -224,5 +325,8 @@ export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
 // Convenience aliases
 export type Profile = Tables<"profiles">;
 export type TeacherDetail = Tables<"teacher_details">;
+export type StudentDetail = Tables<"student_details">;
 export type YogaClass = Tables<"classes">;
+export type ClassReservation = Tables<"class_reservations">;
 export type Post = Tables<"posts">;
+export type PostLike = Tables<"post_likes">;
