@@ -13,17 +13,22 @@ export default async function MapaPage() {
     .order("community_score", { ascending: false });
 
   // Reshape to match ProfesoresView expectations
-  const teachers = (teachersRaw || []).map((p: any) => ({
-    ...(p.teacher_details || {}),
-    id: p.id,
-    bio: p.teacher_details?.bio || "",
-    specialties: p.teacher_details?.specialties || [],
-    profiles: {
-      full_name: p.full_name,
-      avatar_url: p.avatar_url,
-      community_score: p.community_score
-    }
-  }));
+  const teachers = (teachersRaw || []).map((p: any) => {
+    // Supabase might return teacher_details as an array or an object depending on the FK config
+    const details = Array.isArray(p.teacher_details) ? p.teacher_details[0] : p.teacher_details;
+    
+    return {
+      ...(details || {}),
+      id: p.id,
+      bio: details?.bio || "",
+      specialties: details?.specialties || [],
+      profiles: {
+        full_name: p.full_name,
+        avatar_url: p.avatar_url,
+        community_score: p.community_score
+      }
+    };
+  });
 
   const { data: classes } = await supabase
     .from("classes")
