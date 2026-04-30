@@ -1,33 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import ProfesoresView from "@/app/profesores/ProfesoresView";
+import EventListView from "@/components/EventListView";
 
 export const dynamic = "force-dynamic";
 
-async function getCategoryData(category: string) {
+export default async function RetirosPage() {
   const supabase = await createClient();
   
-  const { data: teachers } = await supabase
-    .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url)");
-
-  const { data: classes } = await supabase
+  const { data: events } = await supabase
     .from("classes")
     .select("*")
-    .eq("category", category);
-
-  return { teachers: teachers || [], classes: classes || [] };
-}
-
-export default async function RetirosPage() {
-  const { teachers, classes } = await getCategoryData("retiro");
+    .eq("category", "retiro")
+    .order("scheduled_at", { ascending: true });
 
   return (
-    <div className="bg-surface">
-      <ProfesoresView 
-        teachers={teachers as any} 
-        classes={classes as any} 
-        initialCategory="retiro"
-      />
-    </div>
+    <EventListView 
+      events={events || []} 
+      title="Retiros de Yoga" 
+      subtitle="Escapadas espirituales y retiros de silencio en Mar del Plata y alrededores."
+    />
   );
 }

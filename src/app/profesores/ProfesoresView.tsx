@@ -13,7 +13,7 @@ const YogaMap = dynamic(() => import("@/components/YogaMap"), {
   ),
 });
 
-const DEFAULT_CENTER = { lat: -34.6037, lng: -58.3816 };
+const DEFAULT_CENTER = { lat: -38.0055, lng: -57.5426 };
 
 type TeacherWithProfile = {
   id: string;

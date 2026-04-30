@@ -1,33 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import ProfesoresView from "@/app/profesores/ProfesoresView";
+import EventListView from "@/components/EventListView";
 
 export const dynamic = "force-dynamic";
 
-async function getCategoryData(category: string) {
+export default async function ArmonizacionesPage() {
   const supabase = await createClient();
   
-  const { data: teachers } = await supabase
-    .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url)");
-
-  const { data: classes } = await supabase
+  const { data: events } = await supabase
     .from("classes")
     .select("*")
-    .eq("category", category);
-
-  return { teachers: teachers || [], classes: classes || [] };
-}
-
-export default async function ArmonizacionesPage() {
-  const { teachers, classes } = await getCategoryData("armonizacion");
+    .eq("category", "armonizacion")
+    .order("scheduled_at", { ascending: true });
 
   return (
-    <div className="bg-surface">
-      <ProfesoresView 
-        teachers={teachers as any} 
-        classes={classes as any} 
-        initialCategory="armonizacion"
-      />
-    </div>
+    <EventListView 
+      events={events || []} 
+      title="Armonizaciones" 
+      subtitle="Sesiones de cuencos, baños de gong y meditación sonora en Mar del Plata."
+    />
   );
 }

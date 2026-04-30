@@ -1,33 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import ProfesoresView from "@/app/profesores/ProfesoresView";
+import EventListView from "@/components/EventListView";
 
 export const dynamic = "force-dynamic";
 
-async function getCategoryData(category: string) {
+export default async function FormacionesPage() {
   const supabase = await createClient();
   
-  const { data: teachers } = await supabase
-    .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url)");
-
-  const { data: classes } = await supabase
+  const { data: events } = await supabase
     .from("classes")
     .select("*")
-    .eq("category", category);
-
-  return { teachers: teachers || [], classes: classes || [] };
-}
-
-export default async function FormacionesPage() {
-  const { teachers, classes } = await getCategoryData("formacion");
+    .eq("category", "formacion")
+    .order("scheduled_at", { ascending: true });
 
   return (
-    <div className="bg-surface">
-      <ProfesoresView 
-        teachers={teachers as any} 
-        classes={classes as any} 
-        initialCategory="formacion"
-      />
-    </div>
+    <EventListView 
+      events={events || []} 
+      title="Formaciones" 
+      subtitle="Profesorados y certificaciones para llevar tu conocimiento de yoga al siguiente nivel."
+    />
   );
 }
