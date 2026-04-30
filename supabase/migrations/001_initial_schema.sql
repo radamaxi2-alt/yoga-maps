@@ -14,7 +14,7 @@ CREATE TYPE public.user_role AS ENUM ('profesor', 'alumno');
 -- -------------------------------------------------------
 CREATE TABLE public.profiles (
   id         UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  role       public.user_role NOT NULL DEFAULT 'alumno',
+  role       public.user_role DEFAULT NULL,
   full_name  TEXT,
   avatar_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()

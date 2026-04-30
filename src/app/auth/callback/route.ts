@@ -30,14 +30,21 @@ export async function GET(request: Request) {
             .eq("id", user.id);
         }
 
-        // Check if profesor needs onboarding
+        // Check if user has a role assigned
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
           .single();
 
-        if (profile?.role === "profesor") {
+        // If no role and no roleParam, they logged in directly via OAuth -> go to role selection
+        if (!profile?.role && !roleParam) {
+          return NextResponse.redirect(new URL("/onboarding/rol", origin));
+        }
+
+        const effectiveRole = roleParam || profile?.role;
+
+        if (effectiveRole === "profesor") {
           const { data: teacherDetails } = await supabase
             .from("teacher_details")
             .select("id")
