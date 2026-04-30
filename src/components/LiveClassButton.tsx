@@ -5,20 +5,31 @@ import { useState } from "react";
 export default function LiveClassButton({ jitsiLink }: { jitsiLink: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Check if it's a Jitsi link. If not (like Google Meet or Zoom), we open externally.
+  const isJitsi = jitsiLink.toLowerCase().includes("jit.si") || jitsiLink.toLowerCase().includes("jitsi");
+
+  const handleClick = () => {
+    if (isJitsi) {
+      setIsOpen(true);
+    } else {
+      window.open(jitsiLink, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={handleClick}
         className="animate-pulse-glow inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-600 hover:shadow-lg"
       >
         <span className="relative flex h-2.5 w-2.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
         </span>
-        Clase en Vivo
+        {isJitsi ? "Clase en Vivo" : "Ver Online"}
       </button>
 
-      {isOpen && (
+      {isOpen && isJitsi && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-surface-dark/80 p-4 backdrop-blur-sm sm:p-6">
           <div className="glass relative flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-3xl bg-surface-dark shadow-2xl">
             {/* Header */}
