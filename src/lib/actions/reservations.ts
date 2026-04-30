@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { sendReservationEmail } from "@/lib/email";
 
-export async function reserveClass(classId: string) {
+export async function reserveClass(classId: string, modality: 'presential' | 'online' = 'presential') {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -12,7 +12,7 @@ export async function reserveClass(classId: string) {
     return { error: "Debes iniciar sesión para reservar una clase." };
   }
 
-  // Fetch student info (including medical record)
+  // Fetch student info
   const { data: studentProfile } = await supabase
     .from("profiles")
     .select("full_name, student_details(health_info)")
@@ -30,21 +30,21 @@ export async function reserveClass(classId: string) {
     return { error: "No se encontró la clase." };
   }
 
-  if (classData.is_full) {
-    return { error: "La clase ya está llena (Sala Llena)." };
-  }
+  // Capacidad híbrida
+  const maxCapacity = modality === 'presential' 
+    ? (classData.capacity_presential || 0) 
+    : (classData.capacity_online || 0);
 
-  // Contar reservas actuales
-  if (classData.max_capacity) {
-    const { count, error: countError } = await supabase
-      .from("class_reservations")
-      .select("*", { count: "exact", head: true })
-      .eq("class_id", classId)
-      .eq("status", "confirmed");
+  // Contar reservas actuales para esta modalidad
+  const { count, error: countError } = await supabase
+    .from("class_reservations")
+    .select("*", { count: "exact", head: true })
+    .eq("class_id", classId)
+    .eq("modality", modality)
+    .eq("status", "confirmed");
 
-    if (!countError && count !== null && count >= classData.max_capacity) {
-      return { error: "Lo sentimos, ya no quedan cupos disponibles." };
-    }
+  if (!countError && count !== null && count >= maxCapacity) {
+    return { error: `Lo sentimos, ya no quedan cupos ${modality === 'presential' ? 'presenciales' : 'online'} para esta clase.` };
   }
 
   // Crear la reserva
@@ -53,6 +53,7 @@ export async function reserveClass(classId: string) {
     .insert({
       class_id: classId,
       student_id: user.id,
+      modality: modality,
       status: "confirmed",
     });
 

@@ -116,33 +116,28 @@ export default function ProfesoresView({
         <div className="relative h-[75vh] w-full overflow-hidden rounded-[3rem] shadow-2xl border border-white/5 ring-1 ring-white/10">
           {/* Floating Filters */}
           <div className="absolute top-8 left-1/2 z-10 w-[90%] -translate-x-1/2 flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Buscar por nombre o lugar..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-white/10 bg-surface-dark/60 py-4 px-8 text-sm text-white placeholder:text-white/40 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-brand-500/50 shadow-lg"
-              />
-            </div>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-full border border-white/10 bg-surface-dark/60 px-8 py-4 text-sm text-white backdrop-blur-xl focus:outline-none shadow-lg cursor-pointer hover:bg-surface-dark/80 transition-colors"
+              className="flex-1 rounded-full border border-white/10 bg-surface-dark/60 px-8 py-4 text-sm text-white backdrop-blur-xl focus:outline-none shadow-lg cursor-pointer hover:bg-surface-dark/80 transition-colors appearance-none"
             >
-              <option value="">Categorías</option>
-              <option value="clase">🧘 Clases</option>
-              <option value="retiro">🏕️ Retiros</option>
-              <option value="armonizacion">🔔 Armonizaciones</option>
-              <option value="formacion">🎓 Formaciones</option>
+              <option value="" className="bg-surface-dark">Todas las Categorías</option>
+              <option value="clase" className="bg-surface-dark">🧘 Clases</option>
+              <option value="retiro" className="bg-surface-dark">🏕️ Retiros</option>
+              <option value="armonizacion" className="bg-surface-dark">🔔 Armonizaciones</option>
+              <option value="formacion" className="bg-surface-dark">🎓 Formaciones</option>
             </select>
             <select
               value={specialtyFilter}
               onChange={(e) => setSpecialtyFilter(e.target.value)}
-              className="rounded-full border border-white/10 bg-surface-dark/60 px-8 py-4 text-sm text-white backdrop-blur-xl focus:outline-none shadow-lg cursor-pointer hover:bg-surface-dark/80 transition-colors"
+              className="flex-1 rounded-full border border-white/10 bg-surface-dark/60 px-8 py-4 text-sm text-white backdrop-blur-xl focus:outline-none shadow-lg cursor-pointer hover:bg-surface-dark/80 transition-colors appearance-none"
             >
-              <option value="">Especialidades</option>
-              {allSpecialties.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              <option value="" className="bg-surface-dark">Especialidades</option>
+              {allSpecialties.map(s => (
+                <option key={s} value={s} className="bg-surface-dark">
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
             </select>
           </div>
 

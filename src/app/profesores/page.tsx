@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default async function ProfesoresPage() {
   const supabase = await createClient();
 
-  // FORCE VISIBILITY: Query profiles directly with no complex ordering initially
   const { data: teachersRaw, error: profError } = await supabase
     .from("profiles")
     .select("*, teacher_details(*)")
-    .eq("role", "profesor");
+    .eq("role", "profesor")
+    .order("community_score", { ascending: false });
 
   if (profError) console.error("[CRITICAL] Error fetching profiles:", profError);
   console.log(`[DEBUG] Query de Profesores: ${teachersRaw?.length || 0} encontrados.`);
