@@ -4,11 +4,7 @@ import { useActionState, useState, useRef, useEffect } from "react";
 import { createClass, type ClassState } from "@/lib/actions/classes";
 import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 
-const YOGA_SPECIALTIES = [
-  "Hatha", "Vinyasa", "Ashtanga", "Kundalini", "Iyengar", "Yin",
-  "Restaurativo", "Power Yoga", "Bikram", "Meditación", "Pranayama", "Yoga Nidra",
-  "Otro"
-];
+import { YOGA_SPECIALTIES } from "@/lib/constants";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 

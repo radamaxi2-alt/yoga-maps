@@ -22,10 +22,14 @@ export default async function BlogPage() {
     if (profile?.role === "profesor") isTeacher = true;
   }
 
-  const { data: posts } = await supabase
+  const { data: posts, error: postsError } = await supabase
     .from("posts")
     .select("*, profiles(full_name, avatar_url)")
     .order("created_at", { ascending: false });
+
+  if (postsError) {
+    console.error("Error fetching posts:", postsError);
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

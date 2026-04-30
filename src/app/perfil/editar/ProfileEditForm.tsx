@@ -7,10 +7,7 @@ import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 import type { TeacherDetail } from "@/lib/database.types";
 import Link from "next/link";
 
-const YOGA_SPECIALTIES = [
-  "Hatha", "Vinyasa", "Ashtanga", "Kundalini", "Iyengar", "Yin",
-  "Restaurativo", "Power Yoga", "Bikram", "Meditación", "Pranayama", "Yoga Nidra",
-];
+import { YOGA_SPECIALTIES } from "@/lib/constants";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 

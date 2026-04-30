@@ -6,20 +6,7 @@ import {
   type AuthState,
 } from "@/lib/actions/auth";
 
-const YOGA_SPECIALTIES = [
-  "Hatha",
-  "Vinyasa",
-  "Ashtanga",
-  "Kundalini",
-  "Iyengar",
-  "Yin",
-  "Restaurativo",
-  "Power Yoga",
-  "Bikram",
-  "Meditación",
-  "Pranayama",
-  "Yoga Nidra",
-];
+import { YOGA_SPECIALTIES } from "@/lib/constants";
 
 export default function TeacherOnboardingForm({
   userName,

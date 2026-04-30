@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import CalendarButton from "@/components/CalendarButton";
 import LiveClassButton from "@/components/LiveClassButton";
 import ReserveButton from "@/components/ReserveButton";
+import MonthlyReserveButton from "@/components/MonthlyReserveButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -157,16 +158,23 @@ export default async function TeacherProfilePage({ params }: Props) {
 
               {teacher.specialties && teacher.specialties.length > 0 && (
                 <div className="mt-6 border-t border-brand-50 pt-6 dark:border-surface-dark">
-                  <h3 className="text-xs font-semibold uppercase text-foreground/50 mb-3">Especialidades</h3>
+                  <h3 className="text-xs font-semibold uppercase text-foreground/50 mb-3">Especialidades y Formaciones</h3>
                   <div className="flex flex-wrap gap-2">
-                    {teacher.specialties.map((spec: string) => (
-                      <span
-                        key={spec}
-                        className="rounded-xl bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300"
-                      >
-                        {spec}
-                      </span>
-                    ))}
+                    {teacher.specialties.map((spec: string) => {
+                      const isFormacion = spec === "Formación / Profesorado";
+                      return (
+                        <span
+                          key={spec}
+                          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
+                            isFormacion
+                              ? "bg-accent-400 text-brand-900 shadow-md shadow-accent-400/20 ring-1 ring-accent-500/50 scale-105"
+                              : "bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300"
+                          }`}
+                        >
+                          {isFormacion ? "🎓 " + spec : spec}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -243,7 +251,10 @@ export default async function TeacherProfilePage({ params }: Props) {
                             {Number(cls.price) === 0 ? "Gratis" : `$${Number(cls.price).toLocaleString("es-AR")}`}
                           </span>
                           <div className="flex items-center gap-2">
-                            <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                            <div className="flex flex-col items-end gap-2">
+                              <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                              <MonthlyReserveButton classId={cls.id} isFull={isFull} disabled={hasReserved} />
+                            </div>
                             {cls.jitsi_room_link && (
                               <LiveClassButton jitsiLink={cls.jitsi_room_link} />
                             )}
