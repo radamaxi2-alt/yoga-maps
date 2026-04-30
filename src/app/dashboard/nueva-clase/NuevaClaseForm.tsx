@@ -188,7 +188,7 @@ export default function NuevaClaseForm() {
         </div>
         <div className="flex items-center justify-between rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 dark:border-surface-dark-alt dark:bg-surface-dark/50">
           <label htmlFor="is_full" className="text-sm font-medium text-foreground/80">
-            Marcar como 'Sala Llena'
+            Marcar como &apos;Sala Llena&apos;
           </label>
           <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
             <input type="checkbox" name="is_full" id="is_full" className="peer sr-only" />

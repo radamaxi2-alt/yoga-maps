@@ -61,8 +61,9 @@ export default async function BlogPage() {
             const author = post.profiles as { full_name: string | null; avatar_url: string | null } | null;
             
             return (
-              <article
+              <Link
                 key={post.id}
+                href={`/blog/${post.id}`}
                 className="glass group flex flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10"
               >
                 {/* Image */}
@@ -115,7 +116,7 @@ export default async function BlogPage() {
                     </div>
                   </div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>

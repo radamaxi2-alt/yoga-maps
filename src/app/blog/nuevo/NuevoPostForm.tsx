@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from "react";
 import { createPost, type BlogState } from "@/lib/actions/blog";
-import Link from "next/link";
 
 export default function NuevoPostForm() {
   const [state, formAction, pending] = useActionState<BlogState, FormData>(

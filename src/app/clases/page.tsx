@@ -55,7 +55,10 @@ export default async function ClasesPage() {
       {classes && classes.length > 0 ? (
         <div className="mt-12 space-y-6">
           {classes.map((cls) => {
-            const profile = cls.teacher_details?.profiles as any;
+            const profile = cls.teacher_details?.profiles as unknown as {
+              full_name: string | null;
+              avatar_url: string | null;
+            } | null;
             const name = profile?.full_name || "Profesor";
             const date = new Date(cls.scheduled_at);
             const isFull = cls.is_full;

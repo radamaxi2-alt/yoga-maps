@@ -57,7 +57,17 @@ export default async function DashboardPage() {
         {reservations && reservations.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {reservations.map(res => {
-              const cls = res.classes as any;
+              const cls = res.classes as unknown as {
+                title: string;
+                scheduled_at: string;
+                jitsi_room_link: string | null;
+                address: string | null;
+                teacher_details: {
+                  profiles: {
+                    full_name: string | null;
+                  } | null;
+                } | null;
+              };
               if (!cls) return null;
               const date = new Date(cls.scheduled_at);
               const teacherName = cls.teacher_details?.profiles?.full_name || "Profesor";
@@ -185,32 +195,40 @@ export default async function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-100/20 dark:divide-surface-dark-alt">
-                  {classes.map((cls) => {
-                    const date = new Date(cls.scheduled_at);
-                    const isPast = date < now;
-                    const confirmedReservations = cls.class_reservations?.filter((r: any) => r.status === "confirmed") || [];
-                    const capacityText = cls.max_capacity ? `${confirmedReservations.length}/${cls.max_capacity}` : `${confirmedReservations.length}`;
-                    
-                    return (
-                      <tr key={cls.id} className="transition-colors hover:bg-brand-50/20 dark:hover:bg-surface-dark-alt/50">
-                        <td className="px-6 py-4">
-                          <p className="font-bold text-foreground">{cls.title}</p>
-                          {cls.jitsi_room_link && (
-                            <span className="inline-block text-[10px] font-bold text-blue-500 uppercase tracking-tight">🎥 Online</span>
-                          )}
-                          {confirmedReservations.length > 0 && !isPast && (
-                            <div className="mt-3 space-y-1.5">
-                              {confirmedReservations.map((res: any) => (
-                                <div key={res.id} className="flex items-center justify-between rounded-lg bg-brand-50/50 p-2 text-[11px] border border-brand-100 dark:bg-surface-dark dark:border-surface-dark-alt">
-                                  <span className="font-medium">👤 {res.profiles?.full_name}</span>
-                                  {res.profiles?.student_details?.health_info && (
-                                    <span className="rounded bg-red-100 px-1 text-[9px] font-bold text-red-600 dark:bg-red-900/40">ALERTA</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </td>
+                    {classes.map((cls) => {
+                      const date = new Date(cls.scheduled_at);
+                      const isPast = date < now;
+                      const confirmedReservations = (cls.class_reservations as unknown as {
+                        id: string;
+                        status: string;
+                        profiles: {
+                          full_name: string | null;
+                          avatar_url: string | null;
+                          student_details: { health_info: string | null } | null;
+                        } | null;
+                      }[])?.filter((r) => r.status === "confirmed") || [];
+                      const capacityText = cls.max_capacity ? `${confirmedReservations.length}/${cls.max_capacity}` : `${confirmedReservations.length}`;
+                      
+                      return (
+                        <tr key={cls.id} className="transition-colors hover:bg-brand-50/20 dark:hover:bg-surface-dark-alt/50">
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-foreground">{cls.title}</p>
+                            {cls.jitsi_room_link && (
+                              <span className="inline-block text-[10px] font-bold text-blue-500 uppercase tracking-tight">🎥 Online</span>
+                            )}
+                            {confirmedReservations.length > 0 && !isPast && (
+                              <div className="mt-3 space-y-1.5">
+                                {confirmedReservations.map((res) => (
+                                  <div key={res.id} className="flex items-center justify-between rounded-lg bg-brand-50/50 p-2 text-[11px] border border-brand-100 dark:bg-surface-dark dark:border-surface-dark-alt">
+                                    <span className="font-medium">👤 {res.profiles?.full_name}</span>
+                                    {res.profiles?.student_details?.health_info && (
+                                      <span className="rounded bg-red-100 px-1 text-[9px] font-bold text-red-600 dark:bg-red-900/40">ALERTA</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
                         <td className="px-6 py-4 text-foreground/70">
                           <div className="font-medium text-foreground">
                             {date.toLocaleDateString("es-AR", { day: "numeric", month: "long" })}
