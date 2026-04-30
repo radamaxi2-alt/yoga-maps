@@ -181,26 +181,45 @@ export default function Navbar({
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="border-t border-brand-100 bg-white/95 backdrop-blur-md md:hidden">
-          <div className="space-y-1 px-4 py-6">
+        <div className="fixed inset-x-0 top-[72px] z-50 border-t border-white/5 bg-surface-dark/95 backdrop-blur-2xl md:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="space-y-1 px-6 py-10 max-h-[80vh] overflow-y-auto">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-xl px-4 py-3 text-base font-medium text-foreground/70 hover:bg-brand-50 hover:text-brand-600"
+                className="block rounded-2xl px-4 py-4 text-lg font-bold text-white/90 hover:bg-white/5 hover:text-brand-400 transition-all border border-transparent hover:border-white/5"
               >
                 {label}
               </Link>
             ))}
-            {user && (
-              <div className="mt-6 border-t border-brand-100 pt-6">
-                <p className="px-4 text-xs font-bold text-brand-400 uppercase mb-2">Usuario: {displayName}</p>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full rounded-xl bg-brand-50 px-4 py-3 text-left text-base font-bold text-brand-700"
+            {!user ? (
+              <div className="mt-8 px-4">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex w-full items-center justify-center rounded-2xl bg-brand-600 py-4 text-center text-lg font-black text-white shadow-xl shadow-brand-500/20"
                 >
-                  Cerrar Sesión
+                  ACCEDER
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-10 border-t border-white/5 pt-10">
+                <div className="flex items-center gap-4 px-4 mb-6">
+                  <div className="h-12 w-12 rounded-full bg-brand-500/20 flex items-center justify-center text-2xl border border-brand-500/30">👤</div>
+                  <div>
+                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Sesión de {isProfesor ? 'Instructor' : 'Alumno'}</p>
+                    <p className="text-lg font-black text-white">{displayName}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white/5 px-4 py-5 text-base font-bold text-white hover:bg-red-500/10 hover:text-red-400 transition-all border border-white/5"
+                >
+                  <span>🚪</span> Cerrar Sesión
                 </button>
               </div>
             )}

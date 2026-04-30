@@ -11,39 +11,36 @@ export const metadata: Metadata = {
 export default async function ProfesoresPage() {
   const supabase = await createClient();
 
+  // FORCE VISIBILITY: Query profiles directly with no complex ordering initially
   const { data: teachersRaw, error: profError } = await supabase
     .from("profiles")
     .select("*, teacher_details(*)")
-    .in("role", ["profesor", "escuela"]);
+    .eq("role", "profesor");
 
-  if (profError) console.error("Error fetching profiles:", profError);
-  console.log(`[DEBUG] Se encontraron ${teachersRaw?.length || 0} perfiles profesionales.`);
-  if (teachersRaw && teachersRaw.length > 0) {
-    console.log(`[DEBUG] Primer perfil: ${teachersRaw[0].full_name} (${teachersRaw[0].role})`);
-  }
+  if (profError) console.error("[CRITICAL] Error fetching profiles:", profError);
+  console.log(`[DEBUG] Query de Profesores: ${teachersRaw?.length || 0} encontrados.`);
 
-  // Reshape to match ProfesoresView expectations
+  // Infalible Mapping
   const teachers = (teachersRaw || []).map((p: any) => {
-    // Supabase might return teacher_details as an array or an object depending on the FK config
     const details = Array.isArray(p.teacher_details) ? p.teacher_details[0] : p.teacher_details;
-    
     return {
       ...(details || {}),
       id: p.id,
       bio: details?.bio || "",
       specialties: details?.specialties || [],
+      address: details?.address || "Mar del Plata",
       profiles: {
-        full_name: p.full_name,
-        avatar_url: p.avatar_url,
-        community_score: p.community_score
+        id: p.id,
+        full_name: p.full_name || "Instructor de Yoga",
+        avatar_url: p.avatar_url || "",
+        community_score: p.community_score || 0
       }
     };
   });
 
   const { data: classes } = await supabase
     .from("classes")
-    .select("id, title, latitude, longitude, address, teacher_id, is_full, jitsi_room_link, style")
-    .not("latitude", "is", null);
+    .select("*");
 
   return <ProfesoresView teachers={teachers} classes={classes || []} hideMap={true} />;
 }

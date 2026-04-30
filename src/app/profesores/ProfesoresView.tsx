@@ -169,10 +169,14 @@ export default function ProfesoresView({
             <select
               value={specialtyFilter}
               onChange={(e) => setSpecialtyFilter(e.target.value)}
-              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white focus:outline-none cursor-pointer"
+              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white focus:outline-none cursor-pointer appearance-none"
             >
-              <option value="">Todas las especialidades</option>
-              {allSpecialties.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              <option value="" className="bg-surface-dark text-white">Todas las especialidades</option>
+              {allSpecialties.map(s => (
+                <option key={s} value={s} className="bg-surface-dark text-white">
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -182,7 +186,7 @@ export default function ProfesoresView({
         {filteredTeachers.map((teacher) => (
           <div key={teacher.id} className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-surface-dark/50 border border-white/5 backdrop-blur-2xl transition-all duration-500 hover:border-brand-500/40 hover:shadow-[0_20px_50px_rgba(139,92,246,0.15)] hover:-translate-y-2">
             <Link href={`/profesores/${teacher.id}`} className="h-56 bg-brand-900/10 block overflow-hidden relative">
-              {teacher.profiles?.avatar_url ? (
+              {teacher.profiles?.avatar_url && teacher.profiles.avatar_url !== "" ? (
                 <img src={teacher.profiles.avatar_url} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-900/20 to-surface-dark text-6xl">
