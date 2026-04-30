@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import CalendarButton from "@/components/CalendarButton";
 import LiveClassButton from "@/components/LiveClassButton";
+import ReserveButton from "@/components/ReserveButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TeacherProfilePage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: teacher } = await supabase
     .from("teacher_details")
@@ -45,6 +47,21 @@ export default async function TeacherProfilePage({ params }: Props) {
     .gte("scheduled_at", new Date().toISOString())
     .order("scheduled_at", { ascending: true })
     .limit(10);
+
+  let userReservations: Set<string> = new Set();
+  if (user && classes && classes.length > 0) {
+    const classIds = classes.map(c => c.id);
+    const { data: reservations } = await supabase
+      .from("class_reservations")
+      .select("class_id")
+      .eq("student_id", user.id)
+      .eq("status", "confirmed")
+      .in("class_id", classIds);
+      
+    if (reservations) {
+      userReservations = new Set(reservations.map(r => r.class_id));
+    }
+  }
 
   const profile = teacher.profiles as {
     full_name: string | null;
@@ -126,10 +143,13 @@ export default async function TeacherProfilePage({ params }: Props) {
           <div className="mt-6 space-y-4">
             {classes.map((cls) => {
               const date = new Date(cls.scheduled_at);
+              const isFull = cls.is_full;
+              const hasReserved = userReservations.has(cls.id);
+              
               return (
                 <article
                   key={cls.id}
-                  className="glass flex flex-col gap-5 rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 sm:flex-row sm:items-center relative overflow-hidden"
+                  className={`glass flex flex-col gap-5 rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 sm:flex-row sm:items-center relative overflow-hidden ${isFull ? 'opacity-90' : ''}`}
                 >
                   {/* Date badge */}
                   <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100">
@@ -171,7 +191,7 @@ export default async function TeacherProfilePage({ params }: Props) {
                         location={cls.jitsi_room_link || ""} 
                       />
                     </div>
-                    {cls.is_full && (
+                    {cls.is_full && !hasReserved && (
                       <div className="mt-3">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-100 shadow-sm">
                           <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -189,9 +209,13 @@ export default async function TeacherProfilePage({ params }: Props) {
                         ? "Gratis"
                         : `$${Number(cls.price).toLocaleString("es-AR")}`}
                     </span>
-                    {cls.jitsi_room_link && (
-                      <LiveClassButton jitsiLink={cls.jitsi_room_link} />
-                    )}
+                    <div className="flex flex-col gap-2 w-full sm:w-auto items-end">
+                      <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                      
+                      {cls.jitsi_room_link && (
+                        <LiveClassButton jitsiLink={cls.jitsi_room_link} />
+                      )}
+                    </div>
                   </div>
                 </article>
               );

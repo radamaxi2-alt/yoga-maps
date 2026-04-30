@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import CalendarButton from "@/components/CalendarButton";
 import LiveClassButton from "@/components/LiveClassButton";
+import ReserveButton from "@/components/ReserveButton";
 
 export const metadata: Metadata = {
   title: "Clases",
@@ -12,12 +13,28 @@ export const metadata: Metadata = {
 
 export default async function ClasesPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: classes } = await supabase
     .from("classes")
     .select("*, teacher_details(profiles(full_name, avatar_url))")
     .gte("scheduled_at", new Date().toISOString())
     .order("scheduled_at", { ascending: true });
+
+  let userReservations: Set<string> = new Set();
+  if (user && classes && classes.length > 0) {
+    const classIds = classes.map(c => c.id);
+    const { data: reservations } = await supabase
+      .from("class_reservations")
+      .select("class_id")
+      .eq("student_id", user.id)
+      .eq("status", "confirmed")
+      .in("class_id", classIds);
+      
+    if (reservations) {
+      userReservations = new Set(reservations.map(r => r.class_id));
+    }
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -36,38 +53,35 @@ export default async function ClasesPage() {
 
       {/* Classes List */}
       {classes && classes.length > 0 ? (
-        <div className="mt-12 space-y-4">
+        <div className="mt-12 space-y-6">
           {classes.map((cls) => {
+            const profile = cls.teacher_details?.profiles as any;
+            const name = profile?.full_name || "Profesor";
             const date = new Date(cls.scheduled_at);
-            const teacherProfiles = (
-              cls.teacher_details as {
-                profiles: { full_name: string | null; avatar_url: string | null } | null;
-              } | null
-            )?.profiles;
-            const teacherName = teacherProfiles?.full_name || "Profesor";
+            const isFull = cls.is_full;
+            const hasReserved = userReservations.has(cls.id);
 
             return (
               <article
                 key={cls.id}
-                className="glass group flex flex-col gap-4 rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 sm:flex-row sm:items-center sm:gap-6"
+                className={`glass flex flex-col gap-6 rounded-3xl p-6 sm:flex-row sm:items-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 ${isFull ? 'opacity-90' : ''}`}
               >
                 {/* Date badge */}
-                <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-900/30 dark:to-brand-900/10">
-                  <span className="text-xs font-medium uppercase text-brand-600 dark:text-brand-400">
+                <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 shadow-inner">
+                  <span className="text-sm font-semibold uppercase text-brand-600">
                     {date.toLocaleDateString("es-AR", { month: "short" })}
                   </span>
-                  <span className="text-xl font-bold text-brand-700 dark:text-brand-300">
+                  <span className="text-2xl font-bold text-brand-700">
                     {date.getDate()}
                   </span>
                 </div>
 
-                {/* Class info */}
                 <div className="flex-1 font-sans">
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-brand-600 dark:group-hover:text-brand-400">
+                  <h2 className="text-2xl font-bold text-foreground">
                     {cls.title}
-                  </h3>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-foreground/60">
-                    <span className="flex items-center gap-1">
+                  </h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-foreground/70">
+                    <span className="flex items-center gap-1.5 font-medium">
                       🕐{" "}
                       {date.toLocaleTimeString("es-AR", {
                         hour: "2-digit",
@@ -77,41 +91,74 @@ export default async function ClasesPage() {
                     </span>
                     <Link
                       href={`/profesores/${cls.teacher_id}`}
-                      className="flex items-center gap-1 transition-colors hover:text-brand-600"
+                      className="flex items-center gap-2 rounded-full border border-brand-100/50 bg-white/50 py-1 pl-1 pr-3 transition-colors hover:bg-brand-50 dark:border-surface-dark-alt dark:bg-surface-dark-alt/50 dark:hover:bg-brand-900/20"
                     >
-                      <div className="h-5 w-5 overflow-hidden rounded-full bg-brand-100">
-                        {teacherProfiles?.avatar_url ? (
-                          <img src={teacherProfiles.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-[10px] font-bold text-brand-700">Y</span>
-                        )}
-                      </div>
-                      {teacherName}
+                      {profile?.avatar_url ? (
+                        <img
+                          src={profile.avatar_url}
+                          alt={name}
+                          className="h-6 w-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+                          {name[0].toUpperCase()}
+                        </div>
+                      )}
+                      <span className="font-medium text-brand-900 dark:text-brand-100">
+                        {name}
+                      </span>
                     </Link>
+                    {cls.style && (
+                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-600">
+                        {cls.style}
+                      </span>
+                    )}
+                    {cls.instructor_name && (
+                      <span className="text-xs text-foreground/50">
+                        👨‍🏫 {cls.instructor_name}
+                      </span>
+                    )}
                     <CalendarButton 
                       title={cls.title} 
                       scheduledAt={cls.scheduled_at} 
                       description={cls.description || ""} 
-                      location={cls.jitsi_room_link || ""} 
+                      location={cls.jitsi_room_link || cls.address || ""} 
                     />
                   </div>
+
+                  {cls.is_full && !hasReserved && (
+                    <div className="mt-3">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-100 shadow-sm">
+                        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                        {cls.jitsi_room_link 
+                          ? "Cupos presenciales agotados - Únete a la clase Online" 
+                          : "Sala Llena - No hay cupos disponibles"}
+                      </span>
+                    </div>
+                  )}
+
                   {cls.description && (
-                    <p className="mt-2 line-clamp-2 text-sm text-foreground/70">
+                    <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-foreground/60">
                       {cls.description}
                     </p>
                   )}
                 </div>
 
                 {/* Actions & Price */}
-                <div className="flex flex-col items-start gap-3 sm:items-end sm:justify-center">
-                  <span className="text-2xl font-bold text-brand-600 dark:text-brand-400">
+                <div className="flex flex-col items-start gap-4 sm:items-end sm:justify-center">
+                  <span className="text-3xl font-bold text-brand-600 dark:text-brand-400">
                     {Number(cls.price) === 0
                       ? "Gratis"
                       : `$${Number(cls.price).toLocaleString("es-AR")}`}
                   </span>
-                  {cls.jitsi_room_link && (
-                    <LiveClassButton jitsiLink={cls.jitsi_room_link} />
-                  )}
+                  
+                  <div className="flex flex-col gap-2 w-full sm:w-auto items-end">
+                    <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                    
+                    {cls.jitsi_room_link && (
+                      <LiveClassButton jitsiLink={cls.jitsi_room_link} />
+                    )}
+                  </div>
                 </div>
               </article>
             );
