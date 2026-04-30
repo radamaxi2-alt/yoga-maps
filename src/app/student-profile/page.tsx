@@ -53,31 +53,30 @@ export default async function StudentProfilePage() {
     redirect("/dashboard");
   }
 
-  // Get student's reservations with simplified join to avoid RLS nesting issues
-  const { data: reservations, error: resError } = await supabase
+  // Get student's reservations - SIMPLIFIED to the max
+  const { data: reservationsRaw, error: resError } = await supabase
     .from("class_reservations")
-    .select(`
-      id,
-      status,
-      classes:class_id (
-        id,
-        title,
-        day_of_week,
-        start_time,
-        style,
-        teacher_id,
-        teacher_details:teacher_id (
-          profiles:id (
-            full_name
-          )
-        )
-      )
-    `)
-    .eq("student_id", user.id)
-    .order("created_at", { ascending: false });
+    .select("*")
+    .eq("student_id", user.id);
 
   if (resError) console.error("Error fetching reservations:", resError);
-  console.log(`[DEBUG] Alumno ${user.id} tiene ${reservations?.length || 0} reservas.`);
+  console.log(`[DEBUG] Alumno ${user.id} tiene ${reservationsRaw?.length || 0} reservas en bruto.`);
+
+  // Enrich with class data manually to avoid join issues
+  const reservations = [];
+  if (reservationsRaw) {
+    for (const res of reservationsRaw) {
+      const { data: cls } = await supabase
+        .from("classes")
+        .select("*, teacher_details(profiles(full_name))")
+        .eq("id", res.class_id)
+        .single();
+      reservations.push({ ...res, classes: cls });
+    }
+  }
+
+  if (resError) console.error("Error fetching reservations:", resError);
+  console.log(`[DEBUG] Alumno ${user.id} sincronizado con ${reservations.length} clases.`);
 
   const student = profile.student_details as any;
 

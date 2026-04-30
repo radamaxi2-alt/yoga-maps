@@ -14,8 +14,10 @@ export default async function MapaPage() {
 
   // Reshape to match ProfesoresView expectations
   const teachers = (teachersRaw || []).map((p: any) => ({
-    ...p.teacher_details,
-    id: p.id, // Ensure ID is present if teacher_details is null
+    ...(p.teacher_details || {}),
+    id: p.id,
+    bio: p.teacher_details?.bio || "",
+    specialties: p.teacher_details?.specialties || [],
     profiles: {
       full_name: p.full_name,
       avatar_url: p.avatar_url,

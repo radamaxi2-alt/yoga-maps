@@ -67,22 +67,7 @@ export default function ProfesoresView({
     return Array.from(set).sort();
   }, [teachers, classes]);
 
-  const filteredTeachers = useMemo(() => {
-    return teachers.filter((t) => {
-      const q = searchQuery.toLowerCase();
-      const name = t.profiles?.full_name?.toLowerCase() || "";
-      const addr = t.address?.toLowerCase() || "";
-      const specs = t.specialties?.map(s => s.toLowerCase()) || [];
-      
-      const matchesSearch = !q || name.includes(q) || addr.includes(q);
-      const matchesSpecialty = !specialtyFilter || specs.some(s => s.includes(specialtyFilter.toLowerCase()));
-      
-      const teacherClasses = classes.filter(c => c.teacher_id === t.id);
-      const matchesCategory = !categoryFilter || teacherClasses.some(c => (c.category || "clase").toLowerCase() === categoryFilter.toLowerCase());
-
-      return matchesSearch && matchesSpecialty && matchesCategory;
-    });
-  }, [teachers, classes, searchQuery, specialtyFilter, categoryFilter]);
+  const filteredTeachers = teachers;
 
   const filteredClasses = useMemo(() => {
     return classes.filter((c) => {
