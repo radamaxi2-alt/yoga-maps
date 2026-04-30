@@ -86,7 +86,7 @@ export default function ProfesoresView({
       const q = searchQuery.toLowerCase();
       const matchesSearch = !q || c.title.toLowerCase().includes(q) || (c.address?.toLowerCase().includes(q));
       const matchesSpecialty = !specialtyFilter || c.style === specialtyFilter;
-      const matchesCategory = !categoryFilter || c.category === categoryFilter;
+      const matchesCategory = !categoryFilter || (c.category || "clase") === categoryFilter;
       
       return matchesSearch && matchesSpecialty && matchesCategory;
     });
