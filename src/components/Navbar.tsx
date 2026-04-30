@@ -40,9 +40,14 @@ export default function Navbar({
   }, [user]);
 
   useEffect(() => {
+    setLoggingOut(false);
+  }, []);
+
+  useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggingOut(false);
       const newUser = session?.user ?? null;
       if (newUser?.id !== user?.id) {
         setUser(newUser);

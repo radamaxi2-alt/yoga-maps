@@ -117,12 +117,12 @@ export default function ProfesoresView({
   }, []);
 
   return (
-    <section className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 ${hideMap ? 'bg-surface' : 'bg-surface-dark-alt min-h-screen'}`}>
-      <div className={`max-w-2xl mb-10 ${hideMap ? '' : 'text-center mx-auto'}`}>
-        <h1 className={`text-4xl font-extrabold tracking-tight ${hideMap ? 'text-foreground' : 'text-white'}`}>
+    <section className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 ${hideMap ? 'bg-surface-dark-alt min-h-screen' : 'bg-surface-dark-alt min-h-screen'}`}>
+      <div className={`max-w-2xl mb-10 text-center mx-auto`}>
+        <h1 className={`text-4xl font-extrabold tracking-tight text-white`}>
           {hideMap ? 'Instructores de Yoga' : 'Mapa de Mar del Plata'}
         </h1>
-        <p className={`mt-4 text-lg ${hideMap ? 'text-foreground/60' : 'text-brand-100/60'}`}>
+        <p className={`mt-4 text-lg text-brand-100/60`}>
           {hideMap ? 'Directorio verificado de profesores y escuelas.' : 'Encontrá tu lugar en la ciudad.'}
         </p>
       </div>
@@ -170,51 +170,61 @@ export default function ProfesoresView({
           />
         </div>
       ) : (
-        <div className="mb-12">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <input
-              type="text"
-              placeholder="Buscar profesor..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 rounded-xl border border-brand-200/60 py-3 px-4 text-sm"
-            />
+        <div className="mb-16">
+          <div className="flex flex-col gap-4 sm:flex-row max-w-4xl mx-auto">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Buscar profesor por nombre o especialidad..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 px-6 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              />
+            </div>
             <select
               value={specialtyFilter}
               onChange={(e) => setSpecialtyFilter(e.target.value)}
-              className="rounded-xl border border-brand-200/60 px-4 py-3 text-sm"
+              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white focus:outline-none cursor-pointer"
             >
               <option value="">Todas las especialidades</option>
-              {allSpecialties.map(s => <option key={s} value={s}>{s}</option>)}
+              {allSpecialties.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
             </select>
           </div>
         </div>
       )}
 
-      <div className={`mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 ${hideMap ? '' : 'hidden'}`}>
+      <div className={`mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 ${filteredTeachers.length > 0 ? '' : 'hidden'}`}>
         {filteredTeachers.map((teacher) => (
-          <div key={teacher.id} className="glass group flex flex-col overflow-hidden rounded-3xl transition-all hover:-translate-y-1">
-            <Link href={`/profesores/${teacher.id}`} className="h-40 bg-brand-50 block overflow-hidden">
+          <div key={teacher.id} className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-surface-dark/40 border border-white/5 backdrop-blur-xl transition-all hover:border-brand-500/30 hover:shadow-2xl hover:shadow-brand-500/10 hover:-translate-y-1">
+            <Link href={`/profesores/${teacher.id}`} className="h-48 bg-brand-900/20 block overflow-hidden">
               {teacher.profiles?.avatar_url ? (
-                <img src={teacher.profiles.avatar_url} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                <img src={teacher.profiles.avatar_url} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl opacity-20">🧘</div>
+                <div className="flex h-full w-full items-center justify-center text-5xl opacity-20">🧘</div>
               )}
             </Link>
-            <div className="p-6">
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 ring-1 ring-amber-200">
+            <div className="p-8">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex items-center gap-1 rounded-full bg-brand-500/20 px-2.5 py-0.5 text-[10px] font-bold text-brand-400 uppercase tracking-wider ring-1 ring-brand-500/30">
                   <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   {teacher.profiles?.community_score || 0} pts
                 </span>
               </div>
-              <h3 className="text-lg font-bold">{teacher.profiles?.full_name || "Instructor"}</h3>
-              <p className="mt-2 line-clamp-2 text-xs text-foreground/60">{teacher.bio}</p>
-              <div className="mt-6 flex items-center justify-between">
-                <Link href={`/profesores/${teacher.id}`} className="text-[10px] font-bold text-brand-600 hover:underline">Ver Perfil</Link>
-                <Link href={`/mapa?teacher=${teacher.id}`} className="rounded-full bg-brand-50 px-4 py-1.5 text-[10px] font-bold text-brand-700">📍 Ver en Mapa</Link>
+              <h3 className="text-xl font-bold text-white group-hover:text-brand-400 transition-colors">
+                {teacher.profiles?.full_name || "Instructor"}
+              </h3>
+              <p className="mt-3 line-clamp-2 text-sm text-brand-100/60 leading-relaxed font-sans">
+                {teacher.bio || "Explora las clases y eventos de este instructor verificado."}
+              </p>
+              <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6">
+                <Link href={`/profesores/${teacher.id}`} className="text-xs font-bold text-brand-400 hover:text-brand-300 transition-colors uppercase tracking-widest">
+                  Ver Perfil
+                </Link>
+                <Link href={`/mapa?teacher=${teacher.id}`} className="rounded-full bg-white/5 px-4 py-2 text-[10px] font-bold text-white hover:bg-white/10 transition-all">
+                  📍 Ver en Mapa
+                </Link>
               </div>
             </div>
           </div>

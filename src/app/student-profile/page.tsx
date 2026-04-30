@@ -74,7 +74,7 @@ export default async function StudentProfilePage() {
   const student = profile.student_details as any;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <div className="bg-surface-dark-alt min-h-screen mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Left Column: Profile Card */}
         <div className="lg:col-span-1">
@@ -165,32 +165,36 @@ export default async function StudentProfilePage() {
             <h2 className="text-2xl font-bold text-foreground mb-6">Mis Próximas Clases</h2>
             
             {reservations && reservations.length > 0 ? (
-              <div className="grid gap-4">
-                {reservations.map((res: any) => (
-                  <div key={res.id} className="flex items-center justify-between rounded-2xl bg-white/50 p-4 border border-brand-50 transition-all hover:border-brand-200">
-                    <div>
-                      <h4 className="font-bold text-brand-900">{res.classes.title}</h4>
-                      <p className="text-xs text-brand-600 font-semibold uppercase">
-                        {res.classes.style} — {res.classes.teacher_details.profiles.full_name}
-                      </p>
-                      <p className="mt-1 text-sm text-gray-500">
-                        {res.classes.day_of_week} a las {res.classes.start_time.slice(0,5)} hs
-                      </p>
+              <div className="grid gap-6">
+                {reservations.map((res: any) => {
+                  const cls = res.classes;
+                  if (!cls) return null;
+                  return (
+                    <div key={res.id} className="flex items-center justify-between rounded-[2rem] bg-surface-dark/40 p-6 border border-white/5 transition-all hover:border-brand-500/20">
+                      <div>
+                        <h4 className="text-lg font-bold text-white">{cls.title}</h4>
+                        <p className="text-xs text-brand-400 font-bold uppercase tracking-wider mt-1">
+                          {cls.style} — {cls.teacher_details?.profiles?.full_name || "Profesor"}
+                        </p>
+                        <p className="mt-2 text-sm text-brand-100/60">
+                          {cls.day_of_week} a las {cls.start_time?.slice(0,5)} hs
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="inline-block rounded-full bg-brand-500/10 px-4 py-1.5 text-[10px] font-bold text-brand-400 uppercase tracking-widest ring-1 ring-brand-500/20">
+                          Confirmada
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-[10px] font-bold text-green-700 uppercase">
-                        Confirmada
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <span className="text-4xl">🧘‍♀️</span>
-                <p className="mt-4 text-gray-500">Aún no tienes reservas. ¡Empieza hoy!</p>
-                <Link href="/profesores" className="mt-6 inline-block text-brand-600 font-bold hover:underline">
-                  Buscar clases cerca →
+              <div className="text-center py-20 bg-surface-dark/20 rounded-[2rem] border border-dashed border-white/10">
+                <span className="text-5xl block mb-6">🧘‍♀️</span>
+                <p className="text-brand-100/60 font-medium">Parece que aún no tienes reservas activas.</p>
+                <Link href="/clases" className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-brand-500 hover:-translate-y-0.5">
+                  Explorar Agenda →
                 </Link>
               </div>
             )}

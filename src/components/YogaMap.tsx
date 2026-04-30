@@ -145,7 +145,25 @@ export default function YogaMap({
   selectedMarkerId: string | null;
   onMarkerSelect: (id: string) => void;
 }) {
-  if (!API_KEY || API_KEY === "YOUR_GOOGLE_MAPS_API_KEY") return null;
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return (
+    <div className="h-[70vh] w-full animate-pulse rounded-[3rem] bg-surface-dark-alt flex items-center justify-center">
+      <span className="text-brand-300 font-medium italic">Iniciando mapa...</span>
+    </div>
+  );
+
+  if (!API_KEY || API_KEY === "YOUR_GOOGLE_MAPS_API_KEY") {
+    return (
+      <div className="h-[70vh] w-full rounded-[3rem] bg-surface-dark-alt flex items-center justify-center border border-white/5 p-8 text-center">
+        <p className="text-brand-100/60 font-medium italic">Configurando servicios de ubicación...</p>
+      </div>
+    );
+  }
 
   return (
     <Suspense fallback={
