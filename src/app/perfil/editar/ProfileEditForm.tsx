@@ -2,11 +2,10 @@
 
 import { useRef, useEffect, useState, useCallback, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { updateTeacherProfile, uploadTeacherCover, type ProfileData } from "@/lib/actions/profile";
+import { updateTeacherProfile, uploadTeacherCover, uploadTeacherAvatar, type ProfileData } from "@/lib/actions/profile";
 import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 import type { TeacherDetail } from "@/lib/database.types";
 import Link from "next/link";
-
 import { YOGA_SPECIALTIES } from "@/lib/constants";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
@@ -50,7 +49,7 @@ function PlacesAutocompleteInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder="Empezá a escribir tu dirección..."
-      className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+      className="w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
     />
   );
 }
@@ -63,18 +62,20 @@ type FormValues = {
   average_price: number | "";
   address: string;
   cover_image: string;
+  avatar_url: string;
 };
 
 export default function ProfileEditForm({
   fullName,
+  avatarUrl,
   details,
 }: {
   fullName: string;
+  avatarUrl: string;
   details: TeacherDetail | null;
 }) {
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState("");
-
   const [lat, setLat] = useState(details?.latitude || 0);
   const [lng, setLng] = useState(details?.longitude || 0);
 
@@ -94,19 +95,11 @@ export default function ProfileEditForm({
       average_price: details?.average_price || "",
       address: details?.address || "",
       cover_image: details?.cover_image || "",
+      avatar_url: avatarUrl || "",
     },
   });
 
   const selectedType = watch("teacher_type");
-
-  const handlePlaceSelect = useCallback(
-    (addr: string, latitude: number, longitude: number) => {
-      setValue("address", addr, { shouldValidate: true });
-      setLat(latitude);
-      setLng(longitude);
-    },
-    [setValue]
-  );
 
   const onSubmit = (data: FormValues) => {
     setErrorMsg("");
@@ -121,12 +114,11 @@ export default function ProfileEditForm({
         latitude: lat || null,
         longitude: lng || null,
         cover_image: data.cover_image || null,
+        avatar_url: data.avatar_url || null,
       };
 
       const result = await updateTeacherProfile(payload);
-      if (result?.error) {
-        setErrorMsg(result.error);
-      }
+      if (result?.error) setErrorMsg(result.error);
     });
   };
 
@@ -134,219 +126,119 @@ export default function ProfileEditForm({
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1 text-sm text-foreground/50 transition-colors hover:text-brand-600"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Volver al dashboard
+      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-white/40 hover:text-brand-400">
+        ← Volver al dashboard
       </Link>
 
-      <div className="mt-6 rounded-2xl border border-brand-100/50 bg-white/70 p-8 shadow-xl shadow-brand-500/5 backdrop-blur-lg dark:border-surface-dark-alt dark:bg-surface-dark-alt/70">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Editar Perfil</h1>
-          <p className="mt-2 text-sm text-foreground/60">
-            Actualizá tu información para que los alumnos te encuentren.
-          </p>
-        </div>
+      <div className="mt-6 rounded-3xl border border-white/5 bg-surface-dark-alt/50 p-8 shadow-2xl backdrop-blur-xl">
+        <h1 className="text-2xl font-black text-white italic uppercase tracking-tighter">EDITAR PERFIL</h1>
+        
+        {errorMsg && <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold">{errorMsg}</div>}
 
-        {errorMsg && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Teacher Type */}
-          <fieldset>
-            <legend className="mb-3 text-sm font-medium text-foreground/80">
-              Tipo de Perfil
-            </legend>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="group relative cursor-pointer">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-8">
+          {/* Avatar & Cover Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col items-center gap-6 sm:flex-row">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white/5 bg-white/5 shadow-xl">
+                {watch("avatar_url") ? (
+                  <img src={watch("avatar_url")} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-4xl">🧘</div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-xs font-black text-brand-400 uppercase tracking-widest">Foto de Perfil</label>
                 <input
-                  type="radio"
-                  value="independiente"
-                  {...register("teacher_type")}
-                  className="peer sr-only"
+                  type="file" accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    const result = await uploadTeacherAvatar(formData);
+                    if (result.url) setValue("avatar_url", result.url);
+                  }}
+                  className="block w-full text-[10px] text-white/40 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20"
                 />
-                <div className="rounded-xl border-2 border-brand-100/60 bg-surface-alt/30 p-4 text-center transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:shadow-md hover:border-brand-200 dark:border-surface-dark-alt dark:bg-surface-dark/30">
-                  <span className="text-2xl">🧘</span>
-                  <p className="mt-1 text-sm font-semibold text-foreground">Instructor Independiente</p>
-                </div>
-              </label>
-              <label className="group relative cursor-pointer">
-                <input
-                  type="radio"
-                  value="escuela"
-                  {...register("teacher_type")}
-                  className="peer sr-only"
-                />
-                <div className="rounded-xl border-2 border-brand-100/60 bg-surface-alt/30 p-4 text-center transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:shadow-md hover:border-brand-200 dark:border-surface-dark-alt dark:bg-surface-dark/30">
-                  <span className="text-2xl">🏛️</span>
-                  <p className="mt-1 text-sm font-semibold text-foreground">Centro / Escuela</p>
-                </div>
-              </label>
+              </div>
             </div>
-          </fieldset>
 
-          {/* Name */}
-          <div>
-            <label htmlFor="full_name" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              {selectedType === "escuela" ? "Nombre de la Institución" : "Nombre completo"}
-            </label>
-            <input
-              type="text" id="full_name"
-              {...register("full_name", { required: "El nombre es obligatorio" })}
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
-            {errors.full_name && <p className="mt-1 text-xs text-red-500">{errors.full_name.message}</p>}
-          </div>
-
-          {/* Bio */}
-          <div>
-            <label htmlFor="bio" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Sobre {selectedType === "escuela" ? "el centro" : "vos"}
-            </label>
-            <textarea
-              id="bio" rows={4}
-              {...register("bio")}
-              placeholder={selectedType === "escuela" ? "Contá sobre la historia del centro, enfoque..." : "Contá sobre tu experiencia y formación..."}
-              className="w-full resize-none rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
-          </div>
-
-          {/* Cover Image Upload */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Foto de Portada (Opcional)
-            </label>
-            <p className="mb-4 text-xs text-foreground/50">
-              Subí una foto para tu cabecera. Se recomienda una imagen horizontal.
-            </p>
-            
-            <div className="flex flex-col gap-4">
-              {watch("cover_image") && (
-                <div className="relative aspect-[16/5] w-full overflow-hidden rounded-xl border border-brand-100 bg-brand-50 shadow-inner dark:border-surface-dark-alt dark:bg-surface-dark/50">
-                  <img
-                    src={watch("cover_image")}
-                    alt="Preview"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              )}
-              
+            <div className="space-y-2">
+              <label className="text-xs font-black text-brand-400 uppercase tracking-widest">Foto de Portada</label>
+              <div className="relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-white/5 bg-white/5">
+                {watch("cover_image") && <img src={watch("cover_image")} className="h-full w-full object-cover" />}
+              </div>
               <input
-                type="file"
-                accept="image/*"
+                type="file" accept="image/*"
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  
-                  setErrorMsg("");
                   const formData = new FormData();
                   formData.append("file", file);
-                  
                   const result = await uploadTeacherCover(formData);
-                  if (result.error) {
-                    setErrorMsg(result.error);
-                  } else if (result.url) {
-                    setValue("cover_image", result.url);
-                  }
+                  if (result.url) setValue("cover_image", result.url);
                 }}
-                className="block w-full text-sm text-foreground/50
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-brand-50 file:text-brand-700
-                  hover:file:bg-brand-100
-                  dark:file:bg-brand-900/20 dark:file:text-brand-300"
+                className="block w-full text-[10px] text-white/40 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20"
               />
-              <input type="hidden" {...register("cover_image")} />
             </div>
           </div>
 
-          {/* Specialties */}
-          <fieldset>
-            <legend className="mb-3 text-sm font-medium text-foreground/80">
-              Especialidades
-            </legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {YOGA_SPECIALTIES.map((spec) => (
-                <label key={spec} className="group relative cursor-pointer">
-                  <input
-                    type="checkbox"
-                    value={spec}
-                    {...register("specialties")}
-                    className="peer sr-only"
+          <div className="space-y-6">
+            <div>
+              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Nombre Completo</label>
+              <input {...register("full_name")} className="w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50" />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Sobre {selectedType === 'escuela' ? 'el centro' : 'vos'}</label>
+              <textarea {...register("bio")} rows={4} className="w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50" />
+            </div>
+
+            <div>
+              <label className="mb-3 block text-[10px] font-black text-white/40 uppercase tracking-widest">Especialidades</label>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {YOGA_SPECIALTIES.map((spec) => (
+                  <label key={spec} className="cursor-pointer">
+                    <input type="checkbox" value={spec} {...register("specialties")} className="peer sr-only" />
+                    <div className="rounded-lg border border-white/5 bg-white/5 px-3 py-2 text-center text-[10px] font-bold text-white/40 transition-all peer-checked:border-brand-500/50 peer-checked:bg-brand-500/10 peer-checked:text-brand-400">
+                      {spec}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Dirección Principal</label>
+              {hasApiKey ? (
+                <APIProvider apiKey={API_KEY}>
+                  <Controller
+                    name="address"
+                    control={control}
+                    render={({ field }) => (
+                      <PlacesAutocompleteInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        onPlaceSelect={(addr, lat, lng) => {
+                          setValue("address", addr);
+                          setLat(lat);
+                          setLng(lng);
+                        }}
+                      />
+                    )}
                   />
-                  <div className="rounded-lg border border-brand-100/60 bg-surface-alt/30 px-3 py-2 text-center text-sm transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:font-medium peer-checked:text-brand-700 hover:border-brand-200 dark:border-surface-dark-alt dark:bg-surface-dark/30 dark:peer-checked:border-brand-500 dark:peer-checked:bg-brand-900/20 dark:peer-checked:text-brand-300">
-                    {spec}
-                  </div>
-                </label>
-              ))}
+                </APIProvider>
+              ) : (
+                <input {...register("address")} className="w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50" />
+              )}
             </div>
-          </fieldset>
-
-          {/* Average Price */}
-          <div>
-            <label htmlFor="average_price" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Precio promedio de clase (ARS)
-            </label>
-            <input
-              type="number" id="average_price"
-              step="0.01"
-              {...register("average_price", {
-                min: { value: 0.01, message: "El precio debe ser mayor a 0" },
-              })}
-              placeholder="Ej: 5000"
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
-            {errors.average_price && <p className="mt-1 text-xs text-red-500">{errors.average_price.message}</p>}
-          </div>
-
-          {/* Address with Google Places Autocomplete */}
-          <div>
-            <label htmlFor="address_display" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Dirección / Ubicación principal
-            </label>
-            {hasApiKey ? (
-              <APIProvider apiKey={API_KEY}>
-                <Controller
-                  name="address"
-                  control={control}
-                  render={({ field }) => (
-                    <PlacesAutocompleteInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      onPlaceSelect={handlePlaceSelect}
-                    />
-                  )}
-                />
-              </APIProvider>
-            ) : (
-              <input
-                type="text"
-                id="address_display"
-                placeholder="Ej: Palermo, Buenos Aires"
-                {...register("address")}
-                className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-              />
-            )}
-            <p className="mt-1.5 text-xs text-foreground/40">
-              {lat && lng
-                ? `📍 Coordenadas: ${lat.toFixed(4)}, ${lng.toFixed(4)}`
-                : "Seleccioná una dirección del autocompletado para geolocalizarte."}
-            </p>
           </div>
 
           <button
             type="submit" disabled={isPending}
-            className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-brand-500/25 transition-all hover:shadow-lg hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-full bg-gradient-to-r from-brand-600 to-brand-500 py-4 text-xs font-black text-white shadow-xl shadow-brand-500/20 hover:-translate-y-1 transition-all disabled:opacity-50 uppercase tracking-widest"
           >
-            {isPending ? "Guardando..." : "Guardar Perfil"}
+            {isPending ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
           </button>
         </form>
       </div>

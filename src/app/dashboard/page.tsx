@@ -137,7 +137,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Transfer Info (Static for now as requested) */}
+          {/* Transfer Info */}
           <div className="mt-8 grid sm:grid-cols-3 gap-4 border-t border-white/5 pt-8">
             <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
               <p className="text-[9px] font-black text-brand-400 uppercase mb-1">Plan Zen</p>
@@ -152,9 +152,20 @@ export default async function DashboardPage() {
               <p className="text-lg font-black text-white">$100,000 <span className="text-[10px] opacity-40">/mes</span></p>
             </div>
           </div>
-          <p className="mt-6 text-[10px] text-center text-brand-100/40 italic">
-            Para activar un plan, transfiere al Alias: <b>YOGA.MAPS.MP</b> y envía el comprobante por WhatsApp al +54 223 1234567
-          </p>
+          
+          <div className="mt-8 flex flex-col items-center justify-center p-6 rounded-[2rem] bg-brand-500/5 border border-brand-500/10">
+            <p className="text-sm font-bold text-white mb-2">Alias para transferencias:</p>
+            <p className="text-2xl font-black text-brand-400 tracking-tight select-all">minado.runfla.lemon</p>
+            
+            <a 
+              href={`https://wa.me/542231234567?text=${encodeURIComponent(`Hola! Ya transferí para mi Plan ${profile.subscription_plan}. Mi usuario es: ${profile.full_name} (${user.email})`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-3 text-xs font-black text-white shadow-xl hover:scale-105 transition-all"
+            >
+              <span>💬</span> ENVIAR COMPROBANTE POR WHATSAPP
+            </a>
+          </div>
         </div>
 
         {/* Quick Actions */}

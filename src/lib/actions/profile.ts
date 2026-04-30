@@ -13,6 +13,7 @@ export type ProfileData = {
   latitude: number | null;
   longitude: number | null;
   cover_image: string | null;
+  avatar_url: string | null;
 };
 
 export async function updateTeacherProfile(data: ProfileData) {
@@ -23,13 +24,14 @@ export async function updateTeacherProfile(data: ProfileData) {
 
   if (!user) return { error: "No estás autenticado." };
 
-  // Update profile name
-  if (data.full_name) {
-    await supabase
-      .from("profiles")
-      .update({ full_name: data.full_name })
-      .eq("id", user.id);
-  }
+  // Update profile name and avatar
+  await supabase
+    .from("profiles")
+    .update({ 
+      full_name: data.full_name,
+      avatar_url: data.avatar_url
+    })
+    .eq("id", user.id);
 
   const updateData = {
     teacher_type: data.teacher_type,
@@ -63,6 +65,40 @@ export async function updateTeacherProfile(data: ProfileData) {
   }
 
   redirect("/dashboard");
+}
+
+export async function uploadTeacherAvatar(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: "No estás autenticado." };
+
+  const file = formData.get("file") as File;
+  if (!file || file.size === 0) return { error: "No se seleccionó ningún archivo." };
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
+
+  // Upload to 'avatars' bucket (assuming it exists or using public bucket)
+  const { error: uploadError } = await supabase.storage
+    .from("teacher-covers") // reusing bucket for simplicity if not separate
+    .upload(fileName, file, { upsert: true });
+
+  if (uploadError) return { error: `Error al subir: ${uploadError.message}` };
+
+  const { data: { publicUrl } } = supabase.storage
+    .from("teacher-covers")
+    .getPublicUrl(fileName);
+
+  // Update profiles table
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: publicUrl })
+    .eq("id", user.id);
+
+  if (updateError) return { error: updateError.message };
+
+  return { url: publicUrl };
 }
 
 export type StudentProfileData = {
