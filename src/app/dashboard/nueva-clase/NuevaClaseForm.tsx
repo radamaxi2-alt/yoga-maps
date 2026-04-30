@@ -3,8 +3,7 @@
 import { useActionState, useState, useRef, useEffect } from "react";
 import { createClass, type ClassState } from "@/lib/actions/classes";
 import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
-
-import { YOGA_SPECIALTIES } from "@/lib/constants";
+import { YOGA_SPECIALTIES, EVENT_CATEGORIES } from "@/lib/constants";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -59,6 +58,7 @@ export default function NuevaClaseForm() {
   );
 
   const [styleSelect, setStyleSelect] = useState("");
+  const [category, setCategory] = useState("clase");
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -73,16 +73,46 @@ export default function NuevaClaseForm() {
         </div>
       )}
 
-      <div>
-        <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-foreground/80">
-          Título de la clase *
-        </label>
-        <input
-          type="text" id="title" name="title" required
-          placeholder="Ej: Hatha Yoga para principiantes"
-          className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="category" className="mb-1.5 block text-sm font-medium text-foreground/80">
+            Categoría del Evento *
+          </label>
+          <select
+            id="category" name="category" required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+          >
+            {EVENT_CATEGORIES.map(c => (
+              <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-foreground/80">
+            Título *
+          </label>
+          <input
+            type="text" id="title" name="title" required
+            placeholder="Ej: Retiro Espiritual en la Sierra"
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+          />
+        </div>
       </div>
+
+      {category === "formacion" && (
+        <div className="animate-in fade-in slide-in-from-top-2">
+          <label htmlFor="certification_title" className="mb-1.5 block text-sm font-medium text-brand-600">
+            Título que otorga la Formación
+          </label>
+          <input
+            type="text" id="certification_title" name="certification_title" required
+            placeholder="Ej: Instructor de Yoga Integral 200hs"
+            className="w-full rounded-xl border border-brand-300 bg-brand-50/30 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+          />
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
@@ -111,32 +141,7 @@ export default function NuevaClaseForm() {
             />
           </div>
         )}
-        {styleSelect !== "Otro" && (
-          <div>
-            <label htmlFor="instructor_name" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Profesor a cargo (Opcional)
-            </label>
-            <input
-              type="text" id="instructor_name" name="instructor_name"
-              placeholder="Si es un centro, ¿quién da la clase?"
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
-          </div>
-        )}
       </div>
-
-      {styleSelect === "Otro" && (
-        <div>
-          <label htmlFor="instructor_name" className="mb-1.5 block text-sm font-medium text-foreground/80">
-            Profesor a cargo (Opcional)
-          </label>
-          <input
-            type="text" id="instructor_name" name="instructor_name"
-            placeholder="Si es un centro, ¿quién da la clase?"
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-          />
-        </div>
-      )}
 
       <div>
         <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-foreground/80">
@@ -144,7 +149,7 @@ export default function NuevaClaseForm() {
         </label>
         <textarea
           id="description" name="description" rows={3}
-          placeholder="Describí qué van a trabajar en la clase..."
+          placeholder="Describí qué van a trabajar..."
           className="w-full resize-none rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
         />
       </div>
@@ -165,37 +170,14 @@ export default function NuevaClaseForm() {
           </label>
           <input
             type="number" id="price" name="price" min="0" step="0.01" defaultValue="0"
-            placeholder="0 = Gratis"
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="max_capacity" className="mb-1.5 block text-sm font-medium text-foreground/80">
-            Cupo Máximo Presencial
-          </label>
-          <input
-            type="number" id="max_capacity" name="max_capacity" min="1"
-            placeholder="Ej: 15"
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-          />
-        </div>
-        <div className="flex items-center justify-between rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 dark:border-surface-dark-alt dark:bg-surface-dark/50">
-          <label htmlFor="is_full" className="text-sm font-medium text-foreground/80">
-            Marcar como &apos;Sala Llena&apos;
-          </label>
-          <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
-            <input type="checkbox" name="is_full" id="is_full" className="peer sr-only" />
-            <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-brand-800"></div>
-          </div>
         </div>
       </div>
 
       <div>
         <label htmlFor="address_display" className="mb-1.5 block text-sm font-medium text-foreground/80">
-          Ubicación de la clase (Opcional)
+          Ubicación (Opcional)
         </label>
         {hasApiKey ? (
           <APIProvider apiKey={API_KEY}>
@@ -216,36 +198,19 @@ export default function NuevaClaseForm() {
             placeholder="Ej: Palermo, Buenos Aires"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         )}
-        <p className="mt-1.5 text-xs text-foreground/40">
-          Dejalo vacío para usar la dirección principal de tu perfil.
-        </p>
         <input type="hidden" name="address" value={address} />
         <input type="hidden" name="latitude" value={lat || ""} />
         <input type="hidden" name="longitude" value={lng || ""} />
       </div>
 
-      <div>
-        <label htmlFor="jitsi_room_link" className="mb-1.5 block text-sm font-medium text-foreground/80">
-          Link de sala Online (opcional)
-        </label>
-        <input
-          type="url" id="jitsi_room_link" name="jitsi_room_link"
-          placeholder="https://meet.jit.si/mi-clase-yoga o Zoom"
-          className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-        />
-        <p className="mt-1.5 text-xs text-foreground/40">
-          Si la clase es online o híbrida, pegá acá el link de la sala.
-        </p>
-      </div>
-
       <button
         type="submit" disabled={pending}
-        className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-brand-500/25 transition-all hover:shadow-lg hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 disabled:opacity-50"
       >
-        {pending ? "Publicando..." : "Publicar Clase"}
+        {pending ? "Publicando..." : "Publicar Evento"}
       </button>
     </form>
   );

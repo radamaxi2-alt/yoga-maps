@@ -25,6 +25,8 @@ export async function createClass(
   const latStr = formData.get("latitude") as string;
   const lngStr = formData.get("longitude") as string;
   const maxCapStr = formData.get("max_capacity") as string;
+  const category = formData.get("category") as string;
+  const certification_title = formData.get("certification_title") as string;
 
   const { error } = await supabase.from("classes").insert({
     teacher_id: user.id,
@@ -40,6 +42,8 @@ export async function createClass(
     address: (formData.get("address") as string) || null,
     latitude: latStr ? parseFloat(latStr) : null,
     longitude: lngStr ? parseFloat(lngStr) : null,
+    category: category || "clase",
+    certification_title: certification_title || null,
   });
 
   if (error) return { error: error.message };
@@ -83,6 +87,8 @@ export async function updateClass(
       address: (formData.get("address") as string) || null,
       latitude: latStr ? parseFloat(latStr) : null,
       longitude: lngStr ? parseFloat(lngStr) : null,
+      category: (formData.get("category") as string) || "clase",
+      certification_title: (formData.get("certification_title") as string) || null,
     })
     .eq("id", classId)
     .eq("teacher_id", user.id);

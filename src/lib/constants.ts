@@ -7,10 +7,15 @@ export const YOGA_SPECIALTIES = [
   "Yin",
   "Restaurativo",
   "Power Yoga",
-  "Bikram",
   "Meditación",
   "Pranayama",
   "Yoga Nidra",
-  "Formación / Profesorado",
   "Otro"
+];
+
+export const EVENT_CATEGORIES = [
+  { id: "clase", label: "Clase", emoji: "🧘" },
+  { id: "retiro", label: "Retiro", emoji: "🏕️" },
+  { id: "armonizacion", label: "Armonización", emoji: "🔔" },
+  { id: "formacion", label: "Formación", emoji: "🎓" }
 ];

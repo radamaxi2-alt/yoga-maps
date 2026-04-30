@@ -6,10 +6,15 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
+const supabase = createClient();
+
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/profesores", label: "Profesores" },
   { href: "/clases", label: "Clases" },
+  { href: "/retiros", label: "Retiros" },
+  { href: "/armonizaciones", label: "Armonizaciones" },
+  { href: "/formaciones", label: "Formaciones" },
   { href: "/blog", label: "Blog" },
 ];
 
@@ -27,27 +32,18 @@ export default function Navbar({
   const [isProfesor, setIsProfesor] = useState(initialIsProfesor);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const supabase = createClient();
-
   useEffect(() => {
-    // We still listen for auth changes to handle logout/login events
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       const newUser = session?.user ?? null;
       if (newUser?.id !== user?.id) {
         setUser(newUser);
-        if (!newUser) {
-          setIsProfesor(false);
-        } else {
-          // If the user changed (e.g. login), we might need to fetch the profile
-          // But usually the redirect to / handles this via server-side refresh
-        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, user]);
+  }, [user?.id]);
 
   async function handleLogout() {
     setLoggingOut(true);
