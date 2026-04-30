@@ -9,7 +9,7 @@ export default async function MapaPage() {
   const { data: teachersRaw } = await supabase
     .from("profiles")
     .select("*, teacher_details(*)")
-    .eq("role", "profesor")
+    .in("role", ["profesor", "escuela"])
     .order("community_score", { ascending: false });
 
   // Reshape to match ProfesoresView expectations
