@@ -57,7 +57,7 @@ export default function Navbar({
     user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b-0 font-sans">
+    <header className="sticky top-0 z-[100] w-full glass border-b-0 font-sans">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link

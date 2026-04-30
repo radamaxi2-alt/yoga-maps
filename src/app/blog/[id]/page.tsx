@@ -30,11 +30,13 @@ export default async function BlogPostPage({ params }: Props) {
 
   const { data: post } = await supabase
     .from("posts")
-    .select("*, profiles(full_name, avatar_url)")
+    .select("*, profiles!author_id(full_name, avatar_url)")
     .eq("id", id)
     .single();
 
   if (!post) notFound();
+
+  const author = (post as any).profiles;
 
   // Fetch likes count
   const { count: likesCount } = await supabase
@@ -54,7 +56,6 @@ export default async function BlogPostPage({ params }: Props) {
     if (like) hasLiked = true;
   }
 
-  const author = post.profiles as { full_name: string | null; avatar_url: string | null } | null;
   const date = new Date(post.created_at);
 
   return (

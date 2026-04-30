@@ -29,6 +29,16 @@ type ClassForMap = {
   teacher_id: string;
   is_full: boolean | null;
   style: string | null;
+  category: string | null;
+};
+
+const getCategoryEmoji = (category: string | null) => {
+  switch (category) {
+    case "retiro": return "🏕️";
+    case "armonizacion": return "🔔";
+    case "formacion": return "🎓";
+    default: return "🧘";
+  }
 };
 
 // --- Teacher Marker Component ---
@@ -61,12 +71,9 @@ const TeacherMarker = memo(({
             <p className="text-xs font-semibold text-brand-600 mb-1">
               {isSchool ? "Centro / Escuela" : "Instructor"}
             </p>
-            {teacher.address && (
-              <p className="mt-0.5 text-xs text-gray-600">📍 {teacher.address}</p>
-            )}
             <Link
               href={`/profesores/${teacher.id}`}
-              className="mt-2 inline-block text-xs font-bold text-brand-600 hover:text-brand-500 underline"
+              className="mt-2 inline-block text-xs font-bold text-brand-600 underline"
             >
               Ver perfil →
             </Link>
@@ -90,6 +97,7 @@ const ClassMarker = memo(({
   onSelect: () => void;
 }) => {
   const [markerRef, marker] = useMarkerRef();
+  const emoji = getCategoryEmoji(cls.category);
 
   return (
     <React.Fragment key={`class-${cls.id}`}>
@@ -98,24 +106,20 @@ const ClassMarker = memo(({
         position={{ lat: cls.latitude!, lng: cls.longitude! }}
         onClick={onSelect}
         title={cls.title}
-        label={{ text: "🪷", className: "text-lg" }}
+        label={{ text: emoji, className: "text-lg" }}
       />
       {isSelected && marker && (
         <InfoWindow anchor={marker} onCloseClick={() => onSelect()}>
           <div className="max-w-[200px] p-1 font-sans">
             <div className="flex items-center gap-1 mb-1">
-              <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-700 uppercase">Clase</span>
-              {cls.is_full && (
-                <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 uppercase">Llena</span>
-              )}
+              <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-700 uppercase">
+                {cls.category || "Clase"}
+              </span>
             </div>
             <p className="font-bold text-gray-900">{cls.title}</p>
-            {cls.address && (
-              <p className="mt-0.5 text-xs text-gray-500">📍 {cls.address}</p>
-            )}
             <Link
               href={`/profesores/${cls.teacher_id}`}
-              className="mt-2 inline-block text-xs font-medium text-brand-600 hover:text-brand-700 underline"
+              className="mt-2 inline-block text-xs font-medium text-brand-600 underline"
             >
               Ver detalles →
             </Link>
