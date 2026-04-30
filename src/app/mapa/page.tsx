@@ -8,7 +8,8 @@ export default async function MapaPage() {
   
   const { data: teachers } = await supabase
     .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url)");
+    .select("*, profiles(full_name, avatar_url, community_score)")
+    .order("community_score", { referencedTable: "profiles", ascending: false });
 
   const { data: classes } = await supabase
     .from("classes")

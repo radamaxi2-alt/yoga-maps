@@ -18,6 +18,25 @@ export async function createClass(
 
   if (!user) return { error: "No estás autenticado." };
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_plan")
+    .eq("id", user.id)
+    .single();
+
+  const plan = profile?.subscription_plan || "zen";
+  const limits = { zen: 3, namaste: 20, escuela: 9999 };
+  const limit = limits[plan as keyof typeof limits] || 3;
+
+  const { count } = await supabase
+    .from("classes")
+    .select("*", { count: "exact", head: true })
+    .eq("teacher_id", user.id);
+
+  if ((count || 0) >= limit) {
+    return { error: `Has alcanzado el límite de clases de tu Plan ${plan.toUpperCase()} (${limit}). Actualiza tu plan para crear más.` };
+  }
+
   const styleSelect = formData.get("style_select") as string;
   const customStyle = formData.get("custom_style") as string;
   const style = styleSelect === "Otro" ? customStyle : styleSelect;

@@ -13,8 +13,8 @@ export default async function ProfesoresPage() {
 
   const { data: teachers } = await supabase
     .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url)")
-    .order("created_at", { ascending: false });
+    .select("*, profiles(full_name, avatar_url, community_score)")
+    .order("community_score", { referencedTable: "profiles", ascending: false });
 
   const { data: classes } = await supabase
     .from("classes")
