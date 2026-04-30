@@ -11,10 +11,22 @@ export const metadata: Metadata = {
 export default async function ProfesoresPage() {
   const supabase = await createClient();
 
-  const { data: teachers } = await supabase
-    .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url, community_score)")
-    .order("community_score", { referencedTable: "profiles", ascending: false });
+  const { data: teachersRaw } = await supabase
+    .from("profiles")
+    .select("*, teacher_details(*)")
+    .eq("role", "profesor")
+    .order("community_score", { ascending: false });
+
+  // Reshape to match ProfesoresView expectations
+  const teachers = (teachersRaw || []).map((p: any) => ({
+    ...p.teacher_details,
+    id: p.id,
+    profiles: {
+      full_name: p.full_name,
+      avatar_url: p.avatar_url,
+      community_score: p.community_score
+    }
+  }));
 
   const { data: classes } = await supabase
     .from("classes")
