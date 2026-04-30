@@ -31,11 +31,26 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
+import { createClient } from "@/lib/supabase/server";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let isProfesor = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isProfesor = profile?.role === "profesor";
+  }
+
   return (
     <html
       lang="es"
@@ -44,7 +59,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-background text-foreground font-sans">
         {/* Soft background image overlay */}
         <div className="fixed inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-5 dark:opacity-10 mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
-        <Navbar />
+        <Navbar initialUser={user} initialIsProfesor={isProfesor} />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

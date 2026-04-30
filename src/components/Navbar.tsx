@@ -13,41 +13,41 @@ const NAV_LINKS = [
   { href: "/blog", label: "Blog" },
 ];
 
-export default function Navbar() {
+export default function Navbar({
+  initialUser = null,
+  initialIsProfesor = false,
+}: {
+  initialUser?: User | null;
+  initialIsProfesor?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isProfesor, setIsProfesor] = useState(false);
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [isProfesor, setIsProfesor] = useState(initialIsProfesor);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const supabase = createClient();
 
   useEffect(() => {
-    async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-        setIsProfesor(profile?.role === "profesor");
-      }
-    }
-    loadUser();
-
+    // We still listen for auth changes to handle logout/login events
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session?.user) setIsProfesor(false);
+      const newUser = session?.user ?? null;
+      if (newUser?.id !== user?.id) {
+        setUser(newUser);
+        if (!newUser) {
+          setIsProfesor(false);
+        } else {
+          // If the user changed (e.g. login), we might need to fetch the profile
+          // But usually the redirect to / handles this via server-side refresh
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [supabase, user]);
 
   async function handleLogout() {
     setLoggingOut(true);
