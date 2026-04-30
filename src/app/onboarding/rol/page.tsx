@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { UserRole } from "@/lib/database.types";
 
-const ROLE_OPTIONS = [
+const ROLE_OPTIONS: { value: UserRole; label: string; emoji: string; description: string }[] = [
   {
     value: "alumno",
     label: "Alumno",
@@ -20,7 +21,7 @@ const ROLE_OPTIONS = [
 ];
 
 export default function RoleSelectionPage() {
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const supabase = createClient();
