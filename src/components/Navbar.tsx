@@ -34,6 +34,12 @@ export default function Navbar({
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      setLoggingOut(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
