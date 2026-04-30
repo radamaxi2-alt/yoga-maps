@@ -59,6 +59,7 @@ function PlacesAutocompleteInput({
 }
 
 type FormValues = {
+  teacher_type: "independiente" | "escuela";
   full_name: string;
   bio: string;
   specialties: string[];
@@ -84,9 +85,11 @@ export default function ProfileEditForm({
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
+      teacher_type: (details?.teacher_type as "independiente" | "escuela") || "independiente",
       full_name: fullName || "",
       bio: details?.bio || "",
       specialties: details?.specialties || [],
@@ -94,6 +97,8 @@ export default function ProfileEditForm({
       address: details?.address || "",
     },
   });
+
+  const selectedType = watch("teacher_type");
 
   const handlePlaceSelect = useCallback(
     (addr: string, latitude: number, longitude: number) => {
@@ -108,6 +113,7 @@ export default function ProfileEditForm({
     setErrorMsg("");
     startTransition(async () => {
       const payload: ProfileData = {
+        teacher_type: data.teacher_type,
         full_name: data.full_name,
         bio: data.bio || null,
         specialties: data.specialties,
@@ -153,10 +159,43 @@ export default function ProfileEditForm({
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Teacher Type */}
+          <fieldset>
+            <legend className="mb-3 text-sm font-medium text-foreground/80">
+              Tipo de Perfil
+            </legend>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="group relative cursor-pointer">
+                <input
+                  type="radio"
+                  value="independiente"
+                  {...register("teacher_type")}
+                  className="peer sr-only"
+                />
+                <div className="rounded-xl border-2 border-brand-100/60 bg-surface-alt/30 p-4 text-center transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:shadow-md hover:border-brand-200 dark:border-surface-dark-alt dark:bg-surface-dark/30">
+                  <span className="text-2xl">🧘</span>
+                  <p className="mt-1 text-sm font-semibold text-foreground">Instructor Independiente</p>
+                </div>
+              </label>
+              <label className="group relative cursor-pointer">
+                <input
+                  type="radio"
+                  value="escuela"
+                  {...register("teacher_type")}
+                  className="peer sr-only"
+                />
+                <div className="rounded-xl border-2 border-brand-100/60 bg-surface-alt/30 p-4 text-center transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:shadow-md hover:border-brand-200 dark:border-surface-dark-alt dark:bg-surface-dark/30">
+                  <span className="text-2xl">🏛️</span>
+                  <p className="mt-1 text-sm font-semibold text-foreground">Centro / Escuela</p>
+                </div>
+              </label>
+            </div>
+          </fieldset>
+
           {/* Name */}
           <div>
             <label htmlFor="full_name" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Nombre completo
+              {selectedType === "escuela" ? "Nombre de la Institución" : "Nombre completo"}
             </label>
             <input
               type="text" id="full_name"
@@ -169,12 +208,12 @@ export default function ProfileEditForm({
           {/* Bio */}
           <div>
             <label htmlFor="bio" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Sobre vos
+              Sobre {selectedType === "escuela" ? "el centro" : "vos"}
             </label>
             <textarea
               id="bio" rows={4}
               {...register("bio")}
-              placeholder="Contá sobre tu experiencia y formación..."
+              placeholder={selectedType === "escuela" ? "Contá sobre la historia del centro, enfoque..." : "Contá sobre tu experiencia y formación..."}
               className="w-full resize-none rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
             />
           </div>
@@ -221,7 +260,7 @@ export default function ProfileEditForm({
           {/* Address with Google Places Autocomplete */}
           <div>
             <label htmlFor="address_display" className="mb-1.5 block text-sm font-medium text-foreground/80">
-              Dirección / Ubicación
+              Dirección / Ubicación principal
             </label>
             {hasApiKey ? (
               <APIProvider apiKey={API_KEY}>

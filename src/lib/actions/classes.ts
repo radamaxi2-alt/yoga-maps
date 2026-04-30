@@ -18,6 +18,14 @@ export async function createClass(
 
   if (!user) return { error: "No estás autenticado." };
 
+  const styleSelect = formData.get("style_select") as string;
+  const customStyle = formData.get("custom_style") as string;
+  const style = styleSelect === "Otro" ? customStyle : styleSelect;
+
+  const latStr = formData.get("latitude") as string;
+  const lngStr = formData.get("longitude") as string;
+  const maxCapStr = formData.get("max_capacity") as string;
+
   const { error } = await supabase.from("classes").insert({
     teacher_id: user.id,
     title: formData.get("title") as string,
@@ -25,6 +33,13 @@ export async function createClass(
     price: parseFloat(formData.get("price") as string) || 0,
     scheduled_at: formData.get("scheduled_at") as string,
     jitsi_room_link: (formData.get("jitsi_room_link") as string) || null,
+    style: style || null,
+    instructor_name: (formData.get("instructor_name") as string) || null,
+    max_capacity: maxCapStr ? parseInt(maxCapStr) : null,
+    is_full: formData.get("is_full") === "on",
+    address: (formData.get("address") as string) || null,
+    latitude: latStr ? parseFloat(latStr) : null,
+    longitude: lngStr ? parseFloat(lngStr) : null,
   });
 
   if (error) return { error: error.message };
@@ -45,6 +60,14 @@ export async function updateClass(
 
   const classId = formData.get("class_id") as string;
 
+  const styleSelect = formData.get("style_select") as string;
+  const customStyle = formData.get("custom_style") as string;
+  const style = styleSelect === "Otro" ? customStyle : styleSelect;
+
+  const latStr = formData.get("latitude") as string;
+  const lngStr = formData.get("longitude") as string;
+  const maxCapStr = formData.get("max_capacity") as string;
+
   const { error } = await supabase
     .from("classes")
     .update({
@@ -53,6 +76,13 @@ export async function updateClass(
       price: parseFloat(formData.get("price") as string) || 0,
       scheduled_at: formData.get("scheduled_at") as string,
       jitsi_room_link: (formData.get("jitsi_room_link") as string) || null,
+      style: style || null,
+      instructor_name: (formData.get("instructor_name") as string) || null,
+      max_capacity: maxCapStr ? parseInt(maxCapStr) : null,
+      is_full: formData.get("is_full") === "on",
+      address: (formData.get("address") as string) || null,
+      latitude: latStr ? parseFloat(latStr) : null,
+      longitude: lngStr ? parseFloat(lngStr) : null,
     })
     .eq("id", classId)
     .eq("teacher_id", user.id);

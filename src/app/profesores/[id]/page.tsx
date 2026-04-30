@@ -109,7 +109,7 @@ export default async function TeacherProfilePage({ params }: Props) {
         {teacher.bio && (
           <div className="mt-8 border-t border-brand-100/30 pt-6 dark:border-surface-dark-alt">
             <h2 className="text-sm font-semibold uppercase tracking-widest text-foreground/40">
-              Sobre mí
+              Sobre {teacher.teacher_type === "escuela" ? "el centro" : "mí"}
             </h2>
             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-foreground/70">
               {teacher.bio}
@@ -129,7 +129,7 @@ export default async function TeacherProfilePage({ params }: Props) {
               return (
                 <article
                   key={cls.id}
-                  className="glass flex flex-col gap-5 rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 sm:flex-row sm:items-center"
+                  className="glass flex flex-col gap-5 rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 sm:flex-row sm:items-center relative overflow-hidden"
                 >
                   {/* Date badge */}
                   <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100">
@@ -154,6 +154,16 @@ export default async function TeacherProfilePage({ params }: Props) {
                         })}{" "}
                         hs
                       </span>
+                      {cls.style && (
+                        <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-600">
+                          {cls.style}
+                        </span>
+                      )}
+                      {cls.instructor_name && (
+                        <span className="text-xs text-foreground/50">
+                          👨‍🏫 {cls.instructor_name}
+                        </span>
+                      )}
                       <CalendarButton 
                         title={cls.title} 
                         scheduledAt={cls.scheduled_at} 
@@ -161,6 +171,16 @@ export default async function TeacherProfilePage({ params }: Props) {
                         location={cls.jitsi_room_link || ""} 
                       />
                     </div>
+                    {cls.is_full && (
+                      <div className="mt-3">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-100 shadow-sm">
+                          <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                          {cls.jitsi_room_link 
+                            ? "Cupos presenciales agotados - Únete a la clase Online" 
+                            : "Sala Llena - No hay cupos disponibles"}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-start gap-3 sm:items-end sm:justify-center">

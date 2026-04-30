@@ -54,6 +54,7 @@ export interface Database {
           longitude: number | null;
           address: string | null;
           average_price: number | null;
+          teacher_type: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -65,6 +66,7 @@ export interface Database {
           longitude?: number | null;
           address?: string | null;
           average_price?: number | null;
+          teacher_type?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -76,6 +78,7 @@ export interface Database {
           longitude?: number | null;
           address?: string | null;
           average_price?: number | null;
+          teacher_type?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -98,6 +101,13 @@ export interface Database {
           price: number;
           scheduled_at: string;
           jitsi_room_link: string | null;
+          style: string | null;
+          instructor_name: string | null;
+          max_capacity: number | null;
+          is_full: boolean | null;
+          latitude: number | null;
+          longitude: number | null;
+          address: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -109,6 +119,13 @@ export interface Database {
           price?: number;
           scheduled_at: string;
           jitsi_room_link?: string | null;
+          style?: string | null;
+          instructor_name?: string | null;
+          max_capacity?: number | null;
+          is_full?: boolean | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          address?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -120,6 +137,13 @@ export interface Database {
           price?: number;
           scheduled_at?: string;
           jitsi_room_link?: string | null;
+          style?: string | null;
+          instructor_name?: string | null;
+          max_capacity?: number | null;
+          is_full?: boolean | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          address?: string | null;
           created_at?: string;
           updated_at?: string;
         };

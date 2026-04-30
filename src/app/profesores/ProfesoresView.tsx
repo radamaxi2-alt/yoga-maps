@@ -17,6 +17,7 @@ const DEFAULT_CENTER = { lat: -34.6037, lng: -58.3816 };
 
 type TeacherWithProfile = {
   id: string;
+  teacher_type: string | null;
   bio: string | null;
   specialties: string[] | null;
   latitude: number | null;
@@ -27,6 +28,17 @@ type TeacherWithProfile = {
     full_name: string | null;
     avatar_url: string | null;
   } | null;
+};
+
+type ClassForMap = {
+  id: string;
+  title: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  teacher_id: string;
+  is_full: boolean | null;
+  jitsi_room_link: string | null;
 };
 
 // --- Teacher Marker Component ---
@@ -41,6 +53,7 @@ function TeacherMarker({
 }) {
   const [markerRef, marker] = useMarkerRef();
   const name = teacher.profiles?.full_name || "Profesor";
+  const isSchool = teacher.teacher_type === "escuela";
 
   return (
     <>
@@ -49,24 +62,75 @@ function TeacherMarker({
         position={{ lat: teacher.latitude!, lng: teacher.longitude! }}
         onClick={onSelect}
         title={name}
+        label={{ text: isSchool ? "🏛️" : "🧘", className: "text-xl" }}
       />
       {isSelected && marker && (
         <InfoWindow anchor={marker} onCloseClick={() => onSelect()}>
-          <div className="max-w-[200px] p-1">
-            <p className="font-semibold text-gray-900">{name}</p>
+          <div className="max-w-[200px] p-1 font-sans">
+            <p className="font-bold text-brand-900">{name}</p>
+            <p className="text-xs font-semibold text-brand-600 mb-1">
+              {isSchool ? "Centro / Escuela" : "Instructor"}
+            </p>
             {teacher.address && (
-              <p className="mt-0.5 text-xs text-gray-500">📍 {teacher.address}</p>
+              <p className="mt-0.5 text-xs text-gray-600">📍 {teacher.address}</p>
             )}
             {teacher.specialties && teacher.specialties.length > 0 && (
-              <p className="mt-1 text-xs text-gray-600">
+              <p className="mt-1 text-xs text-gray-500">
                 {teacher.specialties.slice(0, 3).join(", ")}
               </p>
             )}
             <Link
               href={`/profesores/${teacher.id}`}
-              className="mt-2 inline-block text-xs font-medium text-green-600 hover:text-green-700"
+              className="mt-2 inline-block text-xs font-bold text-brand-600 hover:text-brand-500 underline"
             >
               Ver perfil →
+            </Link>
+          </div>
+        </InfoWindow>
+      )}
+    </>
+  );
+}
+
+// --- Class Marker Component ---
+function ClassMarker({
+  cls,
+  isSelected,
+  onSelect,
+}: {
+  cls: ClassForMap;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const [markerRef, marker] = useMarkerRef();
+
+  return (
+    <>
+      <Marker
+        ref={markerRef}
+        position={{ lat: cls.latitude!, lng: cls.longitude! }}
+        onClick={onSelect}
+        title={cls.title}
+        label={{ text: "🪷", className: "text-lg" }}
+      />
+      {isSelected && marker && (
+        <InfoWindow anchor={marker} onCloseClick={() => onSelect()}>
+          <div className="max-w-[200px] p-1 font-sans">
+            <div className="flex items-center gap-1 mb-1">
+              <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-700 uppercase">Clase</span>
+              {cls.is_full && (
+                <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 uppercase">Llena</span>
+              )}
+            </div>
+            <p className="font-bold text-gray-900">{cls.title}</p>
+            {cls.address && (
+              <p className="mt-0.5 text-xs text-gray-500">📍 {cls.address}</p>
+            )}
+            <Link
+              href={`/profesores/${cls.teacher_id}`}
+              className="mt-2 inline-block text-xs font-medium text-brand-600 hover:text-brand-700 underline"
+            >
+              Ver detalles →
             </Link>
           </div>
         </InfoWindow>
@@ -78,8 +142,10 @@ function TeacherMarker({
 // --- Main View ---
 export default function ProfesoresView({
   teachers,
+  classes = [],
 }: {
   teachers: TeacherWithProfile[];
+  classes?: ClassForMap[];
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
@@ -93,7 +159,7 @@ export default function ProfesoresView({
   }, [teachers]);
 
   // Filtered teachers
-  const filtered = useMemo(() => {
+  const filteredTeachers = useMemo(() => {
     return teachers.filter((t) => {
       const profile = t.profiles;
       const name = profile?.full_name?.toLowerCase() || "";
@@ -108,21 +174,33 @@ export default function ProfesoresView({
     });
   }, [teachers, searchQuery, specialtyFilter]);
 
+  // Filtered classes (only show classes that match the search query)
+  const filteredClasses = useMemo(() => {
+    return classes.filter((c) => {
+      if (!c.latitude || !c.longitude) return false;
+      const title = c.title.toLowerCase();
+      const addr = c.address?.toLowerCase() || "";
+      const q = searchQuery.toLowerCase();
+      return !q || title.includes(q) || addr.includes(q);
+    });
+  }, [classes, searchQuery]);
+
   // Teachers with valid coordinates (for map)
-  const mappable = useMemo(
-    () => filtered.filter((t) => t.latitude && t.longitude),
-    [filtered]
+  const mappableTeachers = useMemo(
+    () => filteredTeachers.filter((t) => t.latitude && t.longitude),
+    [filteredTeachers]
   );
 
-  // Compute map center from filtered teachers
+  // Compute map center from filtered items
   const mapCenter = useMemo(() => {
-    if (mappable.length === 0) return DEFAULT_CENTER;
+    const allMappable = [...mappableTeachers, ...filteredClasses];
+    if (allMappable.length === 0) return DEFAULT_CENTER;
     const avgLat =
-      mappable.reduce((s, t) => s + t.latitude!, 0) / mappable.length;
+      allMappable.reduce((s, item) => s + item.latitude!, 0) / allMappable.length;
     const avgLng =
-      mappable.reduce((s, t) => s + t.longitude!, 0) / mappable.length;
+      allMappable.reduce((s, item) => s + item.longitude!, 0) / allMappable.length;
     return { lat: avgLat, lng: avgLng };
-  }, [mappable]);
+  }, [mappableTeachers, filteredClasses]);
 
   const handleMarkerSelect = useCallback(
     (id: string) => {
@@ -141,11 +219,10 @@ export default function ProfesoresView({
           Directorio
         </span>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Profesores de Yoga
+          Profesores y Clases
         </h1>
         <p className="mt-4 text-lg text-foreground/60">
-          Descubrí profesores, filtrá por especialidad o ciudad, y explora el
-          mapa.
+          Descubrí instructores y centros, filtrá por especialidad o ciudad, y explora las clases en el mapa.
         </p>
       </div>
 
@@ -160,7 +237,7 @@ export default function ProfesoresView({
           </svg>
           <input
             type="text"
-            placeholder="Buscar por nombre o ciudad..."
+            placeholder="Buscar por nombre, clase o ciudad..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-brand-200/60 bg-white/60 py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-foreground/30 backdrop-blur-sm transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
@@ -181,7 +258,7 @@ export default function ProfesoresView({
       </div>
 
       {/* Map */}
-      {hasApiKey && mappable.length > 0 && (
+      {hasApiKey && (mappableTeachers.length > 0 || filteredClasses.length > 0) && (
         <div className="mt-8 overflow-hidden rounded-2xl border border-brand-100/50 shadow-lg shadow-brand-500/5">
           <APIProvider apiKey={API_KEY}>
             <Map
@@ -199,7 +276,7 @@ export default function ProfesoresView({
                 { featureType: "water", elementType: "geometry", stylers: [{ color: "#ddd6fe" }] },
               ]}
             >
-              {mappable.map((t) => (
+              {mappableTeachers.map((t) => (
                 <TeacherMarker
                   key={t.id}
                   teacher={t}
@@ -207,35 +284,55 @@ export default function ProfesoresView({
                   onSelect={() => handleMarkerSelect(t.id)}
                 />
               ))}
+              {filteredClasses.map((c) => (
+                <ClassMarker
+                  key={`class-${c.id}`}
+                  cls={c}
+                  isSelected={selectedMarkerId === `class-${c.id}`}
+                  onSelect={() => handleMarkerSelect(`class-${c.id}`)}
+                />
+              ))}
             </Map>
           </APIProvider>
         </div>
       )}
 
-      {hasApiKey && mappable.length === 0 && filtered.length > 0 && (
+      {hasApiKey && mappableTeachers.length === 0 && filteredClasses.length === 0 && filteredTeachers.length > 0 && (
         <div className="mt-8 rounded-2xl border border-brand-100/40 bg-brand-50/30 p-6 text-center text-sm text-foreground/50 dark:border-surface-dark-alt dark:bg-surface-dark-alt/30">
-          📍 Los profesores mostrados aún no cargaron su ubicación en el mapa.
+          📍 Los resultados mostrados aún no cargaron su ubicación en el mapa.
         </div>
       )}
 
+      {/* Legend */}
+      <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs font-medium text-foreground/60">
+        <span className="flex items-center gap-1.5"><span className="text-lg">🧘</span> Instructor</span>
+        <span className="flex items-center gap-1.5"><span className="text-lg">🏛️</span> Centro / Escuela</span>
+        <span className="flex items-center gap-1.5"><span className="text-lg">🪷</span> Clase Específica</span>
+      </div>
+
       {/* Teachers Grid */}
-      {filtered.length > 0 ? (
+      {filteredTeachers.length > 0 ? (
         <>
           <p className="mt-8 text-sm text-foreground/50">
-            {filtered.length} profesor{filtered.length !== 1 ? "es" : ""}{" "}
-            encontrado{filtered.length !== 1 ? "s" : ""}
+            {filteredTeachers.length} resultado{filteredTeachers.length !== 1 ? "s" : ""} encontrado{filteredTeachers.length !== 1 ? "s" : ""}
           </p>
           <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((teacher) => {
+            {filteredTeachers.map((teacher) => {
               const profile = teacher.profiles;
+              const isSchool = teacher.teacher_type === "escuela";
+              
               return (
                 <Link
                   key={teacher.id}
                   href={`/profesores/${teacher.id}`}
-                  className="group rounded-2xl border border-brand-100/50 bg-white/50 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-500/5 dark:border-surface-dark-alt dark:bg-surface-dark-alt/50 dark:hover:border-brand-800"
+                  className="group relative rounded-2xl border border-brand-100/50 bg-white/50 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-500/5 dark:border-surface-dark-alt dark:bg-surface-dark-alt/50 dark:hover:border-brand-800"
                 >
+                  <div className="absolute right-4 top-4 rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:bg-brand-900/30 dark:text-brand-300">
+                    {isSchool ? "Centro" : "Profesor"}
+                  </div>
+                  
                   {/* Avatar */}
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-3xl font-bold text-white shadow-lg shadow-brand-500/20">
+                  <div className="mx-auto mt-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-3xl font-bold text-white shadow-lg shadow-brand-500/20">
                     {profile?.avatar_url ? (
                       <img
                         src={profile.avatar_url}
@@ -302,23 +399,11 @@ export default function ProfesoresView({
           </span>
           <h3 className="mt-4 text-lg font-semibold text-foreground">
             {teachers.length === 0
-              ? "Aún no hay profesores registrados"
+              ? "Aún no hay registros"
               : "No se encontraron resultados"}
           </h3>
           <p className="mt-2 text-sm text-foreground/60">
-            {teachers.length === 0 ? (
-              <>
-                ¿Sos profesor de yoga?{" "}
-                <Link
-                  href="/registro"
-                  className="font-medium text-brand-600 hover:text-brand-500"
-                >
-                  Registrate y publicá tu perfil.
-                </Link>
-              </>
-            ) : (
-              "Probá con otros filtros."
-            )}
+            Probá con otros filtros.
           </p>
         </div>
       )}

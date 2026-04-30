@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export type ProfileData = {
+  teacher_type: string;
   full_name: string;
   bio: string | null;
   specialties: string[];
@@ -30,6 +31,7 @@ export async function updateTeacherProfile(data: ProfileData) {
   }
 
   const updateData = {
+    teacher_type: data.teacher_type,
     bio: data.bio || null,
     specialties: data.specialties.length > 0 ? data.specialties : null,
     address: data.address || null,
