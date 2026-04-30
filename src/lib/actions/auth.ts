@@ -47,6 +47,11 @@ export async function login(
       if (!teacherDetails) {
         redirect("/onboarding/profesor");
       }
+      redirect("/dashboard");
+    }
+
+    if (profile?.role === "alumno") {
+      redirect("/student-profile");
     }
   }
 
@@ -93,6 +98,8 @@ export async function signup(
   // No email confirmation — redirect directly
   if (role === "profesor") {
     redirect("/onboarding/profesor");
+  } else if (role === "alumno") {
+    redirect("/student-profile");
   }
 
   redirect("/");
