@@ -34,28 +34,27 @@ export default function Navbar({
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      setLoggingOut(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    setLoggingOut(false);
-  }, []);
-
-  useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setLoggingOut(false);
       const newUser = session?.user ?? null;
-      if (newUser?.id !== user?.id) {
-        setUser(newUser);
+      setUser(newUser);
+      
+      if (newUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", newUser.id)
+          .single();
+        setIsProfesor(profile?.role === "profesor" || profile?.role === "escuela");
+      } else {
+        setIsProfesor(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [user?.id]);
+  }, []);
 
   async function handleLogout() {
     try {
