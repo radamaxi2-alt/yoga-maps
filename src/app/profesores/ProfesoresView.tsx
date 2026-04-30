@@ -46,10 +46,12 @@ export default function ProfesoresView({
   teachers,
   classes = [],
   initialCategory = "",
+  hideMap = false,
 }: {
   teachers: TeacherWithProfile[];
   classes?: ClassForMap[];
   initialCategory?: string;
+  hideMap?: boolean;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
@@ -151,33 +153,48 @@ export default function ProfesoresView({
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-brand-100/50 shadow-xl mb-16">
-        <YogaMap
-          mappableTeachers={mappableTeachers}
-          filteredClasses={filteredClasses}
-          mapCenter={mapCenter}
-          selectedMarkerId={selectedMarkerId}
-          onMarkerSelect={handleMarkerSelect}
-        />
-      </div>
+      {!hideMap && (
+        <div className="overflow-hidden rounded-3xl border border-brand-100/50 shadow-xl mb-16">
+          <YogaMap
+            mappableTeachers={mappableTeachers}
+            filteredClasses={filteredClasses}
+            mapCenter={mapCenter}
+            selectedMarkerId={selectedMarkerId}
+            onMarkerSelect={handleMarkerSelect}
+          />
+        </div>
+      )}
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {filteredTeachers.map((teacher) => (
-          <Link
+          <div
             key={teacher.id}
-            href={`/profesores/${teacher.id}`}
             className="glass group flex flex-col overflow-hidden rounded-3xl transition-all hover:-translate-y-1"
           >
-            <div className="h-48 bg-brand-50">
-              {teacher.profiles?.avatar_url && (
-                <img src={teacher.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+            <Link href={`/profesores/${teacher.id}`} className="h-48 bg-brand-50 block overflow-hidden">
+              {teacher.profiles?.avatar_url ? (
+                <img src={teacher.profiles.avatar_url} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-4xl opacity-20">🧘</div>
               )}
-            </div>
+            </Link>
             <div className="p-6">
-              <h3 className="text-xl font-bold">{teacher.profiles?.full_name}</h3>
+              <h3 className="text-xl font-bold">{teacher.profiles?.full_name || "Instructor"}</h3>
               <p className="mt-2 line-clamp-2 text-sm text-foreground/60">{teacher.bio}</p>
+              
+              <div className="mt-6 flex items-center justify-between">
+                <Link href={`/profesores/${teacher.id}`} className="text-xs font-bold text-brand-600 hover:underline">
+                  Ver Perfil
+                </Link>
+                <Link 
+                  href={`/mapa?teacher=${teacher.id}`} 
+                  className="rounded-full bg-brand-50 px-4 py-1.5 text-[10px] font-bold text-brand-700 hover:bg-brand-100 transition-colors"
+                >
+                  📍 Ver en Mapa
+                </Link>
+              </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </section>

@@ -10,6 +10,7 @@ const supabase = createClient();
 
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
+  { href: "/mapa", label: "Mapa" },
   { href: "/profesores", label: "Profesores" },
   { href: "/clases", label: "Clases" },
   { href: "/retiros", label: "Retiros" },
