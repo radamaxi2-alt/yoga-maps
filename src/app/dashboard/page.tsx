@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name, avatar_url")
+    .select("role, full_name, avatar_url, subscription_plan, trial_expires_at")
     .eq("id", user.id)
     .single();
 
@@ -36,10 +36,18 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  // Fetch teacher's classes
+  // Fetch teacher's classes with reservations and their modality
   const { data: classes } = await supabase
     .from("classes")
-    .select("*, class_reservations(id, status, profiles(full_name, avatar_url, student_details(health_info)))")
+    .select(`
+      *,
+      class_reservations(
+        id, 
+        status, 
+        modality,
+        profiles(full_name, avatar_url, student_details(health_info))
+      )
+    `)
     .eq("teacher_id", user.id)
     .order("scheduled_at", { ascending: true });
 
@@ -98,80 +106,136 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mx-auto max-w-5xl px-4 mt-8 sm:px-6 lg:px-8">
+        {/* Subscription Plan Status */}
+        <div className="mb-12 glass rounded-[2.5rem] p-8 border-brand-500/20 bg-gradient-to-br from-brand-600/5 to-transparent">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full ring-1 ring-brand-500/30">Mi Suscripción</span>
+                {new Date(profile.trial_expires_at) > now && (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full ring-1 ring-cyan-500/30 animate-pulse">Free Trial Activo</span>
+                )}
+              </div>
+              <h2 className="text-3xl font-black text-white capitalize">Plan {profile.subscription_plan}</h2>
+              <p className="text-sm text-brand-100/50 mt-1">
+                {new Date(profile.trial_expires_at) > now 
+                  ? `Te quedan ${Math.ceil((new Date(profile.trial_expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} días de prueba gratuita.`
+                  : 'Tu periodo de prueba ha finalizado. Suscríbete para seguir creciendo.'}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-bold text-white/40 uppercase">Límite de Clases</p>
+                <p className="text-lg font-black text-white">
+                  {profile.subscription_plan === 'zen' ? '3' : profile.subscription_plan === 'namaste' ? '20' : 'Ilimitado'}
+                </p>
+              </div>
+              <button className="rounded-full bg-white px-8 py-4 text-xs font-black text-brand-700 shadow-xl transition-all hover:bg-brand-50 hover:-translate-y-1 active:scale-95">
+                MEJORAR PLAN
+              </button>
+            </div>
+          </div>
+
+          {/* Transfer Info (Static for now as requested) */}
+          <div className="mt-8 grid sm:grid-cols-3 gap-4 border-t border-white/5 pt-8">
+            <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <p className="text-[9px] font-black text-brand-400 uppercase mb-1">Plan Zen</p>
+              <p className="text-lg font-black text-white">$15,000 <span className="text-[10px] opacity-40">/mes</span></p>
+            </div>
+            <div className="bg-brand-500/10 p-4 rounded-2xl border border-brand-500/20 ring-1 ring-brand-500/30">
+              <p className="text-[9px] font-black text-cyan-400 uppercase mb-1">Plan Namasté</p>
+              <p className="text-lg font-black text-white">$50,000 <span className="text-[10px] opacity-40">/mes</span></p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+              <p className="text-[9px] font-black text-brand-400 uppercase mb-1">Plan Escuela</p>
+              <p className="text-lg font-black text-white">$100,000 <span className="text-[10px] opacity-40">/mes</span></p>
+            </div>
+          </div>
+          <p className="mt-6 text-[10px] text-center text-brand-100/40 italic">
+            Para activar un plan, transfiere al Alias: <b>YOGA.MAPS.MP</b> y envía el comprobante por WhatsApp al +54 223 1234567
+          </p>
+        </div>
+
         {/* Quick Actions */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-foreground">Gestión de Clases</h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-black text-white tracking-tight italic">GESTIÓN DE CLASES</h2>
           <Link
             href="/dashboard/nueva-clase"
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:brightness-110"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-xs font-black text-white shadow-xl shadow-brand-500/20 transition-all hover:shadow-brand-500/40 hover:-translate-y-0.5"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Nueva Clase
+            + NUEVA CLASE
           </Link>
         </div>
 
         {/* Classes Table */}
         {classes && classes.length > 0 ? (
-          <div className="overflow-hidden rounded-3xl border border-brand-100/50 bg-white shadow-xl shadow-brand-500/5 dark:border-surface-dark-alt dark:bg-surface-dark-alt">
+          <div className="overflow-hidden rounded-[2rem] border border-white/5 bg-surface-dark-alt/50 backdrop-blur-xl shadow-2xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="bg-brand-50/50 border-b border-brand-100/30 dark:bg-surface-dark-alt/50 dark:border-surface-dark-alt">
-                    <th className="px-6 py-4 font-bold text-foreground/60 uppercase tracking-wider text-[10px]">Clase</th>
-                    <th className="px-6 py-4 font-bold text-foreground/60 uppercase tracking-wider text-[10px]">Fecha / Hora</th>
-                    <th className="px-6 py-4 font-bold text-foreground/60 uppercase tracking-wider text-[10px]">Reservas</th>
-                    <th className="px-6 py-4 font-bold text-foreground/60 uppercase tracking-wider text-[10px]">Acciones</th>
+                  <tr className="border-b border-white/5 bg-white/5">
+                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Clase / Alumnos</th>
+                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Horario</th>
+                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Cupos</th>
+                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-brand-100/20 dark:divide-surface-dark-alt">
+                <tbody className="divide-y divide-white/5">
                     {classes.map((cls) => {
                       const date = new Date(cls.scheduled_at);
                       const isPast = date < now;
-                      const confirmedReservations = (cls.class_reservations as unknown as {
-                        id: string;
-                        status: string;
-                        profiles: {
-                          full_name: string | null;
-                          avatar_url: string | null;
-                          student_details: { health_info: string | null } | null;
-                        } | null;
-                      }[])?.filter((r) => r.status === "confirmed") || [];
-                      const capacityText = cls.max_capacity ? `${confirmedReservations.length}/${cls.max_capacity}` : `${confirmedReservations.length}`;
+                      const confirmedReservations = (cls.class_reservations as any) || [];
+                      
+                      const presCount = confirmedReservations.filter((r: any) => r.modality === 'presential').length;
+                      const onlineCount = confirmedReservations.filter((r: any) => r.modality === 'online').length;
                       
                       return (
-                        <tr key={cls.id} className="transition-colors hover:bg-brand-50/20 dark:hover:bg-surface-dark-alt/50">
-                          <td className="px-6 py-4">
-                            <p className="font-bold text-foreground">{cls.title}</p>
-                            {cls.jitsi_room_link && (
-                              <span className="inline-block text-[10px] font-bold text-blue-500 uppercase tracking-tight">🎥 Online</span>
-                            )}
+                        <tr key={cls.id} className="transition-colors hover:bg-white/5">
+                          <td className="px-8 py-6">
+                            <p className="text-base font-black text-white mb-3">{cls.title}</p>
+                            
                             {confirmedReservations.length > 0 && !isPast && (
-                              <div className="mt-3 space-y-1.5">
-                                {confirmedReservations.map((res) => (
-                                  <div key={res.id} className="flex items-center justify-between rounded-lg bg-brand-50/50 p-2 text-[11px] border border-brand-100 dark:bg-surface-dark dark:border-surface-dark-alt">
-                                    <span className="font-medium">👤 {res.profiles?.full_name}</span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                                {confirmedReservations.map((res: any) => (
+                                  <div key={res.id} className={`flex items-center justify-between rounded-xl p-3 text-[11px] border ${res.modality === 'online' ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-brand-500/5 border-brand-500/20'}`}>
+                                    <div className="flex flex-col">
+                                      <span className="font-bold text-white">{res.profiles?.full_name}</span>
+                                      <span className={`text-[9px] font-black uppercase ${res.modality === 'online' ? 'text-cyan-400' : 'text-brand-400'}`}>
+                                        {res.modality === 'online' ? '💻 ONLINE' : '📍 SALA'}
+                                      </span>
+                                    </div>
                                     {res.profiles?.student_details?.health_info && (
-                                      <span className="rounded bg-red-100 px-1 text-[9px] font-bold text-red-600 dark:bg-red-900/40">ALERTA</span>
+                                      <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" title="Alerta Médica"></span>
                                     )}
                                   </div>
                                 ))}
                               </div>
                             )}
                           </td>
-                        <td className="px-6 py-4 text-foreground/70">
-                          <div className="font-medium text-foreground">
+                        <td className="px-8 py-6">
+                          <div className="font-black text-white text-sm">
                             {date.toLocaleDateString("es-AR", { day: "numeric", month: "long" })}
                           </div>
-                          <div className="text-xs opacity-60">
+                          <div className="text-[10px] font-bold text-brand-400 uppercase mt-1">
                             {date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}hs
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${cls.is_full ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
-                            {capacityText} anotados
-                          </span>
+                        <td className="px-8 py-6">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black text-white/40 w-12">SALA:</span>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${presCount >= (cls.capacity_presential || 10) ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+                                {presCount}/{cls.capacity_presential || 10}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black text-white/40 w-12">ZOOM:</span>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${onlineCount >= (cls.capacity_online || 10) ? 'bg-red-500/20 text-red-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                                {onlineCount}/{cls.capacity_online || 10}
+                              </span>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">

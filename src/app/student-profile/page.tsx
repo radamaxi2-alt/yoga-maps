@@ -187,10 +187,21 @@ export default async function StudentProfilePage() {
                           {cls.day_of_week} a las {cls.start_time?.slice(0,5)} hs
                         </p>
                       </div>
-                      <div className="text-right">
-                        <span className="inline-block rounded-full bg-brand-500/10 px-4 py-1.5 text-[10px] font-bold text-brand-400 uppercase tracking-widest ring-1 ring-brand-500/20">
-                          Confirmada
+                      <div className="text-right flex flex-col gap-3 items-end">
+                        <span className={`inline-block rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ring-1 ${res.modality === 'online' ? 'bg-cyan-500/10 text-cyan-400 ring-cyan-500/20' : 'bg-brand-500/10 text-brand-400 ring-brand-500/20'}`}>
+                          {res.modality === 'online' ? '💻 Online' : '📍 Presencial'}
                         </span>
+                        
+                        {res.modality === 'online' && cls.jitsi_room_link && (
+                          <a 
+                            href={cls.jitsi_room_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 rounded-full bg-brand-600 px-6 py-2.5 text-xs font-black text-white shadow-xl shadow-brand-500/30 hover:bg-brand-500 hover:-translate-y-0.5 transition-all animate-pulse"
+                          >
+                            <span>🚀</span> UNIRSE A LA CLASE
+                          </a>
+                        )}
                       </div>
                     </div>
                   );

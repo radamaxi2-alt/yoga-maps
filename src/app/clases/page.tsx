@@ -22,17 +22,34 @@ export default async function ClasesPage() {
     .order("scheduled_at", { ascending: true });
 
   let userReservations: Set<string> = new Set();
-  if (user && classes && classes.length > 0) {
+  let reservationCounts: Record<string, { presential: number; online: number }> = {};
+
+  if (classes && classes.length > 0) {
     const classIds = classes.map(c => c.id);
-    const { data: reservations } = await supabase
+    const { data: allRes } = await supabase
       .from("class_reservations")
-      .select("class_id")
-      .eq("student_id", user.id)
+      .select("class_id, modality")
       .eq("status", "confirmed")
       .in("class_id", classIds);
       
-    if (reservations) {
-      userReservations = new Set(reservations.map(r => r.class_id));
+    if (allRes) {
+      allRes.forEach(r => {
+        if (!reservationCounts[r.class_id]) {
+          reservationCounts[r.class_id] = { presential: 0, online: 0 };
+        }
+        if (r.modality === 'presential') reservationCounts[r.class_id].presential++;
+        if (r.modality === 'online') reservationCounts[r.class_id].online++;
+      });
+    }
+
+    if (user) {
+      const { data: myRes } = await supabase
+        .from("class_reservations")
+        .select("class_id")
+        .eq("student_id", user.id)
+        .eq("status", "confirmed")
+        .in("class_id", classIds);
+      if (myRes) userReservations = new Set(myRes.map(r => r.class_id));
     }
   }
 
@@ -112,35 +129,20 @@ export default async function ClasesPage() {
                       </span>
                     </Link>
                     {cls.style && (
-                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-600">
+                      <span className="rounded-full bg-brand-500/10 px-3 py-1 text-[10px] font-bold text-brand-400 uppercase tracking-widest ring-1 ring-brand-500/20">
                         {cls.style}
                       </span>
                     )}
-                    {cls.instructor_name && (
-                      <span className="text-xs text-foreground/50">
-                        👨‍🏫 {cls.instructor_name}
-                      </span>
-                    )}
-                    {hasReserved && (
-                      <CalendarButton 
-                        title={cls.title} 
-                        scheduledAt={cls.scheduled_at} 
-                        description={cls.description || ""} 
-                        location={cls.jitsi_room_link || cls.address || ""} 
-                      />
-                    )}
-                  </div>
 
-                  {cls.is_full && !hasReserved && (
-                    <div className="mt-3">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-100 shadow-sm">
-                        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-                        {cls.jitsi_room_link 
-                          ? "Cupos presenciales agotados - Únete a la clase Online" 
-                          : "Sala Llena - No hay cupos disponibles"}
+                    <div className="flex gap-4">
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
+                        📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential || 10}</b>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
+                        💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online || 10}</b>
                       </span>
                     </div>
-                  )}
+                  </div>
 
                   {cls.description && (
                     <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-foreground/60">
