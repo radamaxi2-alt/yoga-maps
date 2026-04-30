@@ -58,17 +58,28 @@ export default async function TeacherProfilePage({ params }: Props) {
     .limit(3);
 
   let userReservations: Set<string> = new Set();
-  if (user && classes && classes.length > 0) {
-    const classIds = classes.map(c => c.id);
-    const { data: reservations } = await supabase
-      .from("class_reservations")
-      .select("class_id")
-      .eq("student_id", user.id)
-      .eq("status", "confirmed")
-      .in("class_id", classIds);
-      
-    if (reservations) {
-      userReservations = new Set(reservations.map(r => r.class_id));
+  let isStudent = false;
+
+  if (user) {
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    
+    isStudent = userProfile?.role === "alumno";
+
+    if (classes && classes.length > 0) {
+      const { data: reservations } = await supabase
+        .from("class_reservations")
+        .select("class_id")
+        .eq("student_id", user.id)
+        .eq("status", "confirmed")
+        .in("class_id", classes.map(c => c.id));
+        
+      if (reservations) {
+        userReservations = new Set(reservations.map(r => r.class_id));
+      }
     }
   }
 
@@ -246,20 +257,22 @@ export default async function TeacherProfilePage({ params }: Props) {
                           )}
                         </div>
 
-                        <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
-                          <span className="text-xl font-black text-brand-600">
-                            {Number(cls.price) === 0 ? "Gratis" : `$${Number(cls.price).toLocaleString("es-AR")}`}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <div className="flex flex-col items-end gap-2">
-                              <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
-                              <MonthlyReserveButton classId={cls.id} isFull={isFull} disabled={hasReserved} />
+                          <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
+                            <span className="text-xl font-black text-brand-600">
+                              {Number(cls.price) === 0 ? "Gratis" : `$${Number(cls.price).toLocaleString("es-AR")}`}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              {isStudent && (
+                                <div className="flex flex-col items-end gap-2">
+                                  <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                                  <MonthlyReserveButton classId={cls.id} isFull={isFull} disabled={hasReserved} />
+                                </div>
+                              )}
+                              {cls.jitsi_room_link && (
+                                <LiveClassButton jitsiLink={cls.jitsi_room_link} />
+                              )}
                             </div>
-                            {cls.jitsi_room_link && (
-                              <LiveClassButton jitsiLink={cls.jitsi_room_link} />
-                            )}
                           </div>
-                        </div>
                       </article>
                     );
                   })}

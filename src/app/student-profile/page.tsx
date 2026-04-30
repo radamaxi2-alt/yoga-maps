@@ -49,6 +49,10 @@ export default async function StudentProfilePage() {
 
   if (!profile) return notFound();
 
+  if (profile.role !== "alumno") {
+    redirect("/dashboard");
+  }
+
   // Get student's reservations
   const { data: reservations } = await supabase
     .from("class_reservations")

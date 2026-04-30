@@ -26,76 +26,7 @@ export default async function DashboardPage() {
   if (!profile) redirect("/");
 
   if (profile.role === "alumno") {
-    // Student Dashboard view
-    const { data: reservations } = await supabase
-      .from("class_reservations")
-      .select("*, classes(*, teacher_details(profiles(full_name, avatar_url)))")
-      .eq("student_id", user.id)
-      .eq("status", "confirmed")
-      .order("created_at", { ascending: false });
-
-    return (
-      <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Mi Espacio
-            </h1>
-            <p className="mt-1 text-foreground/60">
-              Hola, {profile.full_name || "Alumno"} 👋
-            </p>
-          </div>
-          <Link
-            href="/perfil/editar"
-            className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/60 px-5 py-3 text-sm font-semibold text-brand-700 transition-all hover:border-brand-300 hover:bg-brand-50 dark:border-surface-dark-alt dark:bg-surface-dark-alt/60 dark:text-brand-300"
-          >
-            ✏️ Editar Perfil & Salud
-          </Link>
-        </div>
-
-        <h2 className="text-xl font-bold mb-4">Mis Reservas</h2>
-        {reservations && reservations.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {reservations.map(res => {
-              const cls = res.classes as unknown as {
-                title: string;
-                scheduled_at: string;
-                jitsi_room_link: string | null;
-                address: string | null;
-                teacher_details: {
-                  profiles: {
-                    full_name: string | null;
-                  } | null;
-                } | null;
-              };
-              if (!cls) return null;
-              const date = new Date(cls.scheduled_at);
-              const teacherName = cls.teacher_details?.profiles?.full_name || "Profesor";
-              
-              return (
-                <div key={res.id} className="rounded-2xl border border-brand-100 bg-white p-5 shadow-sm dark:border-surface-dark-alt dark:bg-surface-dark-alt">
-                  <h3 className="font-bold text-lg">{cls.title}</h3>
-                  <p className="text-sm text-foreground/70 mb-3">Con {teacherName}</p>
-                  <div className="flex items-center gap-2 text-sm text-foreground/60 mb-2">
-                    <span>🕐 {date.toLocaleDateString("es-AR")} {date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}hs</span>
-                  </div>
-                  {cls.jitsi_room_link && (
-                    <a href={cls.jitsi_room_link} target="_blank" className="text-sm font-medium text-blue-600 hover:underline">
-                      Ir a sala online
-                    </a>
-                  )}
-                  {cls.address && (
-                    <p className="text-sm text-foreground/60">📍 {cls.address}</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-foreground/50 text-sm">Aún no tienes clases reservadas.</p>
-        )}
-      </section>
-    );
+    redirect("/student-profile");
   }
 
   // Fetch teacher details for the landing page look
