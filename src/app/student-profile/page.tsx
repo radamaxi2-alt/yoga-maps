@@ -53,23 +53,31 @@ export default async function StudentProfilePage() {
     redirect("/dashboard");
   }
 
-  // Get student's reservations
-  const { data: reservations } = await supabase
+  // Get student's reservations with simplified join to avoid RLS nesting issues
+  const { data: reservations, error: resError } = await supabase
     .from("class_reservations")
     .select(`
-      *,
-      classes (
+      id,
+      status,
+      classes:class_id (
+        id,
         title,
         day_of_week,
         start_time,
         style,
-        teacher_details (
-          profiles (full_name)
+        teacher_id,
+        teacher_details:teacher_id (
+          profiles:id (
+            full_name
+          )
         )
       )
     `)
     .eq("student_id", user.id)
     .order("created_at", { ascending: false });
+
+  if (resError) console.error("Error fetching reservations:", resError);
+  console.log(`[DEBUG] Alumno ${user.id} tiene ${reservations?.length || 0} reservas.`);
 
   const student = profile.student_details as any;
 

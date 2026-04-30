@@ -11,11 +11,16 @@ export const metadata: Metadata = {
 export default async function ProfesoresPage() {
   const supabase = await createClient();
 
-  const { data: teachersRaw } = await supabase
+  const { data: teachersRaw, error: profError } = await supabase
     .from("profiles")
     .select("*, teacher_details(*)")
-    .in("role", ["profesor", "escuela"])
-    .order("community_score", { ascending: false });
+    .in("role", ["profesor", "escuela"]);
+
+  if (profError) console.error("Error fetching profiles:", profError);
+  console.log(`[DEBUG] Se encontraron ${teachersRaw?.length || 0} perfiles profesionales.`);
+  if (teachersRaw && teachersRaw.length > 0) {
+    console.log(`[DEBUG] Primer perfil: ${teachersRaw[0].full_name} (${teachersRaw[0].role})`);
+  }
 
   // Reshape to match ProfesoresView expectations
   const teachers = (teachersRaw || []).map((p: any) => ({
@@ -31,7 +36,7 @@ export default async function ProfesoresPage() {
   const { data: classes } = await supabase
     .from("classes")
     .select("id, title, latitude, longitude, address, teacher_id, is_full, jitsi_room_link, style")
-    .not("latitude", "is", null); // Only fetch classes with a specific location
+    .not("latitude", "is", null);
 
-  return <ProfesoresView teachers={teachers || []} classes={classes || []} hideMap={true} />;
+  return <ProfesoresView teachers={teachers} classes={classes || []} hideMap={true} />;
 }
