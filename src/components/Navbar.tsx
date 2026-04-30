@@ -205,13 +205,21 @@ export default function Navbar({
               </div>
             ) : (
               <div className="mt-10 border-t border-white/5 pt-10">
-                <div className="flex items-center gap-4 px-4 mb-6">
+                <div className="flex items-center gap-4 px-4 mb-8">
                   <div className="h-12 w-12 rounded-full bg-brand-500/20 flex items-center justify-center text-2xl border border-brand-500/30">👤</div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Sesión de {isProfesor ? 'Instructor' : 'Alumno'}</p>
-                    <p className="text-lg font-black text-white">{displayName}</p>
+                    <p className="text-lg font-black text-white truncate">{displayName}</p>
                   </div>
                 </div>
+
+                <Link
+                  href={isProfesor ? "/dashboard" : "/student-profile"}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-brand-600 px-4 py-5 text-lg font-black text-white shadow-xl shadow-brand-500/20 mb-3 hover:scale-[1.02] transition-transform"
+                >
+                  {isProfesor ? "🏢 MI PANEL" : "🧘 MI PERFIL"}
+                </Link>
                 <button
                   onClick={() => {
                     setMobileOpen(false);

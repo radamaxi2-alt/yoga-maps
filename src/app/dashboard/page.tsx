@@ -118,17 +118,20 @@ export default async function DashboardPage() {
               </div>
               <h2 className="text-3xl font-black text-white capitalize">Plan {profile.subscription_plan}</h2>
               <p className="text-sm text-brand-100/50 mt-1">
-                {new Date(profile.trial_expires_at) > now 
-                  ? `Te quedan ${Math.ceil((new Date(profile.trial_expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} días de prueba gratuita.`
-                  : 'Tu periodo de prueba ha finalizado. Suscríbete para seguir creciendo.'}
+                Límite de <b>{profile.subscription_plan === 'zen' ? '12' : profile.subscription_plan === 'namaste' ? '80' : 'Ilimitado'}</b> clases por mes de suscripción.
               </p>
+              {new Date(profile.trial_expires_at) > now && (
+                <p className="text-[10px] text-cyan-400 font-bold mt-2">
+                   ⚠️ Te quedan {Math.ceil((new Date(profile.trial_expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} días de prueba gratuita.
+                </p>
+              )}
             </div>
             
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold text-white/40 uppercase">Límite de Clases</p>
+                <p className="text-[10px] font-bold text-white/40 uppercase">Cupo Mensual</p>
                 <p className="text-lg font-black text-white">
-                  {profile.subscription_plan === 'zen' ? '3' : profile.subscription_plan === 'namaste' ? '20' : 'Ilimitado'}
+                  {profile.subscription_plan === 'zen' ? '12' : profile.subscription_plan === 'namaste' ? '80' : '∞'}
                 </p>
               </div>
               <button className="rounded-full bg-white px-8 py-4 text-xs font-black text-brand-700 shadow-xl transition-all hover:bg-brand-50 hover:-translate-y-1 active:scale-95">

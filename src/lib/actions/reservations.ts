@@ -30,20 +30,30 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
     return { error: "No se encontró la clase." };
   }
 
-  // Capacidad híbrida
-  const maxCapacity = modality === 'presential' 
-    ? (classData.capacity_presential || 0) 
-    : (classData.capacity_online || 0);
+  // 1. Verificar Cupo Total Compartido
+  const { count: totalConfirmed, error: totalError } = await supabase
+    .from("class_reservations")
+    .select("*", { count: "exact", head: true })
+    .eq("class_id", classId)
+    .eq("status", "confirmed");
 
-  // Contar reservas actuales para esta modalidad
-  const { count, error: countError } = await supabase
+  if (!totalError && totalConfirmed !== null && totalConfirmed >= (classData.total_capacity || 20)) {
+    return { error: "Lo sentimos, la clase ha alcanzado su capacidad total máxima (Presencial + Online)." };
+  }
+
+  // 2. Verificar Cupo por Modalidad (si aplica)
+  const maxModalityCapacity = modality === 'presential' 
+    ? (classData.capacity_presential || 20) 
+    : (classData.capacity_online || 20);
+
+  const { count: modalityCount, error: modError } = await supabase
     .from("class_reservations")
     .select("*", { count: "exact", head: true })
     .eq("class_id", classId)
     .eq("modality", modality)
     .eq("status", "confirmed");
 
-  if (!countError && count !== null && count >= maxCapacity) {
+  if (!modError && modalityCount !== null && modalityCount >= maxModalityCapacity) {
     return { error: `Lo sentimos, ya no quedan cupos ${modality === 'presential' ? 'presenciales' : 'online'} para esta clase.` };
   }
 
