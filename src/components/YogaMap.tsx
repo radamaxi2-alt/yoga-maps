@@ -2,7 +2,7 @@
 
 import { APIProvider, Map, InfoWindow, useMarkerRef, Marker } from "@vis.gl/react-google-maps";
 import Link from "next/link";
-import React, { memo } from "react";
+import React, { memo, Suspense } from "react";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -148,33 +148,40 @@ export default function YogaMap({
   if (!API_KEY || API_KEY === "YOUR_GOOGLE_MAPS_API_KEY") return null;
 
   return (
-    <APIProvider apiKey={API_KEY}>
-      <Map
-        center={mapCenter}
-        defaultZoom={12}
-        style={{ width: "100%", height: "450px" }}
-        disableDefaultUI={true}
-        zoomControl={true}
-        gestureHandling={"greedy"}
-        mapId={"YOGA_MAP_ID"}
-      >
-        {mappableTeachers.map((t) => (
-          <TeacherMarker
-            key={t.id}
-            teacher={t}
-            isSelected={selectedMarkerId === t.id}
-            onSelect={() => onMarkerSelect(t.id)}
-          />
-        ))}
-        {filteredClasses.map((c) => (
-          <ClassMarker
-            key={c.id}
-            cls={c}
-            isSelected={selectedMarkerId === c.id}
-            onSelect={() => onMarkerSelect(c.id)}
-          />
-        ))}
-      </Map>
-    </APIProvider>
+    <Suspense fallback={
+      <div className="h-[450px] w-full animate-pulse rounded-2xl bg-brand-50 flex items-center justify-center">
+        <span className="text-brand-300 font-medium">Cargando mapa...</span>
+      </div>
+    }>
+      <APIProvider apiKey={API_KEY}>
+        <Map
+          key={`${mapCenter.lat}-${mapCenter.lng}`}
+          defaultCenter={mapCenter}
+          defaultZoom={12}
+          style={{ width: "100%", height: "450px" }}
+          disableDefaultUI={true}
+          zoomControl={true}
+          gestureHandling={"greedy"}
+          mapId={"YOGA_MAP_ID"}
+        >
+          {mappableTeachers.map((t) => (
+            <TeacherMarker
+              key={t.id}
+              teacher={t}
+              isSelected={selectedMarkerId === t.id}
+              onSelect={() => onMarkerSelect(t.id)}
+            />
+          ))}
+          {filteredClasses.map((c) => (
+            <ClassMarker
+              key={c.id}
+              cls={c}
+              isSelected={selectedMarkerId === c.id}
+              onSelect={() => onMarkerSelect(c.id)}
+            />
+          ))}
+        </Map>
+      </APIProvider>
+    </Suspense>
   );
 }

@@ -45,13 +45,15 @@ type ClassForMap = {
 export default function ProfesoresView({
   teachers,
   classes = [],
+  initialCategory = "",
 }: {
   teachers: TeacherWithProfile[];
   classes?: ClassForMap[];
+  initialCategory?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
 
   const allSpecialties = useMemo(() => {
