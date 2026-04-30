@@ -18,7 +18,7 @@ export default async function ProfesoresPage() {
 
   const { data: classes } = await supabase
     .from("classes")
-    .select("id, title, latitude, longitude, address, teacher_id, is_full, jitsi_room_link")
+    .select("id, title, latitude, longitude, address, teacher_id, is_full, jitsi_room_link, style")
     .not("latitude", "is", null); // Only fetch classes with a specific location
 
   return <ProfesoresView teachers={teachers || []} classes={classes || []} />;

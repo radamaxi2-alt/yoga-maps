@@ -39,6 +39,7 @@ type ClassForMap = {
   teacher_id: string;
   is_full: boolean | null;
   jitsi_room_link: string | null;
+  style: string | null;
 };
 
 // --- Teacher Marker Component ---
@@ -155,8 +156,11 @@ export default function ProfesoresView({
   const allSpecialties = useMemo(() => {
     const set = new Set<string>();
     teachers.forEach((t) => t.specialties?.forEach((s) => set.add(s)));
+    classes.forEach((c) => {
+      if (c.style) set.add(c.style);
+    });
     return Array.from(set).sort();
-  }, [teachers]);
+  }, [teachers, classes]);
 
   // Filtered teachers
   const filteredTeachers = useMemo(() => {
@@ -170,20 +174,37 @@ export default function ProfesoresView({
       const matchesSpecialty =
         !specialtyFilter || t.specialties?.includes(specialtyFilter);
 
-      return matchesSearch && matchesSpecialty;
-    });
-  }, [teachers, searchQuery, specialtyFilter]);
+      // Check if any class from this teacher matches the filters
+      const hasMatchingClass = classes.some((c) => {
+        if (c.teacher_id !== t.id) return false;
+        const cTitle = c.title.toLowerCase();
+        const cAddr = c.address?.toLowerCase() || "";
+        const cMatchesSearch = !q || cTitle.includes(q) || cAddr.includes(q);
+        const cMatchesSpecialty = !specialtyFilter || c.style === specialtyFilter;
+        return cMatchesSearch && cMatchesSpecialty;
+      });
 
-  // Filtered classes (only show classes that match the search query)
+      return (matchesSearch && matchesSpecialty) || hasMatchingClass;
+    });
+  }, [teachers, classes, searchQuery, specialtyFilter]);
+
+  // Filtered classes (only show classes that match the search query and specialty)
   const filteredClasses = useMemo(() => {
     return classes.filter((c) => {
       if (!c.latitude || !c.longitude) return false;
       const title = c.title.toLowerCase();
       const addr = c.address?.toLowerCase() || "";
       const q = searchQuery.toLowerCase();
-      return !q || title.includes(q) || addr.includes(q);
+      
+      const matchesSearch = !q || title.includes(q) || addr.includes(q);
+      const matchesSpecialty = 
+        !specialtyFilter || 
+        c.style === specialtyFilter || 
+        teachers.find(t => t.id === c.teacher_id)?.specialties?.includes(specialtyFilter);
+
+      return matchesSearch && matchesSpecialty;
     });
-  }, [classes, searchQuery]);
+  }, [classes, searchQuery, specialtyFilter, teachers]);
 
   // Teachers with valid coordinates (for map)
   const mappableTeachers = useMemo(
@@ -249,12 +270,24 @@ export default function ProfesoresView({
           className="rounded-xl border border-brand-200/60 bg-white/60 px-4 py-3 text-sm text-foreground backdrop-blur-sm transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
         >
           <option value="">Todas las especialidades</option>
-          {allSpecialties.map((s) => (
-            <option key={s} value={s}>
-              {s}
+          {allSpecialties.map((spec) => (
+            <option key={spec} value={spec}>
+              {spec}
             </option>
           ))}
         </select>
+        {(searchQuery || specialtyFilter) && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSpecialtyFilter("");
+              setSelectedMarkerId(null);
+            }}
+            className="rounded-xl border border-red-200/60 bg-red-50/80 px-4 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:hover:bg-red-900/40"
+          >
+            Limpiar Filtros
+          </button>
+        )}
       </div>
 
       {/* Map */}
