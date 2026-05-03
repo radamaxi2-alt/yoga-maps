@@ -43,9 +43,14 @@ export async function createClass(
 
   const latStr = formData.get("latitude") as string;
   const lngStr = formData.get("longitude") as string;
-  const maxCapStr = formData.get("max_capacity") as string;
+  const capPresStr = formData.get("capacity_presential") as string;
+  const capOnlineStr = formData.get("capacity_online") as string;
   const category = formData.get("category") as string;
   const certification_title = formData.get("certification_title") as string;
+
+  const capacity_presential = capPresStr ? parseInt(capPresStr) : 10;
+  const capacity_online = capOnlineStr ? parseInt(capOnlineStr) : 10;
+  const total_capacity = capacity_presential + capacity_online;
 
   const { error } = await supabase.from("classes").insert({
     teacher_id: user.id,
@@ -56,7 +61,9 @@ export async function createClass(
     jitsi_room_link: (formData.get("jitsi_room_link") as string) || null,
     style: style || null,
     instructor_name: (formData.get("instructor_name") as string) || null,
-    max_capacity: maxCapStr ? parseInt(maxCapStr) : null,
+    capacity_presential,
+    capacity_online,
+    total_capacity,
     is_full: formData.get("is_full") === "on",
     address: (formData.get("address") as string) || null,
     latitude: latStr ? parseFloat(latStr) : null,
@@ -89,7 +96,12 @@ export async function updateClass(
 
   const latStr = formData.get("latitude") as string;
   const lngStr = formData.get("longitude") as string;
-  const maxCapStr = formData.get("max_capacity") as string;
+  const capPresStr = formData.get("capacity_presential") as string;
+  const capOnlineStr = formData.get("capacity_online") as string;
+
+  const capacity_presential = capPresStr ? parseInt(capPresStr) : 10;
+  const capacity_online = capOnlineStr ? parseInt(capOnlineStr) : 10;
+  const total_capacity = capacity_presential + capacity_online;
 
   const { error } = await supabase
     .from("classes")
@@ -101,7 +113,9 @@ export async function updateClass(
       jitsi_room_link: (formData.get("jitsi_room_link") as string) || null,
       style: style || null,
       instructor_name: (formData.get("instructor_name") as string) || null,
-      max_capacity: maxCapStr ? parseInt(maxCapStr) : null,
+      capacity_presential,
+      capacity_online,
+      total_capacity,
       is_full: formData.get("is_full") === "on",
       address: (formData.get("address") as string) || null,
       latitude: latStr ? parseFloat(latStr) : null,

@@ -164,6 +164,7 @@ export default function NuevaClaseForm() {
             className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         </div>
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="price" className="mb-1.5 block text-sm font-medium text-foreground/80">
             Precio (ARS)
@@ -172,6 +173,26 @@ export default function NuevaClaseForm() {
             type="number" id="price" name="price" min="0" step="0.01" defaultValue="0"
             className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="capacity_presential" className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-brand-600">
+              Cupo SALA
+            </label>
+            <input
+              type="number" id="capacity_presential" name="capacity_presential" min="0" defaultValue="15"
+              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            />
+          </div>
+          <div>
+            <label htmlFor="capacity_online" className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-cyan-600">
+              Cupo ZOOM
+            </label>
+            <input
+              type="number" id="capacity_online" name="capacity_online" min="0" defaultValue="5"
+              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            />
+          </div>
         </div>
       </div>
 

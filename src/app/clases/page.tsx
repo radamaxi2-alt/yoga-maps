@@ -136,10 +136,10 @@ export default async function ClasesPage() {
 
                     <div className="flex gap-4">
                       <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-                        📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential || 10}</b>
+                        📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential || 15}</b>
                       </span>
                       <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-                        💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online || 10}</b>
+                        💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online || 5}</b>
                       </span>
                     </div>
                   </div>
@@ -160,7 +160,15 @@ export default async function ClasesPage() {
                   </span>
                   
                   <div className="flex flex-col gap-2 w-full sm:w-auto items-end">
-                    <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                    <ReserveButton 
+                      classId={cls.id} 
+                      isFull={isFull} 
+                      userHasReserved={hasReserved}
+                      currentPresential={reservationCounts[cls.id]?.presential || 0}
+                      currentOnline={reservationCounts[cls.id]?.online || 0}
+                      maxPresential={cls.capacity_presential || 15}
+                      maxOnline={cls.capacity_online || 5}
+                    />
                     
                     {cls.jitsi_room_link && (
                       <LiveClassButton jitsiLink={cls.jitsi_room_link} />
