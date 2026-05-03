@@ -182,12 +182,3 @@ export async function uploadTeacherCover(formData: FormData) {
 
   return { url: publicUrl };
 }
-
-export async function activatePlanForDemo(planId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: " No estás autenticado.\ };
- const { error } = await supabase.from(\profiles\).update({ subscription_plan: planId }).eq(\id\, user.id);
- if (error) return { error: error.message };
- redirect(\/dashboard\);
-}
