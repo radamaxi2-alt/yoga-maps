@@ -101,19 +101,6 @@ export default function NuevaClaseForm() {
         </div>
       </div>
 
-      {category === "formacion" && (
-        <div className="animate-in fade-in slide-in-from-top-2">
-          <label htmlFor="certification_title" className="mb-1.5 block text-sm font-medium text-brand-600">
-            Título que otorga la Formación
-          </label>
-          <input
-            type="text" id="certification_title" name="certification_title" required
-            placeholder="Ej: Instructor de Yoga Integral 200hs"
-            className="w-full rounded-xl border border-brand-300 bg-brand-50/30 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20"
-          />
-        </div>
-      )}
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="style_select" className="mb-1.5 block text-sm font-medium text-foreground/80">
@@ -164,7 +151,6 @@ export default function NuevaClaseForm() {
             className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         </div>
-      <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="price" className="mb-1.5 block text-sm font-medium text-foreground/80">
             Precio (ARS)
@@ -174,25 +160,26 @@ export default function NuevaClaseForm() {
             className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="capacity_presential" className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-brand-600">
-              Cupo SALA
-            </label>
-            <input
-              type="number" id="capacity_presential" name="capacity_presential" min="0" defaultValue="15"
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
-          </div>
-          <div>
-            <label htmlFor="capacity_online" className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-cyan-600">
-              Cupo ZOOM
-            </label>
-            <input
-              type="number" id="capacity_online" name="capacity_online" min="0" defaultValue="5"
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
-          </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="capacity_presential" className="mb-1.5 block text-sm font-medium text-brand-600 uppercase tracking-widest font-black">
+            📍 Cupo Máximo Presencial (SALA)
+          </label>
+          <input
+            type="number" id="capacity_presential" name="capacity_presential" min="0" defaultValue="15"
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+          />
+        </div>
+        <div>
+          <label htmlFor="capacity_online" className="mb-1.5 block text-sm font-medium text-cyan-600 uppercase tracking-widest font-black">
+            💻 Cupo Máximo Online (ZOOM)
+          </label>
+          <input
+            type="number" id="capacity_online" name="capacity_online" min="0" defaultValue="5"
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+          />
         </div>
       </div>
 
@@ -229,7 +216,7 @@ export default function NuevaClaseForm() {
 
       <button
         type="submit" disabled={pending}
-        className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 disabled:opacity-50"
+        className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/20 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
       >
         {pending ? "Publicando..." : "Publicar Evento"}
       </button>
