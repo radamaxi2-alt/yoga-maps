@@ -106,25 +106,41 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mx-auto max-w-5xl px-4 mt-8 sm:px-6 lg:px-8">
+        {/* Free Trial Banner */}
+        {new Date(profile.trial_expires_at) > now && (
+          <div className="mb-10 relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-cyan-600 to-brand-600 p-8 shadow-2xl shadow-cyan-500/10">
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-3xl shadow-inner backdrop-blur-md">🎁</div>
+                <div>
+                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">PRUEBA GRATUITA ACTIVA</h3>
+                  <p className="text-sm font-medium text-white/80">
+                    Estás usando la Prueba Gratis de 15 días. Te quedan <b className="text-white">{Math.ceil((new Date(profile.trial_expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))}</b> días.
+                  </p>
+                </div>
+              </div>
+              <Link 
+                href="/dashboard/planes"
+                className="rounded-full bg-white px-8 py-3.5 text-xs font-black uppercase tracking-widest text-brand-700 shadow-xl transition-all hover:scale-105 active:scale-95"
+              >
+                Ver Planes
+              </Link>
+            </div>
+            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+          </div>
+        )}
+
         {/* Subscription Plan Status */}
         <div className="mb-12 glass rounded-[2.5rem] p-8 border-brand-500/20 bg-gradient-to-br from-brand-600/5 to-transparent">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full ring-1 ring-brand-500/30">Mi Suscripción</span>
-                {new Date(profile.trial_expires_at) > now && (
-                  <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full ring-1 ring-cyan-500/30 animate-pulse">Free Trial Activo</span>
-                )}
               </div>
               <h2 className="text-3xl font-black text-white capitalize">Plan {profile.subscription_plan}</h2>
               <p className="text-sm text-brand-100/50 mt-1">
                 Límite de <b>{profile.subscription_plan === 'zen' ? '12' : profile.subscription_plan === 'namaste' ? '80' : 'Ilimitado'}</b> clases por mes de suscripción.
               </p>
-              {new Date(profile.trial_expires_at) > now && (
-                <p className="text-[10px] text-cyan-400 font-bold mt-2">
-                   ⚠️ Te quedan {Math.ceil((new Date(profile.trial_expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} días de prueba gratuita.
-                </p>
-              )}
             </div>
             
             <div className="flex items-center gap-4">
@@ -134,9 +150,12 @@ export default async function DashboardPage() {
                   {profile.subscription_plan === 'zen' ? '12' : profile.subscription_plan === 'namaste' ? '80' : '∞'}
                 </p>
               </div>
-              <button className="rounded-full bg-white px-8 py-4 text-xs font-black text-brand-700 shadow-xl transition-all hover:bg-brand-50 hover:-translate-y-1 active:scale-95">
-                MEJORAR PLAN
-              </button>
+              <Link 
+                href="/dashboard/planes"
+                className="rounded-full bg-white px-8 py-4 text-xs font-black text-brand-700 shadow-xl transition-all hover:bg-brand-50 hover:-translate-y-1 active:scale-95"
+              >
+                GESTIONAR PLAN
+              </Link>
             </div>
           </div>
 
