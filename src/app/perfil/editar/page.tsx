@@ -19,7 +19,7 @@ export default async function PerfilEditarPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name, avatar_url")
+    .select("role, full_name, avatar_url, cover_position")
     .eq("id", user.id)
     .single();
 
@@ -36,6 +36,7 @@ export default async function PerfilEditarPage() {
       <ProfileEditForm
         fullName={profile.full_name || ""}
         avatarUrl={profile.avatar_url || ""}
+        coverPosition={profile.cover_position ?? 50}
         details={details}
       />
     );

@@ -34,7 +34,7 @@ export default async function TeacherProfilePage({ params }: Props) {
 
   const { data: teacher } = await supabase
     .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url)")
+    .select("*, profiles(full_name, avatar_url, cover_position)")
     .eq("id", id)
     .single();
 
@@ -58,6 +58,7 @@ export default async function TeacherProfilePage({ params }: Props) {
     .limit(3);
 
   let userReservations: Set<string> = new Set();
+  let reservationCounts: Record<string, { presential: number; online: number }> = {};
   let isStudent = false;
 
   if (user) {
@@ -68,14 +69,33 @@ export default async function TeacherProfilePage({ params }: Props) {
       .single();
     
     isStudent = userProfile?.role === "alumno";
+  }
 
-    if (classes && classes.length > 0) {
+  if (classes && classes.length > 0) {
+    const classIds = classes.map(c => c.id);
+    
+    // Fetch counts for ALL classes at once
+    const { data: allRes } = await supabase
+      .from("class_reservations")
+      .select("class_id, modality")
+      .eq("status", "confirmed")
+      .in("class_id", classIds);
+      
+    if (allRes) {
+      allRes.forEach(r => {
+        if (!reservationCounts[r.class_id]) reservationCounts[r.class_id] = { presential: 0, online: 0 };
+        if (r.modality === 'presential') reservationCounts[r.class_id].presential++;
+        if (r.modality === 'online') reservationCounts[r.class_id].online++;
+      });
+    }
+
+    if (user) {
       const { data: reservations } = await supabase
         .from("class_reservations")
         .select("class_id")
         .eq("student_id", user.id)
         .eq("status", "confirmed")
-        .in("class_id", classes.map(c => c.id));
+        .in("class_id", classIds);
         
       if (reservations) {
         userReservations = new Set(reservations.map(r => r.class_id));
@@ -86,6 +106,7 @@ export default async function TeacherProfilePage({ params }: Props) {
   const profile = teacher.profiles as {
     full_name: string | null;
     avatar_url: string | null;
+    cover_position: number | null;
   } | null;
   const name = profile?.full_name || "Profesor";
   const isSchool = teacher.teacher_type === "escuela";
@@ -99,6 +120,7 @@ export default async function TeacherProfilePage({ params }: Props) {
             src={teacher.cover_image}
             alt="Portada"
             className="h-full w-full object-cover"
+            style={{ objectPosition: `center ${profile?.cover_position ?? 50}%` }}
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-tr from-brand-800 via-brand-600 to-brand-400"></div>
@@ -206,6 +228,7 @@ export default async function TeacherProfilePage({ params }: Props) {
                     const date = new Date(cls.scheduled_at);
                     const isFull = cls.is_full;
                     const hasReserved = userReservations.has(cls.id);
+                    const counts = reservationCounts[cls.id] || { presential: 0, online: 0 };
                     
                     return (
                       <article
@@ -247,14 +270,14 @@ export default async function TeacherProfilePage({ params }: Props) {
                               />
                             )}
                           </div>
-                          {cls.is_full && !hasReserved && (
-                            <div className="mt-2">
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase text-red-600 border border-red-100">
-                                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                                {cls.jitsi_room_link ? "Presencial agotado - Sólo Online" : "Sala Llena"}
-                              </span>
-                            </div>
-                          )}
+                          <div className="mt-2 flex gap-3">
+                            <span className="text-[9px] font-bold uppercase tracking-tighter text-foreground/40">
+                              SALA: {counts.presential}/{cls.capacity_presential || 15}
+                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-tighter text-foreground/40">
+                              ZOOM: {counts.online}/{cls.capacity_online || 5}
+                            </span>
+                          </div>
                         </div>
 
                           <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
@@ -264,7 +287,15 @@ export default async function TeacherProfilePage({ params }: Props) {
                             <div className="flex items-center gap-2">
                               {isStudent && (
                                 <div className="flex flex-col items-end gap-2">
-                                  <ReserveButton classId={cls.id} isFull={isFull} userHasReserved={hasReserved} />
+                                  <ReserveButton 
+                                    classId={cls.id} 
+                                    isFull={isFull} 
+                                    userHasReserved={hasReserved}
+                                    currentPresential={counts.presential}
+                                    currentOnline={counts.online}
+                                    maxPresential={cls.capacity_presential || 15}
+                                    maxOnline={cls.capacity_online || 5}
+                                  />
                                   <MonthlyReserveButton classId={cls.id} isFull={isFull} disabled={hasReserved} />
                                 </div>
                               )}

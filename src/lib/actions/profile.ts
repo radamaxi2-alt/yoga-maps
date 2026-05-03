@@ -14,6 +14,7 @@ export type ProfileData = {
   longitude: number | null;
   cover_image: string | null;
   avatar_url: string | null;
+  cover_position: number | null;
 };
 
 export async function updateTeacherProfile(data: ProfileData) {
@@ -24,12 +25,13 @@ export async function updateTeacherProfile(data: ProfileData) {
 
   if (!user) return { error: "No estás autenticado." };
 
-  // Update profile name and avatar
+  // Update profile name, avatar and position
   await supabase
     .from("profiles")
     .update({ 
       full_name: data.full_name,
-      avatar_url: data.avatar_url
+      avatar_url: data.avatar_url,
+      cover_position: data.cover_position ?? 50
     })
     .eq("id", user.id);
 
