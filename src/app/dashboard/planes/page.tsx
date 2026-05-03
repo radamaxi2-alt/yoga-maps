@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import UpgradeButton from "./UpgradeButton";
 
 export default async function PlanesPage() {
   const supabase = await createClient();
@@ -113,14 +114,10 @@ export default async function PlanesPage() {
                 ))}
               </ul>
 
-              <a 
-                href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola! Quiero activar el ${plan.name} para ${profile.full_name}. ¿Cómo procedo?`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`mt-10 block w-full rounded-full py-4 text-center text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-95 ${plan.popular ? 'bg-cyan-500 text-white shadow-cyan-500/20' : 'bg-white text-brand-900 shadow-brand-500/10'}`}
-              >
-                Activar Plan
-              </a>
+              <UpgradeButton 
+                planId={plan.id} 
+                currentPlan={profile?.subscription_plan || 'zen'} 
+              />
             </div>
           ))}
         </div>
@@ -186,7 +183,7 @@ export default async function PlanesPage() {
             </div>
             <p className="mt-4 text-sm opacity-60">Una vez realizada la transferencia, hacé clic en el botón de abajo para enviarnos el comprobante.</p>
             <a 
-              href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola! Acabo de transferir para activar mi cuenta. Mi usuario es ${profile.full_name}. Adjunto el comprobante.`)}`}
+              href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola! Acabo de transferir para activar mi cuenta. Mi usuario es ${profile?.full_name}. Adjunto el comprobante.`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 inline-flex items-center gap-3 rounded-full bg-white px-10 py-4 text-xs font-black uppercase tracking-widest text-brand-900 shadow-2xl hover:scale-105 transition-all"
