@@ -30,14 +30,18 @@ export default function ReserveButton({
   const onlineFull = currentOnline >= maxOnline;
   const allFull = presentialFull && onlineFull;
 
-  // Auto-switch modality if current one is full
+  // Auto-switch modality if current one is full or disabled (0 capacity)
   useEffect(() => {
-    if (modality === 'presential' && presentialFull && !onlineFull) {
+    if (maxPresential === 0 && modality !== 'online') {
       setModality('online');
-    } else if (modality === 'online' && onlineFull && !presentialFull) {
+    } else if (maxOnline === 0 && modality !== 'presential') {
+      setModality('presential');
+    } else if (modality === 'presential' && presentialFull && !onlineFull && maxOnline > 0) {
+      setModality('online');
+    } else if (modality === 'online' && onlineFull && !presentialFull && maxPresential > 0) {
       setModality('presential');
     }
-  }, [presentialFull, onlineFull, modality]);
+  }, [presentialFull, onlineFull, modality, maxPresential, maxOnline]);
 
   const handleReserve = () => {
     setErrorMsg("");
@@ -72,24 +76,26 @@ export default function ReserveButton({
   return (
     <div className="flex flex-col items-end gap-3">
       {/* Modality Selector */}
-      <div className="flex gap-1 p-1 bg-surface-dark/50 rounded-full border border-white/5 backdrop-blur-md">
-        <button
-          type="button"
-          onClick={() => !presentialFull && setModality('presential')}
-          disabled={presentialFull}
-          className={`px-3 py-1 text-[10px] font-black rounded-full transition-all ${modality === 'presential' ? 'bg-brand-500 text-white' : 'text-white/40 hover:text-white/60'} ${presentialFull ? 'opacity-20 cursor-not-allowed' : ''}`}
-        >
-          {presentialFull ? 'SALA LLENA' : 'SALA'}
-        </button>
-        <button
-          type="button"
-          onClick={() => !onlineFull && setModality('online')}
-          disabled={onlineFull}
-          className={`px-3 py-1 text-[10px] font-black rounded-full transition-all ${modality === 'online' ? 'bg-brand-500 text-white' : 'text-white/40 hover:text-white/60'} ${onlineFull ? 'opacity-20 cursor-not-allowed' : ''}`}
-        >
-          {onlineFull ? 'ZOOM LLENO' : 'ZOOM'}
-        </button>
-      </div>
+      {maxPresential > 0 && maxOnline > 0 && (
+        <div className="flex gap-1 p-1 bg-surface-dark/50 rounded-full border border-white/5 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => !presentialFull && setModality('presential')}
+            disabled={presentialFull}
+            className={`px-3 py-1 text-[10px] font-black rounded-full transition-all ${modality === 'presential' ? 'bg-brand-500 text-white' : 'text-white/40 hover:text-white/60'} ${presentialFull ? 'opacity-20 cursor-not-allowed' : ''}`}
+          >
+            {presentialFull ? 'SALA LLENA' : 'SALA'}
+          </button>
+          <button
+            type="button"
+            onClick={() => !onlineFull && setModality('online')}
+            disabled={onlineFull}
+            className={`px-3 py-1 text-[10px] font-black rounded-full transition-all ${modality === 'online' ? 'bg-brand-500 text-white' : 'text-white/40 hover:text-white/60'} ${onlineFull ? 'opacity-20 cursor-not-allowed' : ''}`}
+          >
+            {onlineFull ? 'ZOOM LLENO' : 'ZOOM'}
+          </button>
+        </div>
+      )}
 
       <button
         onClick={handleReserve}

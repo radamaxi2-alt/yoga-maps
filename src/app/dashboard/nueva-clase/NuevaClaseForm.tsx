@@ -63,6 +63,27 @@ export default function NuevaClaseForm() {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
 
+  // Capacities Logic
+  const [capPres, setCapPres] = useState(15);
+  const [capOnline, setCapOnline] = useState(5);
+  const MAX_TOTAL = 20;
+
+  const handlePresChange = (val: number) => {
+    const newPres = Math.min(val, MAX_TOTAL);
+    setCapPres(newPres);
+    if (newPres + capOnline > MAX_TOTAL) {
+      setCapOnline(MAX_TOTAL - newPres);
+    }
+  };
+
+  const handleOnlineChange = (val: number) => {
+    const newOnline = Math.min(val, MAX_TOTAL);
+    setCapOnline(newOnline);
+    if (newOnline + capPres > MAX_TOTAL) {
+      setCapPres(MAX_TOTAL - newOnline);
+    }
+  };
+
   const hasApiKey = API_KEY && API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY";
 
   return (
@@ -95,7 +116,7 @@ export default function NuevaClaseForm() {
           </label>
           <input
             type="text" id="title" name="title" required
-            placeholder="Ej: Retiro Espiritual en la Sierra"
+            placeholder="Ej: Yoga para principiantes"
             className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         </div>
@@ -162,25 +183,40 @@ export default function NuevaClaseForm() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="capacity_presential" className="mb-1.5 block text-sm font-medium text-brand-600 uppercase tracking-widest font-black">
-            📍 Cupo Máximo Presencial (SALA)
-          </label>
-          <input
-            type="number" id="capacity_presential" name="capacity_presential" min="0" defaultValue="15"
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-          />
+      <div className="rounded-2xl bg-brand-500/5 p-6 border border-brand-500/10">
+        <div className="flex items-center justify-between mb-4">
+          <label className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Distribución de Cupos</label>
+          <span className={`text-[10px] font-black px-2 py-1 rounded-full ${capPres + capOnline >= MAX_TOTAL ? 'bg-red-500 text-white' : 'bg-brand-500/20 text-brand-400'}`}>
+            TOTAL: {capPres + capOnline} / {MAX_TOTAL}
+          </span>
         </div>
-        <div>
-          <label htmlFor="capacity_online" className="mb-1.5 block text-sm font-medium text-cyan-600 uppercase tracking-widest font-black">
-            💻 Cupo Máximo Online (ZOOM)
-          </label>
-          <input
-            type="number" id="capacity_online" name="capacity_online" min="0" defaultValue="5"
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-          />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label htmlFor="capacity_presential" className="mb-1.5 block text-xs font-bold text-white/60">
+              📍 Presencial (SALA)
+            </label>
+            <input
+              type="number" id="capacity_presential" name="capacity_presential" 
+              min="0" max={MAX_TOTAL}
+              value={capPres}
+              onChange={(e) => handlePresChange(parseInt(e.target.value) || 0)}
+              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            />
+          </div>
+          <div>
+            <label htmlFor="capacity_online" className="mb-1.5 block text-xs font-bold text-white/60">
+              💻 Online (ZOOM)
+            </label>
+            <input
+              type="number" id="capacity_online" name="capacity_online" 
+              min="0" max={MAX_TOTAL}
+              value={capOnline}
+              onChange={(e) => handleOnlineChange(parseInt(e.target.value) || 0)}
+              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            />
+          </div>
         </div>
+        <p className="mt-3 text-[10px] text-white/40 italic">* La suma total de ambas modalidades no puede superar los 20 alumnos.</p>
       </div>
 
       <div>

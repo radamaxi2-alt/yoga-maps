@@ -258,14 +258,14 @@ export default async function DashboardPage() {
                           <div className="space-y-1.5">
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-black text-white/40 w-12">SALA:</span>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${presCount >= (cls.capacity_presential || 10) ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-                                {presCount}/{cls.capacity_presential || 10}
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${presCount >= (cls.capacity_presential ?? 0) && (cls.capacity_presential ?? 0) > 0 ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+                                {presCount}/{cls.capacity_presential ?? 0}
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-black text-white/40 w-12">ZOOM:</span>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${onlineCount >= (cls.capacity_online || 10) ? 'bg-red-500/20 text-red-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
-                                {onlineCount}/{cls.capacity_online || 10}
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${onlineCount >= (cls.capacity_online ?? 0) && (cls.capacity_online ?? 0) > 0 ? 'bg-red-500/20 text-red-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                                {onlineCount}/{cls.capacity_online ?? 0}
                               </span>
                             </div>
                           </div>
