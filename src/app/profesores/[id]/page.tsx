@@ -274,7 +274,7 @@ export default async function TeacherProfilePage({ params }: Props) {
                               SALA: {counts.presential}/{cls.capacity_presential || 0}
                             </span>
                             <span className="text-[9px] font-bold uppercase tracking-tighter text-foreground/40">
-                              ZOOM: {counts.online}/{cls.capacity_online || 0}
+                              ZOOM: {counts.online}/{cls.capacity_online ?? 0}
                             </span>
                           </div>
                         </div>

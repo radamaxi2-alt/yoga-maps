@@ -37,14 +37,16 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
     .eq("class_id", classId)
     .eq("status", "confirmed");
 
-  if (!totalError && totalConfirmed !== null && totalConfirmed >= (classData.total_capacity || 20)) {
-    return { error: "Lo sentimos, la clase ha alcanzado su capacidad total máxima (Presencial + Online)." };
+  const totalCapacity = classData.total_capacity ?? 20;
+
+  if (!totalError && totalConfirmed !== null && totalConfirmed >= totalCapacity) {
+    return { error: "Lo sentimos, la clase ha alcanzado su capacidad total máxima." };
   }
 
   // 2. Verificar Cupo por Modalidad (si aplica)
   const maxModalityCapacity = modality === 'presential' 
-    ? (classData.capacity_presential || 20) 
-    : (classData.capacity_online || 20);
+    ? (classData.capacity_presential ?? 20) 
+    : (classData.capacity_online ?? 20);
 
   const { count: modalityCount, error: modError } = await supabase
     .from("class_reservations")

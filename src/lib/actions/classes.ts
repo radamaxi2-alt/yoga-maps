@@ -49,16 +49,11 @@ export async function createClass(
 
   const latStr = formData.get("latitude") as string;
   const lngStr = formData.get("longitude") as string;
-  const capPresStr = formData.get("capacity_presential") as string;
-  const capOnlineStr = formData.get("capacity_online") as string;
+  const capPresRaw = formData.get("capacity_presential");
+  const capOnlineRaw = formData.get("capacity_online");
 
-  // STRICT CAPACITY FIX: 0 must be 0.
-  const capacity_presential = (capPresStr !== null && capPresStr !== "" && capPresStr !== undefined) 
-    ? parseInt(capPresStr, 10) 
-    : 15;
-  const capacity_online = (capOnlineStr !== null && capOnlineStr !== "" && capOnlineStr !== undefined) 
-    ? parseInt(capOnlineStr, 10) 
-    : 5;
+  const capacity_presential = (capPresRaw !== null && capPresRaw !== "") ? Number(capPresRaw) : 15;
+  const capacity_online = (capOnlineRaw !== null && capOnlineRaw !== "") ? Number(capOnlineRaw) : 5;
   const total_capacity = capacity_presential + capacity_online;
 
   const address = (formData.get("address") as string) || null;
@@ -176,15 +171,11 @@ export async function updateClass(
     .single();
 
   const title = formData.get("title") as string;
-  const capPresStr = formData.get("capacity_presential") as string;
-  const capOnlineStr = formData.get("capacity_online") as string;
+  const capPresRaw = formData.get("capacity_presential");
+  const capOnlineRaw = formData.get("capacity_online");
 
-  const capacity_presential = (capPresStr !== null && capPresStr !== "" && capPresStr !== undefined) 
-    ? parseInt(capPresStr, 10) 
-    : 15;
-  const capacity_online = (capOnlineStr !== null && capOnlineStr !== "" && capOnlineStr !== undefined) 
-    ? parseInt(capOnlineStr, 10) 
-    : 5;
+  const capacity_presential = (capPresRaw !== null && capPresRaw !== "") ? Number(capPresRaw) : 15;
+  const capacity_online = (capOnlineRaw !== null && capOnlineRaw !== "") ? Number(capOnlineRaw) : 5;
   const total_capacity = capacity_presential + capacity_online;
 
   const styleSelect = formData.get("style_select") as string;

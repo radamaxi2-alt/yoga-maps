@@ -136,10 +136,10 @@ export default async function ClasesPage() {
 
                     <div className="flex gap-4">
                       <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-                        📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential || 15}</b>
+                        📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential ?? 0}</b>
                       </span>
                       <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-                        💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online || 5}</b>
+                        💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online ?? 0}</b>
                       </span>
                     </div>
                   </div>
