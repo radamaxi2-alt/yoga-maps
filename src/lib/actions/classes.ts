@@ -26,7 +26,6 @@ export async function createClass(
     .single();
 
   const plan = profile?.subscription_plan || "zen";
-  // Updated limits according to user request
   const limits = { zen: 12, namaste: 80, escuela: 99999 };
   const limit = limits[plan as keyof typeof limits] || 12;
 
@@ -37,7 +36,6 @@ export async function createClass(
 
   const currentCount = count || 0;
 
-  // Form Data extraction
   const title = formData.get("title") as string;
   const description = (formData.get("description") as string) || null;
   const price = parseFloat(formData.get("price") as string) || 0;
@@ -54,16 +52,19 @@ export async function createClass(
   const capPresStr = formData.get("capacity_presential") as string;
   const capOnlineStr = formData.get("capacity_online") as string;
 
-  // BUG FIX: Ensure '0' is respected and not defaulted to 10/15
-  const capacity_presential = (capPresStr !== null && capPresStr !== "") ? parseInt(capPresStr) : 15;
-  const capacity_online = (capOnlineStr !== null && capOnlineStr !== "") ? parseInt(capOnlineStr) : 5;
+  // STRICT CAPACITY FIX: 0 must be 0.
+  const capacity_presential = (capPresStr !== null && capPresStr !== "" && capPresStr !== undefined) 
+    ? parseInt(capPresStr, 10) 
+    : 15;
+  const capacity_online = (capOnlineStr !== null && capOnlineStr !== "" && capOnlineStr !== undefined) 
+    ? parseInt(capOnlineStr, 10) 
+    : 5;
   const total_capacity = capacity_presential + capacity_online;
 
   const address = (formData.get("address") as string) || null;
   const latitude = latStr ? parseFloat(latStr) : null;
   const longitude = lngStr ? parseFloat(lngStr) : null;
 
-  // Recurrence logic
   const isRecurring = formData.get("is_recurring") === "on";
   const repeatDays = (formData.get("repeat_days") as string || "").split(",").filter(Boolean);
   const repeatUntil = formData.get("repeat_until") as string;
@@ -75,7 +76,7 @@ export async function createClass(
     if (currentCount >= limit) {
       return { error: `Límite de plan alcanzado (${limit} clases). Mejora tu plan para publicar más.` };
     }
-    classInstances.push({
+    const newClass: any = {
       teacher_id: user.id,
       title,
       description,
@@ -89,22 +90,20 @@ export async function createClass(
       address,
       latitude,
       longitude,
-      category,
-      series_id
-    });
+      category
+    };
+    if (series_id) newClass.series_id = series_id;
+    classInstances.push(newClass);
   } else {
-    // Generate recurring instances
     const startDate = new Date(scheduledAt);
     const endDate = new Date(repeatUntil + "T23:59:59");
     const daysToRepeat = repeatDays.map(d => parseInt(d));
 
     let currentDate = new Date(startDate);
-    
-    // Safety break to prevent infinite loops or massive inserts
     let safetyCounter = 0;
     while (currentDate <= endDate && safetyCounter < 100) {
       if (daysToRepeat.includes(currentDate.getDay())) {
-        classInstances.push({
+        const newClass: any = {
           teacher_id: user.id,
           title,
           description,
@@ -118,22 +117,40 @@ export async function createClass(
           address,
           latitude,
           longitude,
-          category,
-          series_id
-        });
+          category
+        };
+        if (series_id) newClass.series_id = series_id;
+        classInstances.push(newClass);
       }
       currentDate.setDate(currentDate.getDate() + 1);
       safetyCounter++;
     }
 
     if (currentCount + classInstances.length > limit) {
-      return { error: `Esta serie de clases superaría tu límite mensual (${limit} clases). Solo puedes crear ${limit - currentCount} clases más.` };
+      return { error: `Esta serie de clases superaría tu límite mensual (${limit} clases).` };
     }
   }
 
-  const { error } = await supabase.from("classes").insert(classInstances);
+  if (classInstances.length === 0) {
+    return { error: "No se generaron clases. Revisa que los días seleccionados estén dentro del rango de fechas." };
+  }
 
-  if (error) return { error: error.message };
+  // ATTEMPT 1: With series_id
+  const { error: error1 } = await supabase.from("classes").insert(classInstances);
+
+  if (error1) {
+    console.error("Insert error (Attempt 1):", error1);
+    
+    // ATTEMPT 2: Fallback without series_id if column missing
+    if (error1.message.includes("series_id") || error1.code === "42703") {
+      const fallbackInstances = classInstances.map(({ series_id, ...rest }) => rest);
+      const { error: error2 } = await supabase.from("classes").insert(fallbackInstances);
+      
+      if (error2) return { error: "Error al crear la clase: " + error2.message };
+    } else {
+      return { error: "Error al crear la clase: " + error1.message };
+    }
+  }
 
   redirect("/dashboard");
 }
@@ -158,36 +175,37 @@ export async function updateClass(
     .eq("id", classId)
     .single();
 
+  const title = formData.get("title") as string;
+  const capPresStr = formData.get("capacity_presential") as string;
+  const capOnlineStr = formData.get("capacity_online") as string;
+
+  const capacity_presential = (capPresStr !== null && capPresStr !== "" && capPresStr !== undefined) 
+    ? parseInt(capPresStr, 10) 
+    : 15;
+  const capacity_online = (capOnlineStr !== null && capOnlineStr !== "" && capOnlineStr !== undefined) 
+    ? parseInt(capOnlineStr, 10) 
+    : 5;
+  const total_capacity = capacity_presential + capacity_online;
+
   const styleSelect = formData.get("style_select") as string;
   const customStyle = formData.get("custom_style") as string;
   const style = styleSelect === "Otro" ? customStyle : styleSelect;
 
-  const latStr = formData.get("latitude") as string;
-  const lngStr = formData.get("longitude") as string;
-  const capPresStr = formData.get("capacity_presential") as string;
-  const capOnlineStr = formData.get("capacity_online") as string;
-
-  const capacity_presential = (capPresStr !== null && capPresStr !== "") ? parseInt(capPresStr) : 15;
-  const capacity_online = (capOnlineStr !== null && capOnlineStr !== "") ? parseInt(capOnlineStr) : 5;
-  const total_capacity = capacity_presential + capacity_online;
-
-  const updateData = {
-    title: formData.get("title") as string,
+  const updateData: any = {
+    title,
     description: (formData.get("description") as string) || null,
     price: parseFloat(formData.get("price") as string) || 0,
     scheduled_at: formData.get("scheduled_at") as string,
     jitsi_room_link: (formData.get("jitsi_room_link") as string) || null,
     style: style || null,
-    instructor_name: (formData.get("instructor_name") as string) || null,
     capacity_presential,
     capacity_online,
     total_capacity,
     is_full: formData.get("is_full") === "on",
     address: (formData.get("address") as string) || null,
-    latitude: latStr ? parseFloat(latStr) : null,
-    longitude: lngStr ? parseFloat(lngStr) : null,
+    latitude: formData.get("latitude") ? parseFloat(formData.get("latitude") as string) : null,
+    longitude: formData.get("longitude") ? parseFloat(formData.get("longitude") as string) : null,
     category: (formData.get("category") as string) || "clase",
-    certification_title: (formData.get("certification_title") as string) || null,
   };
 
   let query = supabase.from("classes").update(updateData);
