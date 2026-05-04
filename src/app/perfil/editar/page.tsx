@@ -25,22 +25,7 @@ export default async function PerfilEditarPage() {
 
   if (!profile) redirect("/");
 
-  if (profile.role === "profesor") {
-    const { data: details } = await supabase
-      .from("teacher_details")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    return (
-      <ProfileEditForm
-        fullName={profile.full_name || ""}
-        avatarUrl={profile.avatar_url || ""}
-        coverPosition={profile.cover_position ?? 50}
-        details={details}
-      />
-    );
-  } else if (profile.role === "alumno") {
+  if (profile.role === "alumno") {
     const { data: details } = await supabase
       .from("student_details")
       .select("*")
@@ -55,5 +40,19 @@ export default async function PerfilEditarPage() {
     );
   }
 
-  redirect("/");
+  // Default to teacher form if they are a professor or have no role yet
+  const { data: details } = await supabase
+    .from("teacher_details")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  return (
+    <ProfileEditForm
+      fullName={profile.full_name || ""}
+      avatarUrl={profile.avatar_url || ""}
+      coverPosition={profile.cover_position ?? 50}
+      details={details}
+    />
+  );
 }
