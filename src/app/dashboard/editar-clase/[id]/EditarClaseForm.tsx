@@ -21,27 +21,27 @@ export default function EditarClaseForm({
     {}
   );
 
-  const [capPres, setCapPres] = useState(yogaClass.capacity_presential ?? 15);
-  const [capOnline, setCapOnline] = useState(yogaClass.capacity_online ?? 5);
+  const [updateSeries, setUpdateSeries] = useState(false);
+  
+  // Capacity & Modality States
+  const [showPresential, setShowPresential] = useState((yogaClass.capacity_presential ?? 0) > 0);
+  const [showOnline, setShowOnline] = useState((yogaClass.capacity_online ?? 0) > 0);
+  const [capPres, setCapPres] = useState(yogaClass.capacity_presential ?? 0);
+  const [capOnline, setCapOnline] = useState(yogaClass.capacity_online ?? 0);
   const MAX_TOTAL = 20;
 
-  const [updateSeries, setUpdateSeries] = useState(false);
-
   const handlePresChange = (val: number) => {
-    const newPres = Math.min(val, MAX_TOTAL);
-    setCapPres(newPres);
-    if (newPres + capOnline > MAX_TOTAL) {
-      setCapOnline(MAX_TOTAL - newPres);
-    }
+    const num = isNaN(val) ? 0 : val;
+    setCapPres(num);
   };
 
   const handleOnlineChange = (val: number) => {
-    const newOnline = Math.min(val, MAX_TOTAL);
-    setCapOnline(newOnline);
-    if (newOnline + capPres > MAX_TOTAL) {
-      setCapPres(MAX_TOTAL - newOnline);
-    }
+    const num = isNaN(val) ? 0 : val;
+    setCapOnline(num);
   };
+
+  const totalCapacity = (showPresential ? capPres : 0) + (showOnline ? capOnline : 0);
+  const isOverLimit = totalCapacity > MAX_TOTAL;
 
   return (
     <form action={formAction} className="space-y-6 pb-10">
@@ -73,11 +73,6 @@ export default function EditarClaseForm({
               Toda la serie
             </button>
           </div>
-          <p className="mt-3 text-[9px] text-white/40 italic">
-            {updateSeries 
-              ? "* Se actualizarán esta clase y todas las siguientes de la serie." 
-              : "* Solo se modificará esta instancia específica."}
-          </p>
         </div>
       )}
 
@@ -104,17 +99,6 @@ export default function EditarClaseForm({
         </div>
       </div>
 
-      <div>
-        <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-foreground/80">
-          Descripción
-        </label>
-        <textarea
-          id="description" name="description" rows={3}
-          defaultValue={yogaClass.description || ""}
-          className="w-full resize-none rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-        />
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="scheduled_at" className="mb-1.5 block text-sm font-medium text-foreground/80">
@@ -128,55 +112,84 @@ export default function EditarClaseForm({
         </div>
         <div>
           <label htmlFor="jitsi_room_link" className="mb-1.5 block text-sm font-medium text-foreground/80">
-            Link de sala Jitsi (opcional)
+            Link de sala Zoom/Meet
           </label>
           <input
             type="url" id="jitsi_room_link" name="jitsi_room_link"
             defaultValue={yogaClass.jitsi_room_link || ""}
-            placeholder="https://meet.jit.si/mi-clase-yoga"
-            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground placeholder:text-foreground/30 transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+            placeholder="https://meet.jit.si/..."
+            className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         </div>
       </div>
 
-      {/* Capacity UI */}
-      <div className="rounded-2xl bg-brand-500/5 p-6 border border-brand-500/10">
-        <div className="flex items-center justify-between mb-4">
-          <label className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Distribución de Cupos</label>
-          <span className={`text-[10px] font-black px-2 py-1 rounded-full ${capPres + capOnline >= MAX_TOTAL ? 'bg-red-500 text-white' : 'bg-brand-500/20 text-brand-400'}`}>
-            TOTAL: {capPres + capOnline} / {MAX_TOTAL}
-          </span>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <label htmlFor="capacity_presential" className="mb-1.5 block text-xs font-bold text-white/60">
-              📍 Presencial (SALA)
-            </label>
-            <input
-              type="number" id="capacity_presential" name="capacity_presential" 
-              min="0" max={MAX_TOTAL}
-              value={capPres}
-              onChange={(e) => handlePresChange(parseInt(e.target.value) || 0)}
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
+      {/* CAPACITY REDESIGN */}
+      <div className="rounded-2xl bg-brand-500/5 p-6 border border-brand-500/10 space-y-6">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Cupos de la Clase</label>
+          <div className="flex flex-col items-end">
+            <span className={`text-[10px] font-black px-2 py-1 rounded-full ${isOverLimit ? 'bg-red-500 text-white animate-pulse' : 'bg-brand-500/20 text-brand-400'}`}>
+              TOTAL: {totalCapacity} / {MAX_TOTAL}
+            </span>
+            {isOverLimit && (
+              <span className="text-[9px] text-red-400 font-bold mt-1 uppercase">Límite superado (máx 20)</span>
+            )}
           </div>
-          <div>
-            <label htmlFor="capacity_online" className="mb-1.5 block text-xs font-bold text-white/60">
-              💻 Online (ZOOM)
-            </label>
-            <input
-              type="number" id="capacity_online" name="capacity_online" 
-              min="0" max={MAX_TOTAL}
-              value={capOnline}
-              onChange={(e) => handleOnlineChange(parseInt(e.target.value) || 0)}
-              className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
-            />
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* Presential Toggle */}
+          <div className={`rounded-xl p-4 border transition-all ${showPresential ? 'bg-brand-500/10 border-brand-500/30' : 'bg-surface-dark/40 border-white/5'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-white/80">📍 Presencial</span>
+              <button
+                type="button"
+                onClick={() => setShowPresential(!showPresential)}
+                className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${showPresential ? 'bg-brand-500' : 'bg-white/10'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ${showPresential ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+            {showPresential && (
+              <input
+                type="number" id="capacity_presential" name="capacity_presential" 
+                min="0" max={MAX_TOTAL}
+                value={capPres}
+                onChange={(e) => handlePresChange(parseInt(e.target.value))}
+                className="w-full rounded-lg border border-brand-500/30 bg-surface-dark/50 px-3 py-2 text-sm text-foreground focus:border-brand-500 focus:outline-none"
+              />
+            )}
+            <input type="hidden" name="capacity_presential" value={showPresential ? capPres : 0} />
+          </div>
+
+          {/* Online Toggle */}
+          <div className={`rounded-xl p-4 border transition-all ${showOnline ? 'bg-brand-500/10 border-brand-500/30' : 'bg-surface-dark/40 border-white/5'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-white/80">💻 Online</span>
+              <button
+                type="button"
+                onClick={() => setShowOnline(!showOnline)}
+                className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${showOnline ? 'bg-brand-500' : 'bg-white/10'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ${showOnline ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+            {showOnline && (
+              <input
+                type="number" id="capacity_online" name="capacity_online" 
+                min="0" max={MAX_TOTAL}
+                value={capOnline}
+                onChange={(e) => handleOnlineChange(parseInt(e.target.value))}
+                className="w-full rounded-lg border border-brand-500/30 bg-surface-dark/50 px-3 py-2 text-sm text-foreground focus:border-brand-500 focus:outline-none"
+              />
+            )}
+            <input type="hidden" name="capacity_online" value={showOnline ? capOnline : 0} />
           </div>
         </div>
       </div>
 
       <button
-        type="submit" disabled={pending}
+        type="submit" disabled={pending || isOverLimit}
         className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/20 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
       >
         {pending ? "Guardando..." : "Guardar Cambios"}
