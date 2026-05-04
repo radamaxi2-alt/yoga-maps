@@ -12,13 +12,12 @@ type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("teacher_details")
-    .select("profiles(full_name)")
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
     .eq("id", id)
     .single();
 
-  const profile = data?.profiles as { full_name: string | null } | null;
   const name = profile?.full_name || "Profesor";
 
   return {
@@ -32,13 +31,18 @@ export default async function TeacherProfilePage({ params }: Props) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: teacher } = await supabase
-    .from("teacher_details")
-    .select("*, profiles(full_name, avatar_url, cover_position)")
+  // Fetch from profiles first to avoid 404 if teacher_details is missing
+  const { data: profileRaw } = await supabase
+    .from("profiles")
+    .select("*, teacher_details(*)")
     .eq("id", id)
     .single();
 
-  if (!teacher) notFound();
+  if (!profileRaw || profileRaw.role !== "profesor") notFound();
+
+  const details = Array.isArray(profileRaw.teacher_details) 
+    ? profileRaw.teacher_details[0] 
+    : profileRaw.teacher_details;
 
   // Fetch teacher's upcoming classes
   const { data: classes } = await supabase
@@ -103,24 +107,19 @@ export default async function TeacherProfilePage({ params }: Props) {
     }
   }
 
-  const profile = teacher.profiles as {
-    full_name: string | null;
-    avatar_url: string | null;
-    cover_position: number | null;
-  } | null;
-  const name = profile?.full_name || "Profesor";
-  const isSchool = teacher.teacher_type === "escuela";
+  const name = profileRaw.full_name || "Profesor";
+  const isSchool = details?.teacher_type === "escuela";
 
   return (
     <section className="bg-brand-50/30 min-h-screen pb-16 dark:bg-surface-dark">
       {/* Cover Image */}
       <div className="relative h-64 w-full sm:h-80 lg:h-96">
-        {teacher.cover_image ? (
+        {details?.cover_image ? (
           <img
-            src={teacher.cover_image}
+            src={details.cover_image}
             alt="Portada"
             className="h-full w-full object-cover"
-            style={{ objectPosition: `center ${profile?.cover_position ?? 50}%` }}
+            style={{ objectPosition: `center ${profileRaw.cover_position ?? 50}%` }}
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-tr from-brand-800 via-brand-600 to-brand-400"></div>
@@ -145,9 +144,9 @@ export default async function TeacherProfilePage({ params }: Props) {
         <div className="-mt-24 relative z-10 flex flex-col items-center sm:flex-row sm:items-end sm:gap-6 rounded-3xl bg-white/80 p-6 shadow-xl shadow-brand-900/5 backdrop-blur-xl dark:bg-surface-dark-alt/90">
           
           <div className="relative -mt-16 sm:-mt-24 flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-5xl font-bold text-white shadow-2xl shadow-brand-500/30 ring-4 ring-white dark:ring-surface-dark-alt">
-            {profile?.avatar_url ? (
+            {profileRaw.avatar_url ? (
               <img
-                src={profile.avatar_url}
+                src={profileRaw.avatar_url}
                 alt={name}
                 className="h-full w-full rounded-full object-cover"
               />
@@ -164,8 +163,8 @@ export default async function TeacherProfilePage({ params }: Props) {
               {name}
             </h1>
             <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-medium text-foreground/70">
-              {teacher.address && (
-                <span className="flex items-center gap-1">📍 {teacher.address}</span>
+              {details?.address && (
+                <span className="flex items-center gap-1">📍 {details.address}</span>
               )}
               <span className="flex items-center gap-1 bg-brand-100 text-brand-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider text-[10px] font-bold">
                 {isSchool ? "Centro / Escuela" : "Instructor"}
@@ -181,19 +180,19 @@ export default async function TeacherProfilePage({ params }: Props) {
               <h2 className="text-sm font-bold uppercase tracking-widest text-brand-500">
                 Sobre {isSchool ? "Nosotros" : "Mí"}
               </h2>
-              {teacher.bio ? (
+              {details?.bio ? (
                 <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-foreground/80">
-                  {teacher.bio}
+                  {details.bio}
                 </p>
               ) : (
                 <p className="mt-4 text-sm text-foreground/50 italic">No hay información disponible.</p>
               )}
 
-              {teacher.specialties && teacher.specialties.length > 0 && (
+              {details?.specialties && details.specialties.length > 0 && (
                 <div className="mt-6 border-t border-brand-50 pt-6 dark:border-surface-dark">
                   <h3 className="text-xs font-semibold uppercase text-foreground/50 mb-3">Especialidades y Formaciones</h3>
                   <div className="flex flex-wrap gap-2">
-                    {teacher.specialties.map((spec: string) => {
+                    {details.specialties.map((spec: string) => {
                       const isFormacion = spec === "Formación / Profesorado";
                       return (
                         <span
@@ -272,10 +271,10 @@ export default async function TeacherProfilePage({ params }: Props) {
                           </div>
                           <div className="mt-2 flex gap-3">
                             <span className="text-[9px] font-bold uppercase tracking-tighter text-foreground/40">
-                              SALA: {counts.presential}/{cls.capacity_presential || 15}
+                              SALA: {counts.presential}/{cls.capacity_presential || 0}
                             </span>
                             <span className="text-[9px] font-bold uppercase tracking-tighter text-foreground/40">
-                              ZOOM: {counts.online}/{cls.capacity_online || 5}
+                              ZOOM: {counts.online}/{cls.capacity_online || 0}
                             </span>
                           </div>
                         </div>
@@ -293,8 +292,8 @@ export default async function TeacherProfilePage({ params }: Props) {
                                     userHasReserved={hasReserved}
                                     currentPresential={counts.presential}
                                     currentOnline={counts.online}
-                                    maxPresential={cls.capacity_presential || 15}
-                                    maxOnline={cls.capacity_online || 5}
+                                    maxPresential={cls.capacity_presential || 0}
+                                    maxOnline={cls.capacity_online || 0}
                                   />
                                   <MonthlyReserveButton classId={cls.id} isFull={isFull} disabled={hasReserved} />
                                 </div>
