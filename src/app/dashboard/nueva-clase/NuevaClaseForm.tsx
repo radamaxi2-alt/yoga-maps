@@ -7,6 +7,16 @@ import { YOGA_SPECIALTIES, EVENT_CATEGORIES } from "@/lib/constants";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
+const DAYS_OF_WEEK = [
+  { id: "0", label: "Dom" },
+  { id: "1", label: "Lun" },
+  { id: "2", label: "Mar" },
+  { id: "3", label: "Mié" },
+  { id: "4", label: "Jue" },
+  { id: "5", label: "Vie" },
+  { id: "6", label: "Sáb" },
+];
+
 function PlacesAutocompleteInput({
   value,
   onChange,
@@ -68,6 +78,11 @@ export default function NuevaClaseForm() {
   const [capOnline, setCapOnline] = useState(5);
   const MAX_TOTAL = 20;
 
+  // Recurrence Logic
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [repeatUntil, setRepeatUntil] = useState("");
+
   const handlePresChange = (val: number) => {
     const newPres = Math.min(val, MAX_TOTAL);
     setCapPres(newPres);
@@ -84,10 +99,16 @@ export default function NuevaClaseForm() {
     }
   };
 
+  const toggleDay = (dayId: string) => {
+    setSelectedDays(prev => 
+      prev.includes(dayId) ? prev.filter(d => d !== dayId) : [...prev, dayId]
+    );
+  };
+
   const hasApiKey = API_KEY && API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY";
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-6 pb-20">
       {state.error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
           {state.error}
@@ -165,7 +186,7 @@ export default function NuevaClaseForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="scheduled_at" className="mb-1.5 block text-sm font-medium text-foreground/80">
-            Fecha y hora *
+            Fecha y hora de inicio *
           </label>
           <input
             type="datetime-local" id="scheduled_at" name="scheduled_at" required
@@ -181,6 +202,51 @@ export default function NuevaClaseForm() {
             className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
           />
         </div>
+      </div>
+
+      {/* Recurrence Options */}
+      <div className="rounded-2xl bg-brand-500/5 p-6 border border-brand-500/10">
+        <div className="flex items-center gap-3 mb-4">
+          <input 
+            type="checkbox" id="is_recurring" name="is_recurring"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+            className="h-5 w-5 rounded border-brand-500/30 bg-surface-dark text-brand-600 focus:ring-brand-500"
+          />
+          <label htmlFor="is_recurring" className="text-sm font-bold text-white uppercase tracking-wider">Repetir esta clase semanalmente</label>
+        </div>
+
+        {isRecurring && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div>
+              <p className="mb-3 text-[10px] font-black text-brand-400 uppercase tracking-widest">¿Qué días se repite?</p>
+              <div className="flex flex-wrap gap-2">
+                {DAYS_OF_WEEK.map(day => (
+                  <button
+                    key={day.id}
+                    type="button"
+                    onClick={() => toggleDay(day.id)}
+                    className={`h-10 w-10 rounded-full text-[10px] font-black transition-all ${selectedDays.includes(day.id) ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30' : 'bg-white/5 text-white/40 border border-white/5 hover:bg-white/10'}`}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
+              <input type="hidden" name="repeat_days" value={selectedDays.join(',')} />
+            </div>
+
+            <div>
+              <label htmlFor="repeat_until" className="mb-1.5 block text-[10px] font-black text-brand-400 uppercase tracking-widest">¿Hasta qué fecha repetir?</label>
+              <input
+                type="date" id="repeat_until" name="repeat_until"
+                value={repeatUntil}
+                onChange={(e) => setRepeatUntil(e.target.value)}
+                required={isRecurring}
+                className="w-full rounded-xl border border-brand-200/60 bg-surface-alt/50 px-4 py-3 text-sm text-foreground transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl bg-brand-500/5 p-6 border border-brand-500/10">
@@ -250,12 +316,14 @@ export default function NuevaClaseForm() {
         <input type="hidden" name="longitude" value={lng || ""} />
       </div>
 
-      <button
-        type="submit" disabled={pending}
-        className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/20 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-      >
-        {pending ? "Publicando..." : "Publicar Evento"}
-      </button>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface-dark/80 backdrop-blur-md border-t border-white/5 sm:relative sm:bg-transparent sm:border-0 sm:p-0">
+        <button
+          type="submit" disabled={pending}
+          className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/20 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+        >
+          {pending ? "Publicando..." : "Publicar Clase(s)"}
+        </button>
+      </div>
     </form>
   );
 }
