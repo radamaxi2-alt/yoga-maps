@@ -1,35 +1,46 @@
 import Link from "next/link";
+import NearbyClasses from "@/components/NearbyClasses";
 
 export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
+      <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/images/hero-home.png" 
+            alt="Yoga en la naturaleza" 
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/80 via-surface-dark/40 to-background" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="animate-fade-in mb-4 inline-block rounded-full border border-brand-200/50 bg-brand-50/80 px-5 py-2 text-xs font-semibold uppercase tracking-widest text-brand-700 backdrop-blur-sm">
+            <span className="animate-fade-in mb-4 inline-block rounded-full border border-brand-400/30 bg-brand-500/10 px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-brand-300 backdrop-blur-xl">
               🪷 Tu refugio de bienestar
             </span>
-            <h1 className="animate-fade-in mt-4 font-serif text-5xl font-bold leading-tight text-foreground sm:text-6xl lg:text-7xl">
+            <h1 className="animate-fade-in mt-4 font-serif text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl drop-shadow-2xl">
               Práctica espiritual y{" "}
-              <span className="text-brand-600">
+              <span className="text-brand-400">
                 energía vital
               </span>
             </h1>
-            <p className="animate-fade-in mx-auto mt-6 max-w-xl text-lg leading-relaxed text-foreground/70 font-sans">
+            <p className="animate-fade-in mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/80 font-sans drop-shadow-lg">
               Conectamos a estudiantes con los mejores profesores de yoga.
               Explora clases presenciales, online y retiros de armonización.
             </p>
             <div className="animate-fade-in mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row font-sans">
               <Link
                 href="/profesores"
-                className="inline-flex items-center rounded-full bg-brand-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/30 hover:bg-brand-500"
+                className="inline-flex items-center rounded-full bg-brand-500 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-2xl shadow-brand-500/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-brand-500/60 hover:bg-brand-400"
               >
                 Directorio de Profesores
               </Link>
               <Link
                 href="/clases"
-                className="glass inline-flex items-center rounded-full px-8 py-3.5 text-sm font-semibold text-brand-700 transition-all duration-200 hover:-translate-y-1 hover:bg-brand-50"
+                className="glass inline-flex items-center rounded-full px-8 py-4 text-xs font-black uppercase tracking-widest text-white transition-all duration-300 hover:-translate-y-1 hover:bg-white/10"
               >
                 Ver Agenda de Clases
               </Link>
@@ -37,6 +48,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <NearbyClasses />
 
       {/* Features Section */}
       <section className="py-20 font-sans">

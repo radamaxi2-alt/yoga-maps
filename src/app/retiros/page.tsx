@@ -17,6 +17,8 @@ export default async function RetirosPage() {
       events={events || []} 
       title="Retiros de Yoga" 
       subtitle="Escapadas espirituales y retiros de silencio en Mar del Plata y alrededores."
+      backgroundImage="/images/hero-retiros.png"
+      badge="🪷 Retiros"
     />
   );
 }

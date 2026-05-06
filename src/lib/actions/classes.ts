@@ -8,6 +8,41 @@ export type ClassState = {
   error?: string;
 };
 
+export async function searchTeachers(query: string) {
+  const supabase = await createClient();
+  const cleanQuery = query.replace('@', '').toLowerCase();
+  
+  if (cleanQuery.length < 2) return [];
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url, username")
+    .eq("role", "profesor")
+    .or(`username.ilike.%${cleanQuery}%,full_name.ilike.%${cleanQuery}%`)
+    .limit(5);
+
+  return data || [];
+}
+
+export async function searchSchools(query: string) {
+  const supabase = await createClient();
+  if (query.length < 2) return [];
+
+  const { data } = await supabase
+    .from("teacher_details")
+    .select("id, profiles(full_name, avatar_url, username)")
+    .eq("teacher_type", "escuela")
+    .or(`address.ilike.%${query}%,profiles.full_name.ilike.%${query}%`)
+    .limit(5);
+
+  return data?.map((d: any) => ({
+    id: d.id,
+    full_name: d.profiles.full_name,
+    avatar_url: d.profiles.avatar_url,
+    username: d.profiles.username
+  })) || [];
+}
+
 export async function createClass(
   _prevState: ClassState,
   formData: FormData
@@ -21,9 +56,13 @@ export async function createClass(
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("subscription_plan")
+    .select("role, subscription_plan")
     .eq("id", user.id)
     .single();
+
+  if (profile?.role !== "profesor") {
+    return { error: "Solo los perfiles de Profesor pueden crear clases. Las Escuelas son ahora centros de vinculación." };
+  }
 
   const plan = profile?.subscription_plan || "zen";
   const limits = { zen: 12, namaste: 80, escuela: 99999 };
@@ -42,6 +81,8 @@ export async function createClass(
   const scheduledAt = formData.get("scheduled_at") as string;
   const jitsiLink = (formData.get("jitsi_room_link") as string) || null;
   const category = (formData.get("category") as string) || "clase";
+  const guestTeacherIds = formData.get("guest_teacher_ids") ? (formData.get("guest_teacher_ids") as string).split(',').filter(Boolean) : [];
+  const schoolId = (formData.get("school_id") as string) || null;
   
   const styleSelect = formData.get("style_select") as string;
   const customStyle = formData.get("custom_style") as string;
@@ -85,7 +126,9 @@ export async function createClass(
       address,
       latitude,
       longitude,
-      category
+      category,
+      guest_teacher_ids: guestTeacherIds,
+      school_id: schoolId
     };
     if (series_id) newClass.series_id = series_id;
     classInstances.push(newClass);
@@ -112,7 +155,9 @@ export async function createClass(
           address,
           latitude,
           longitude,
-          category
+          category,
+          guest_teacher_ids: guestTeacherIds,
+          school_id: schoolId
         };
         if (series_id) newClass.series_id = series_id;
         classInstances.push(newClass);
@@ -130,21 +175,10 @@ export async function createClass(
     return { error: "No se generaron clases. Revisa que los días seleccionados estén dentro del rango de fechas." };
   }
 
-  // ATTEMPT 1: With series_id
-  const { error: error1 } = await supabase.from("classes").insert(classInstances);
+  const { error } = await supabase.from("classes").insert(classInstances);
 
-  if (error1) {
-    console.error("Insert error (Attempt 1):", error1);
-    
-    // ATTEMPT 2: Fallback without series_id if column missing
-    if (error1.message.includes("series_id") || error1.code === "42703") {
-      const fallbackInstances = classInstances.map(({ series_id, ...rest }) => rest);
-      const { error: error2 } = await supabase.from("classes").insert(fallbackInstances);
-      
-      if (error2) return { error: "Error al crear la clase: " + error2.message };
-    } else {
-      return { error: "Error al crear la clase: " + error1.message };
-    }
+  if (error) {
+    return { error: "Error al crear la clase: " + error.message };
   }
 
   redirect("/dashboard");
@@ -173,6 +207,7 @@ export async function updateClass(
   const title = formData.get("title") as string;
   const capPresRaw = formData.get("capacity_presential");
   const capOnlineRaw = formData.get("capacity_online");
+  const guestTeacherIds = formData.get("guest_teacher_ids") ? (formData.get("guest_teacher_ids") as string).split(',').filter(Boolean) : [];
 
   const capacity_presential = (capPresRaw !== null && capPresRaw !== "") ? Number(capPresRaw) : 15;
   const capacity_online = (capOnlineRaw !== null && capOnlineRaw !== "") ? Number(capOnlineRaw) : 5;
@@ -197,6 +232,8 @@ export async function updateClass(
     latitude: formData.get("latitude") ? parseFloat(formData.get("latitude") as string) : null,
     longitude: formData.get("longitude") ? parseFloat(formData.get("longitude") as string) : null,
     category: (formData.get("category") as string) || "clase",
+    guest_teacher_ids: guestTeacherIds,
+    school_id: (formData.get("school_id") as string) || null
   };
 
   let query = supabase.from("classes").update(updateData);

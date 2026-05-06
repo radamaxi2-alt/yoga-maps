@@ -1,14 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { Metadata } from "next";
-import CalendarButton from "@/components/CalendarButton";
 import LiveClassButton from "@/components/LiveClassButton";
 import ReserveButton from "@/components/ReserveButton";
+import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
-  title: "Clases",
-  description:
-    "Consulta la agenda de clases de yoga. Filtra por estilo, horario y ubicación.",
+  title: "Agenda de Clases | Yoga Maps",
+  description: "Consulta la agenda de clases de yoga. Filtra por estilo, horario y ubicación.",
 };
 
 export default async function ClasesPage() {
@@ -54,144 +53,141 @@ export default async function ClasesPage() {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="max-w-2xl">
-        <span className="mb-2 inline-block rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:border-brand-800 dark:bg-brand-900/30 dark:text-brand-300">
-          Agenda
-        </span>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Próximas Clases
-        </h1>
-        <p className="mt-4 text-lg text-foreground/60">
-          Explorá las próximas clases de yoga y reservá tu lugar.
-        </p>
-      </div>
+    <>
+      <PageHero 
+        title="Agenda de Clases"
+        subtitle="Explorá las próximas prácticas y reservá tu lugar en sala o de forma online."
+        backgroundImage="/images/hero-clases.png"
+        badge="🧘 Práctica Hoy"
+      />
+      
+      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        {/* Classes List */}
+        {classes && classes.length > 0 ? (
+          <div className="space-y-6">
+            {classes.map((cls) => {
+              const profile = cls.teacher_details?.profiles as unknown as {
+                full_name: string | null;
+                avatar_url: string | null;
+              } | null;
+              const name = profile?.full_name || "Profesor";
+              const date = new Date(cls.scheduled_at);
+              const isFull = cls.is_full;
+              const hasReserved = userReservations.has(cls.id);
 
-      {/* Classes List */}
-      {classes && classes.length > 0 ? (
-        <div className="mt-12 space-y-6">
-          {classes.map((cls) => {
-            const profile = cls.teacher_details?.profiles as unknown as {
-              full_name: string | null;
-              avatar_url: string | null;
-            } | null;
-            const name = profile?.full_name || "Profesor";
-            const date = new Date(cls.scheduled_at);
-            const isFull = cls.is_full;
-            const hasReserved = userReservations.has(cls.id);
-
-            return (
-              <article
-                key={cls.id}
-                className={`glass flex flex-col gap-6 rounded-3xl p-6 sm:flex-row sm:items-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 ${isFull ? 'opacity-90' : ''}`}
-              >
-                {/* Date badge */}
-                <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 shadow-inner">
-                  <span className="text-sm font-semibold uppercase text-brand-600">
-                    {date.toLocaleDateString("es-AR", { month: "short" })}
-                  </span>
-                  <span className="text-2xl font-bold text-brand-700">
-                    {date.getDate()}
-                  </span>
-                </div>
-
-                <div className="flex-1 font-sans">
-                  <h2 className="text-2xl font-bold text-foreground">
-                    {cls.title}
-                  </h2>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-foreground/70">
-                    <span className="flex items-center gap-1.5 font-medium">
-                      🕐{" "}
-                      {date.toLocaleTimeString("es-AR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
-                      hs
+              return (
+                <article
+                  key={cls.id}
+                  className={`glass flex flex-col gap-6 rounded-3xl p-6 sm:flex-row sm:items-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 ${isFull ? 'opacity-90' : ''}`}
+                >
+                  {/* Date badge */}
+                  <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 shadow-inner">
+                    <span className="text-sm font-semibold uppercase text-brand-600">
+                      {date.toLocaleDateString("es-AR", { month: "short" })}
                     </span>
-                    <Link
-                      href={`/profesores/${cls.teacher_id}`}
-                      className="flex items-center gap-2 rounded-full border border-brand-100/50 bg-white/50 py-1 pl-1 pr-3 transition-colors hover:bg-brand-50 dark:border-surface-dark-alt dark:bg-surface-dark-alt/50 dark:hover:bg-brand-900/20"
-                    >
-                      {profile?.avatar_url ? (
-                        <img
-                          src={profile.avatar_url}
-                          alt={name}
-                          className="h-6 w-6 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
-                          {name[0].toUpperCase()}
-                        </div>
-                      )}
-                      <span className="font-medium text-brand-900 dark:text-brand-100">
-                        {name}
-                      </span>
-                    </Link>
-                    {cls.style && (
-                      <span className="rounded-full bg-brand-500/10 px-3 py-1 text-[10px] font-bold text-brand-400 uppercase tracking-widest ring-1 ring-brand-500/20">
-                        {cls.style}
-                      </span>
-                    )}
+                    <span className="text-2xl font-bold text-brand-700">
+                      {date.getDate()}
+                    </span>
+                  </div>
 
-                    <div className="flex gap-4">
-                      <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-                        📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential ?? 0}</b>
+                  <div className="flex-1 font-sans">
+                    <h2 className="text-2xl font-bold text-foreground">
+                      {cls.title}
+                    </h2>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-foreground/70">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        🕐{" "}
+                        {date.toLocaleTimeString("es-AR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
-                      <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-                        💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online ?? 0}</b>
-                      </span>
+                      <Link
+                        href={`/profesores/${cls.teacher_id}`}
+                        className="flex items-center gap-2 rounded-full border border-brand-100/50 bg-white/50 py-1 pl-1 pr-3 transition-colors hover:bg-brand-50 dark:border-surface-dark-alt dark:bg-surface-dark-alt/50 dark:hover:bg-brand-900/20"
+                      >
+                        {profile?.avatar_url ? (
+                          <img
+                            src={profile.avatar_url}
+                            alt={name}
+                            className="h-6 w-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+                            {name[0].toUpperCase()}
+                          </div>
+                        )}
+                        <span className="font-medium text-brand-900 dark:text-brand-100">
+                          {name}
+                        </span>
+                      </Link>
+                      {cls.style && (
+                        <span className="rounded-full bg-brand-500/10 px-3 py-1 text-[10px] font-bold text-brand-400 uppercase tracking-widest ring-1 ring-brand-500/20">
+                          {cls.style}
+                        </span>
+                      )}
+
+                      <div className="flex gap-4">
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
+                          📍 Presenciales: <b className="text-foreground">{reservationCounts[cls.id]?.presential || 0}/{cls.capacity_presential ?? 0}</b>
+                        </span>
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
+                          💻 Online: <b className="text-foreground">{reservationCounts[cls.id]?.online || 0}/{cls.capacity_online ?? 0}</b>
+                        </span>
+                      </div>
+                    </div>
+
+                    {cls.description && (
+                      <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-foreground/60">
+                        {cls.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions & Price */}
+                  <div className="flex flex-col items-start gap-4 sm:items-end sm:justify-center">
+                    <span className="text-3xl font-bold text-brand-600 dark:text-brand-400">
+                      {Number(cls.price) === 0
+                        ? "Gratis"
+                        : `$${Number(cls.price).toLocaleString("es-AR")}`}
+                    </span>
+                    
+                    <div className="flex flex-col gap-2 w-full sm:w-auto items-end">
+                      <ReserveButton 
+                        classId={cls.id} 
+                        classTitle={cls.title}
+                        scheduledAt={cls.scheduled_at}
+                        isFull={isFull} 
+                        userHasReserved={hasReserved}
+                        currentPresential={reservationCounts[cls.id]?.presential || 0}
+                        currentOnline={reservationCounts[cls.id]?.online || 0}
+                        maxPresential={cls.capacity_presential || 15}
+                        maxOnline={cls.capacity_online || 5}
+                      />
+                      
+                      {cls.jitsi_room_link && (
+                        <LiveClassButton jitsiLink={cls.jitsi_room_link} />
+                      )}
                     </div>
                   </div>
-
-                  {cls.description && (
-                    <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-foreground/60">
-                      {cls.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Actions & Price */}
-                <div className="flex flex-col items-start gap-4 sm:items-end sm:justify-center">
-                  <span className="text-3xl font-bold text-brand-600 dark:text-brand-400">
-                    {Number(cls.price) === 0
-                      ? "Gratis"
-                      : `$${Number(cls.price).toLocaleString("es-AR")}`}
-                  </span>
-                  
-                  <div className="flex flex-col gap-2 w-full sm:w-auto items-end">
-                    <ReserveButton 
-                      classId={cls.id} 
-                      isFull={isFull} 
-                      userHasReserved={hasReserved}
-                      currentPresential={reservationCounts[cls.id]?.presential || 0}
-                      currentOnline={reservationCounts[cls.id]?.online || 0}
-                      maxPresential={cls.capacity_presential || 15}
-                      maxOnline={cls.capacity_online || 5}
-                    />
-                    
-                    {cls.jitsi_room_link && (
-                      <LiveClassButton jitsiLink={cls.jitsi_room_link} />
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="mt-16 text-center">
-          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-3xl dark:bg-brand-900/30">
-            📅
-          </span>
-          <h3 className="mt-4 text-lg font-semibold text-foreground">
-            No hay clases programadas
-          </h3>
-          <p className="mt-2 text-sm text-foreground/60">
-            Las clases aparecerán acá cuando los profesores las publiquen.
-          </p>
-        </div>
-      )}
-    </section>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-16 text-center">
+            <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-3xl dark:bg-brand-900/30">
+              📅
+            </span>
+            <h3 className="mt-4 text-lg font-semibold text-foreground">
+              No hay clases programadas
+            </h3>
+            <p className="mt-2 text-sm text-foreground/60">
+              Las clases aparecerán acá cuando los profesores las publiquen.
+            </p>
+          </div>
+        )}
+      </section>
+    </>
   );
 }

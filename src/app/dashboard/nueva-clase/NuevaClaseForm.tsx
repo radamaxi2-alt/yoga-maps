@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState, useState, useEffect } from "react";
-import { createClass, type ClassState } from "@/lib/actions/classes";
+import { createClass, searchTeachers, searchSchools, type ClassState } from "@/lib/actions/classes";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import PlacesAutocompleteInput from "@/components/PlacesAutocompleteInput";
+import { X, Search, Users, Landmark } from "lucide-react";
 
 const YOGA_SPECIALTIES = [
   "Hatha Yoga",
@@ -48,6 +49,16 @@ export default function NuevaClaseForm() {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
 
+  // Collaboration States
+  const [guestSearch, setGuestSearch] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedGuests, setSelectedGuests] = useState<any[]>([]);
+
+  // School States
+  const [schoolSearch, setSchoolSearch] = useState("");
+  const [schoolResults, setSchoolResults] = useState<any[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
+
   // Capacity & Modality States
   const [showPresential, setShowPresential] = useState(false);
   const [showOnline, setShowOnline] = useState(false);
@@ -62,6 +73,44 @@ export default function NuevaClaseForm() {
 
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const hasApiKey = !!API_KEY;
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (guestSearch.length >= 2) {
+        const results = await searchTeachers(guestSearch);
+        setSearchResults(results);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [guestSearch]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (schoolSearch.length >= 2) {
+        const results = await searchSchools(schoolSearch);
+        setSchoolResults(results);
+      } else {
+        setSchoolResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [schoolSearch]);
+
+  const addGuest = (teacher: any) => {
+    if (!selectedGuests.find(g => g.id === teacher.id)) {
+      setSelectedGuests([...selectedGuests, teacher]);
+    }
+    setGuestSearch("");
+    setSearchResults([]);
+  };
+
+  const removeGuest = (id: string) => {
+    setSelectedGuests(selectedGuests.filter(g => g.id !== id));
+  };
 
   const toggleDay = (dayId: number) => {
     setSelectedDays(prev => 
@@ -147,6 +196,58 @@ export default function NuevaClaseForm() {
               />
             </div>
           )}
+
+          {/* COLABORACIÓN: Profesores Invitados */}
+          <div className="sm:col-span-2 space-y-4">
+            <label className="mb-2 block text-xs font-black text-brand-400 uppercase tracking-widest flex items-center gap-2">
+              Profesores Invitados <span className="text-[10px] lowercase font-medium opacity-40 italic">(Opcional para retiros y eventos)</span>
+            </label>
+            
+            <div className="relative">
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selectedGuests.map(guest => (
+                  <div key={guest.id} className="flex items-center gap-2 bg-brand-500/20 border border-brand-500/30 pl-2 pr-1 py-1 rounded-full animate-in zoom-in-95">
+                    <img src={guest.avatar_url || `https://ui-avatars.com/api/?name=${guest.full_name}`} className="h-5 w-5 rounded-full object-cover" />
+                    <span className="text-[10px] font-bold text-white">{guest.full_name}</span>
+                    <button type="button" onClick={() => removeGuest(guest.id)} className="p-1 hover:bg-white/10 rounded-full text-brand-400">
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="relative">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+                <input
+                  type="text"
+                  value={guestSearch}
+                  onChange={(e) => setGuestSearch(e.target.value)}
+                  placeholder="Buscá por @username o nombre..."
+                  className="w-full rounded-2xl border border-white/10 bg-surface-dark/50 pl-11 pr-4 py-3.5 text-sm text-foreground focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+
+              {searchResults.length > 0 && (
+                <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-surface-dark-alt shadow-2xl backdrop-blur-xl">
+                  {searchResults.map(teacher => (
+                    <button
+                      key={teacher.id}
+                      type="button"
+                      onClick={() => addGuest(teacher)}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/5"
+                    >
+                      <img src={teacher.avatar_url || `https://ui-avatars.com/api/?name=${teacher.full_name}`} className="h-8 w-8 rounded-full object-cover shadow-lg" />
+                      <div>
+                        <p className="text-sm font-bold text-white">{teacher.full_name}</p>
+                        <p className="text-[10px] text-brand-400 font-black uppercase tracking-tighter">@{teacher.username || 'sin_usuario'}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <input type="hidden" name="guest_teacher_ids" value={selectedGuests.map(g => g.id).join(',')} />
+          </div>
 
           <div className="sm:col-span-2">
             <label htmlFor="description" className="mb-2 block text-xs font-black text-brand-400 uppercase tracking-widest">Descripción de la práctica</label>
@@ -252,6 +353,68 @@ export default function NuevaClaseForm() {
               <input type="hidden" name="address" value={address} />
               <input type="hidden" name="latitude" value={lat || ""} />
               <input type="hidden" name="longitude" value={lng || ""} />
+            </div>
+
+            {/* VINCULACIÓN: Escuela / HUB */}
+            <div>
+              <label className="mb-2 block text-xs font-black text-brand-400 uppercase tracking-widest flex items-center gap-2">
+                Sede / Escuela <span className="text-[10px] lowercase font-medium opacity-40 italic">(Vincula esta clase a un centro)</span>
+              </label>
+              
+              {selectedSchool ? (
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-brand-500/10 border border-brand-500/30 animate-in zoom-in-95">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-surface-dark flex items-center justify-center font-bold text-brand-400">
+                      <Landmark size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{selectedSchool.full_name}</p>
+                      <p className="text-[10px] text-brand-400 font-black uppercase">@{selectedSchool.username}</p>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setSelectedSchool(null)}
+                    className="p-2 hover:bg-white/10 rounded-full text-brand-400 transition-all"
+                  >
+                    <X size={16} />
+                  </button>
+                  <input type="hidden" name="school_id" value={selectedSchool.id} />
+                </div>
+              ) : (
+                <div className="relative">
+                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+                  <input
+                    type="text"
+                    value={schoolSearch}
+                    onChange={(e) => setSchoolSearch(e.target.value)}
+                    placeholder="Buscá la Escuela por nombre..."
+                    className="w-full rounded-2xl border border-white/10 bg-surface-dark/50 pl-11 pr-4 py-3.5 text-sm text-foreground focus:border-brand-500 outline-none transition-all"
+                  />
+                  {schoolResults.length > 0 && (
+                    <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-surface-dark-alt shadow-2xl backdrop-blur-xl">
+                      {schoolResults.map(school => (
+                        <button
+                          key={school.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSchool(school);
+                            setSchoolSearch("");
+                            setSchoolResults([]);
+                          }}
+                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/5"
+                        >
+                          <img src={school.avatar_url || `https://ui-avatars.com/api/?name=${school.full_name}`} className="h-8 w-8 rounded-full object-cover shadow-lg" />
+                          <div>
+                            <p className="text-sm font-bold text-white">{school.full_name}</p>
+                            <p className="text-[10px] text-brand-400 font-black uppercase tracking-tighter">@{school.username || 'sin_usuario'}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {showOnline && (

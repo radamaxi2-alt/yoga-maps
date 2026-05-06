@@ -16,6 +16,7 @@ export type ProfileData = {
   avatar_url: string | null;
   cover_position: number | null;
   whatsapp_number: string | null;
+  username: string | null;
 };
 
 export async function updateTeacherProfile(data: ProfileData) {
@@ -26,13 +27,14 @@ export async function updateTeacherProfile(data: ProfileData) {
 
   if (!user) return { error: "No estás autenticado." };
 
-  // Update profile name, avatar and position
+  // Update profile name, avatar, position and username
   await supabase
     .from("profiles")
     .update({ 
       full_name: data.full_name,
       avatar_url: data.avatar_url,
-      cover_position: data.cover_position ?? 50
+      cover_position: data.cover_position ?? 50,
+      username: data.username ? data.username.replace('@', '').toLowerCase() : null
     })
     .eq("id", user.id);
 

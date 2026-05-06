@@ -65,17 +65,20 @@ type FormValues = {
   avatar_url: string;
   cover_position: number;
   whatsapp_number: string;
+  username: string;
 };
 
 export default function ProfileEditForm({
   fullName,
   avatarUrl,
   coverPosition,
+  username,
   details,
 }: {
   fullName: string;
   avatarUrl: string;
   coverPosition: number;
+  username: string;
   details: TeacherDetail | null;
 }) {
   const [isPending, startTransition] = useTransition();
@@ -102,6 +105,7 @@ export default function ProfileEditForm({
       avatar_url: avatarUrl || "",
       cover_position: coverPosition || 50,
       whatsapp_number: details?.whatsapp_number || "",
+      username: username || "",
     },
   });
 
@@ -126,6 +130,7 @@ export default function ProfileEditForm({
         avatar_url: data.avatar_url || null,
         cover_position: data.cover_position,
         whatsapp_number: data.whatsapp_number || null,
+        username: data.username || null,
       };
 
       const result = await updateTeacherProfile(payload);
@@ -250,9 +255,18 @@ export default function ProfileEditForm({
           </div>
 
           <div className="space-y-8 pt-6 border-t border-white/5">
-            <div>
-              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Nombre del Perfil</label>
-              <input {...register("full_name")} className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div>
+                <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Nombre del Perfil</label>
+                <input {...register("full_name")} className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
+              </div>
+              <div>
+                <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Nombre de Usuario (@username)</label>
+                <div className="relative">
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 font-bold">@</span>
+                  <input {...register("username")} placeholder="tu_usuario" className="w-full rounded-2xl border border-white/5 bg-white/5 pl-10 pr-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
+                </div>
+              </div>
             </div>
 
             <div>

@@ -52,6 +52,13 @@ export default async function DashboardPage() {
     .eq("teacher_id", user.id)
     .order("scheduled_at", { ascending: true });
 
+  // Fetch low credit notifications (students with 1 credit left)
+  const { data: lowCredits } = await supabase
+    .from("teacher_credits")
+    .select("*, profiles!teacher_credits_student_id_fkey(full_name, username)")
+    .eq("teacher_id", user.id)
+    .eq("credits", 1);
+
   const now = new Date();
   const name = profile.full_name || "Profesor";
   const isSchool = teacher?.teacher_type === "escuela";
@@ -190,6 +197,40 @@ export default async function DashboardPage() {
             </a>
           </div>
         </div>
+
+        {/* Low Credit Notifications */}
+        {lowCredits && lowCredits.length > 0 && (
+          <div className="mb-12 glass rounded-[2.5rem] p-8 border-amber-500/20 bg-amber-500/5">
+            <h3 className="text-xs font-black text-amber-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
+              Alumnos con Créditos Bajos
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {lowCredits.map((lc: any) => (
+                <div key={lc.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
+                      {lc.profiles?.full_name?.[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{lc.profiles?.full_name}</p>
+                      <p className="text-[10px] text-amber-400 font-black uppercase">Último crédito disponible</p>
+                    </div>
+                  </div>
+                  <a 
+                    href={`https://wa.me/${teacher?.whatsapp_number || '542231234567'}?text=${encodeURIComponent(`¡Hola ${lc.profiles?.full_name}! Te queda solo 1 clase en tu abono con ${name}. ¿Querés renovar ahora para no perder tu lugar?`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-xl bg-amber-500/10 text-amber-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-amber-500 hover:text-brand-900"
+                    title="Avisar por WhatsApp"
+                  >
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.417-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.305 1.652zm6.599-3.835c1.402.831 2.923 1.272 4.476 1.274h.001c5.42 0 9.832-4.412 9.835-9.834.001-2.628-1.022-5.1-2.881-6.959s-4.331-2.885-6.959-2.885c-5.422 0-9.833 4.412-9.836 9.834-.001 1.637.404 3.235 1.174 4.652l-.768 2.805 2.958-.787zm11.487-7.071c-.303-.153-1.8-.886-2.077-.988-.278-.101-.481-.153-.684.153-.202.303-.784.988-.962 1.19-.177.202-.354.228-.658.076-.304-.153-1.282-.473-2.441-1.507-.903-.805-1.512-1.8-1.689-2.102-.177-.304-.019-.468.133-.619.136-.136.304-.354.456-.531.151-.177.202-.304.304-.506.101-.202.051-.38-.025-.531-.076-.153-.684-1.646-.937-2.253-.247-.604-.499-.523-.684-.533l-.583-.007c-.202 0-.531.076-.81.38-.278.304-1.063 1.038-1.063 2.532 0 1.494 1.088 2.937 1.24 3.14.151.202 2.141 3.27 5.188 4.585.725.313 1.291.5 1.731.641.728.232 1.391.199 1.915.121.584-.087 1.8-.735 2.053-1.444.253-.708.253-1.316.177-1.444-.076-.127-.278-.202-.582-.355z"/></svg>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="flex items-center justify-between mb-8">

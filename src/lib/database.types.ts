@@ -19,6 +19,7 @@ export interface Database {
           role: UserRole;
           full_name: string | null;
           avatar_url: string | null;
+          username: string | null;
           created_at: string;
         };
         Insert: {
@@ -26,6 +27,7 @@ export interface Database {
           role?: UserRole;
           full_name?: string | null;
           avatar_url?: string | null;
+          username?: string | null;
           created_at?: string;
         };
         Update: {
@@ -33,6 +35,7 @@ export interface Database {
           role?: UserRole;
           full_name?: string | null;
           avatar_url?: string | null;
+          username?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -56,6 +59,8 @@ export interface Database {
           average_price: number | null;
           teacher_type: string | null;
           cover_image: string | null;
+          gallery: string[] | null;
+          whatsapp_number: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -69,6 +74,8 @@ export interface Database {
           average_price?: number | null;
           teacher_type?: string | null;
           cover_image?: string | null;
+          gallery?: string[] | null;
+          whatsapp_number?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -82,6 +89,8 @@ export interface Database {
           average_price?: number | null;
           teacher_type?: string | null;
           cover_image?: string | null;
+          gallery?: string[] | null;
+          whatsapp_number?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -115,6 +124,8 @@ export interface Database {
           address: string | null;
           category: string | null;
           series_id: string | null;
+          guest_teacher_ids: string[] | null;
+          school_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -137,6 +148,8 @@ export interface Database {
           address?: string | null;
           category?: string | null;
           series_id?: string | null;
+          guest_teacher_ids?: string[] | null;
+          school_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -159,6 +172,7 @@ export interface Database {
           address?: string | null;
           category?: string | null;
           series_id?: string | null;
+          school_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -168,6 +182,13 @@ export interface Database {
             columns: ["teacher_id"];
             isOneToOne: false;
             referencedRelation: "teacher_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "classes_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           }
         ];
@@ -202,25 +223,31 @@ export interface Database {
         Row: {
           id: string;
           class_id: string;
-          student_id: string;
+          student_id: string | null;
+          guest_name: string | null;
           modality: "presential" | "online";
-          status: "confirmed" | "cancelled";
+          status: "pending" | "confirmed" | "cancelled";
+          attendance: "none" | "present" | "absent";
           created_at: string;
         };
         Insert: {
           id?: string;
           class_id: string;
-          student_id: string;
+          student_id?: string | null;
+          guest_name?: string | null;
           modality?: "presential" | "online";
-          status?: "confirmed" | "cancelled";
+          status?: "pending" | "confirmed" | "cancelled";
+          attendance?: "none" | "present" | "absent";
           created_at?: string;
         };
         Update: {
           id?: string;
           class_id?: string;
-          student_id?: string;
+          student_id?: string | null;
+          guest_name?: string | null;
           modality?: "presential" | "online";
-          status?: "confirmed" | "cancelled";
+          status?: "pending" | "confirmed" | "cancelled";
+          attendance?: "none" | "present" | "absent";
           created_at?: string;
         };
         Relationships: [
@@ -234,6 +261,45 @@ export interface Database {
           {
             foreignKeyName: "class_reservations_student_id_fkey";
             columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      teacher_credits: {
+        Row: {
+          id: string;
+          student_id: string;
+          teacher_id: string;
+          credits: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_id: string;
+          teacher_id: string;
+          credits?: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          student_id?: string;
+          teacher_id?: string;
+          credits?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "teacher_credits_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "teacher_credits_teacher_id_fkey";
+            columns: ["teacher_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -305,6 +371,45 @@ export interface Database {
           {
             foreignKeyName: "posts_author_id_fkey";
             columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      credit_transactions: {
+        Row: {
+          id: string;
+          student_id: string;
+          teacher_id: string;
+          amount: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_id: string;
+          teacher_id: string;
+          amount: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          student_id?: string;
+          teacher_id?: string;
+          amount?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "credit_transactions_teacher_id_fkey";
+            columns: ["teacher_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
