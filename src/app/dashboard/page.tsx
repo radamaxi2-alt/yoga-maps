@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import DeleteClassButton from "./DeleteClassButton";
+import TeacherCalendar from "@/components/TeacherCalendar";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -201,100 +202,24 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {/* Classes Table */}
-        {classes && classes.length > 0 ? (
-          <div className="overflow-hidden rounded-[2rem] border border-white/5 bg-surface-dark-alt/50 backdrop-blur-xl shadow-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-white/5 bg-white/5">
-                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Clase / Alumnos</th>
-                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Horario</th>
-                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Cupos</th>
-                    <th className="px-8 py-5 font-black text-brand-400 uppercase tracking-widest text-[10px]">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                    {classes.map((cls) => {
-                      const date = new Date(cls.scheduled_at);
-                      const isPast = date < now;
-                      const confirmedReservations = (cls.class_reservations as any) || [];
-                      
-                      const presCount = confirmedReservations.filter((r: any) => r.modality === 'presential').length;
-                      const onlineCount = confirmedReservations.filter((r: any) => r.modality === 'online').length;
-                      
-                      return (
-                        <tr key={cls.id} className="transition-colors hover:bg-white/5">
-                          <td className="px-8 py-6">
-                            <p className="text-base font-black text-white mb-3">{cls.title}</p>
-                            
-                            {confirmedReservations.length > 0 && !isPast && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-                                {confirmedReservations.map((res: any) => (
-                                  <div key={res.id} className={`flex items-center justify-between rounded-xl p-3 text-[11px] border ${res.modality === 'online' ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-brand-500/5 border-brand-500/20'}`}>
-                                    <div className="flex flex-col">
-                                      <span className="font-bold text-white">{res.profiles?.full_name}</span>
-                                      <span className={`text-[9px] font-black uppercase ${res.modality === 'online' ? 'text-cyan-400' : 'text-brand-400'}`}>
-                                        {res.modality === 'online' ? '💻 ONLINE' : '📍 SALA'}
-                                      </span>
-                                    </div>
-                                    {res.profiles?.student_details?.health_info && (
-                                      <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" title="Alerta Médica"></span>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </td>
-                        <td className="px-8 py-6">
-                          <div className="font-black text-white text-sm">
-                            {date.toLocaleDateString("es-AR", { day: "numeric", month: "long" })}
-                          </div>
-                          <div className="text-[10px] font-bold text-brand-400 uppercase mt-1">
-                            {date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}hs
-                          </div>
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-black text-white/40 w-12">SALA:</span>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${presCount >= (cls.capacity_presential ?? 0) && (cls.capacity_presential ?? 0) > 0 ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-                                {presCount}/{cls.capacity_presential ?? 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-black text-white/40 w-12">ZOOM:</span>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${onlineCount >= (cls.capacity_online ?? 0) && (cls.capacity_online ?? 0) > 0 ? 'bg-red-500/20 text-red-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
-                                {onlineCount}/{cls.capacity_online ?? 0}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/dashboard/editar-clase/${cls.id}`}
-                              className="rounded-lg bg-brand-50 p-2 text-brand-600 transition-colors hover:bg-brand-100 dark:bg-surface-dark dark:text-brand-400"
-                            >
-                              ✏️
-                            </Link>
-                            <DeleteClassButton classId={cls.id} />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+        {/* Teacher Calendar Management */}
+        <div className="mb-12">
+          {classes && classes.length > 0 ? (
+            <TeacherCalendar classes={classes as any} />
+          ) : (
+            <div className="mt-16 text-center glass rounded-[2.5rem] p-16 border-dashed border-white/10">
+              <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-500/10 text-5xl shadow-inner">📅</div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic">No tenés clases creadas</h3>
+              <p className="mt-3 text-brand-100/40 font-medium">Empezá a cargar tu cartelera hoy mismo para verla en tu calendario.</p>
+              <Link
+                href="/dashboard/nueva-clase"
+                className="mt-8 inline-block rounded-full bg-white px-10 py-4 text-xs font-black text-brand-700 uppercase tracking-widest shadow-xl transition-all hover:scale-105"
+              >
+                Cargar mi primer clase
+              </Link>
             </div>
-          </div>
-        ) : (
-          <div className="mt-16 text-center">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-brand-50 text-4xl shadow-inner dark:bg-surface-dark-alt">📅</div>
-            <h3 className="text-lg font-bold text-foreground">No tenés clases creadas</h3>
-            <p className="mt-2 text-sm text-foreground/60">Empezá a cargar tu cartelera hoy mismo.</p>
-          </div>
-        )}
+          )}
+        </div>
       </section>
     </div>
   );
