@@ -37,8 +37,8 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  // Fetch teacher's classes with reservations and their modality
-  const { data: classes } = await supabase
+  // Fetch teacher's classes with reservations
+  const { data: classesRaw, error: classesError } = await supabase
     .from("classes")
     .select(`
       *,
@@ -46,21 +46,42 @@ export default async function DashboardPage() {
         id, 
         status, 
         modality,
-        profiles(full_name, avatar_url, student_details(health_info))
+        student_id,
+        profiles(full_name, avatar_url)
       )
     `)
     .eq("teacher_id", user.id)
     .order("scheduled_at", { ascending: true });
 
-  // Fetch low credit notifications (students with 1 credit left)
-  const { data: lowCredits, error: lowCreditsError } = await supabase
-    .from("teacher_credits")
-    .select("*, profiles!teacher_credits_student_id_fkey(full_name, username)")
-    .eq("teacher_id", user.id)
-    .eq("credits", 1);
+  if (classesError) {
+    console.error("Error fetching classes:", classesError);
+  }
 
-  if (lowCreditsError) {
-    console.error("Error fetching low credits:", lowCreditsError);
+  const classes = classesRaw || [];
+
+  // Fetch low credit notifications (students with 1 credit left)
+  let lowCredits: any[] = [];
+  try {
+    const { data: lowCreditsRaw, error: lowCreditsError } = await supabase
+      .from("teacher_credits")
+      .select("*")
+      .eq("teacher_id", user.id)
+      .eq("credits", 1);
+
+    if (lowCreditsRaw && !lowCreditsError) {
+      const studentIds = lowCreditsRaw.map(lc => lc.student_id);
+      const { data: studentProfiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, username")
+        .in("id", studentIds);
+      
+      lowCredits = lowCreditsRaw.map(lc => ({
+        ...lc,
+        profiles: studentProfiles?.find(p => p.id === lc.student_id) || null
+      }));
+    }
+  } catch (e) {
+    console.error("Critical error fetching low credits:", e);
   }
 
   const now = new Date();
