@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import DeleteClassButton from "./DeleteClassButton";
 import TeacherCalendar from "@/components/TeacherCalendar";
+import QuickActions from "./QuickActions";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -258,29 +258,7 @@ export default async function DashboardPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-          <h2 className="text-2xl font-black text-white tracking-tight italic">GESTIÓN DE CLASES</h2>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}/profesores/${user.id}`;
-                navigator.clipboard.writeText(url);
-                alert("¡Link copiado al portapapeles! Compartilo con tus alumnos.");
-              }}
-              className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-[10px] font-black text-brand-400 shadow-xl transition-all hover:bg-white/10 hover:-translate-y-0.5"
-            >
-              🔗 INVITAR ALUMNOS
-            </button>
-            {!isSchool && (
-              <Link
-                href="/dashboard/nueva-clase"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-xs font-black text-white shadow-xl shadow-brand-500/20 transition-all hover:shadow-brand-500/40 hover:-translate-y-0.5"
-              >
-                + NUEVA CLASE
-              </Link>
-            )}
-          </div>
-        </div>
+        <QuickActions userId={user.id} isSchool={isSchool} />
 
         {/* Teacher Calendar Management */}
         <div className="mb-12">
