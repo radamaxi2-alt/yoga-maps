@@ -57,9 +57,10 @@ interface ClassEvent {
 
 interface Props {
   classes: ClassEvent[];
+  isSchool?: boolean;
 }
 
-export default function TeacherCalendar({ classes }: Props) {
+export default function TeacherCalendar({ classes, isSchool = false }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedClass, setSelectedClass] = useState<ClassEvent | null>(null);
   const [filter, setFilter] = useState<string>("all");
@@ -328,12 +329,14 @@ export default function TeacherCalendar({ classes }: Props) {
                     <Users size={16} className="text-brand-400" />
                     <h4 className="text-xs font-black text-white uppercase tracking-widest">Alumnos Inscriptos</h4>
                   </div>
-                  <button 
-                    onClick={() => setShowManualModal(true)}
-                    className="text-[10px] font-black text-brand-400 uppercase tracking-widest hover:text-brand-300 transition-colors flex items-center gap-1.5"
-                  >
-                    <Plus size={12} /> Agregar Alumno
-                  </button>
+                  {!isSchool && (
+                    <button 
+                      onClick={() => setShowManualModal(true)}
+                      className="text-[10px] font-black text-brand-400 uppercase tracking-widest hover:text-brand-300 transition-colors flex items-center gap-1.5"
+                    >
+                      <Plus size={12} /> Agregar Alumno
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-4">
@@ -361,7 +364,7 @@ export default function TeacherCalendar({ classes }: Props) {
                                   <span className={`text-[9px] font-black uppercase ${res.modality === 'online' ? 'text-cyan-400' : 'text-brand-400'}`}>
                                     {res.modality === 'online' ? '💻 Online' : '📍 Sala'}
                                   </span>
-                                  {res.student_id && (
+                                  {res.student_id && !isSchool && (
                                     <button 
                                       onClick={() => setShowCreditModal({ studentId: res.student_id, name: res.profiles?.full_name })}
                                       className="text-[8px] text-brand-300/60 hover:text-brand-300 font-bold flex items-center gap-1"
@@ -373,7 +376,7 @@ export default function TeacherCalendar({ classes }: Props) {
                               </div>
                             </div>
                             
-                            {!res.guest_name && (
+                            {!res.guest_name && !isSchool && (
                               <div className="flex items-center gap-2">
                                 {isPending ? (
                                   <button
@@ -418,17 +421,19 @@ export default function TeacherCalendar({ classes }: Props) {
               </div>
 
               {/* Actions */}
-              <div className="sticky bottom-0 bg-surface-dark pt-6 border-t border-white/10 flex gap-4">
-                <Link
-                  href={`/dashboard/editar-clase/${selectedClass.id}`}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-white/5 border border-white/10 py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-white/10"
-                >
-                  <Edit2 size={14} /> Editar Clase
-                </Link>
-                <div className="flex-1">
-                  <DeleteClassButton classId={selectedClass.id} />
+              {!isSchool && (
+                <div className="sticky bottom-0 bg-surface-dark pt-6 border-t border-white/10 flex gap-4">
+                  <Link
+                    href={`/dashboard/editar-clase/${selectedClass.id}`}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-white/5 border border-white/10 py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-white/10"
+                  >
+                    <Edit2 size={14} /> Editar Clase
+                  </Link>
+                  <div className="flex-1">
+                    <DeleteClassButton classId={selectedClass.id} />
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           </>
         )}

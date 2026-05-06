@@ -233,31 +233,47 @@ export default async function DashboardPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <h2 className="text-2xl font-black text-white tracking-tight italic">GESTIÓN DE CLASES</h2>
-          <Link
-            href="/dashboard/nueva-clase"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-xs font-black text-white shadow-xl shadow-brand-500/20 transition-all hover:shadow-brand-500/40 hover:-translate-y-0.5"
-          >
-            + NUEVA CLASE
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/profesores/${user.id}`;
+                navigator.clipboard.writeText(url);
+                alert("¡Link copiado al portapapeles! Compartilo con tus alumnos.");
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-[10px] font-black text-brand-400 shadow-xl transition-all hover:bg-white/10 hover:-translate-y-0.5"
+            >
+              🔗 INVITAR ALUMNOS
+            </button>
+            {!isSchool && (
+              <Link
+                href="/dashboard/nueva-clase"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-xs font-black text-white shadow-xl shadow-brand-500/20 transition-all hover:shadow-brand-500/40 hover:-translate-y-0.5"
+              >
+                + NUEVA CLASE
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Teacher Calendar Management */}
         <div className="mb-12">
           {classes && classes.length > 0 ? (
-            <TeacherCalendar classes={classes as any} />
+            <TeacherCalendar classes={classes as any} isSchool={isSchool} />
           ) : (
             <div className="mt-16 text-center glass rounded-[2.5rem] p-16 border-dashed border-white/10">
               <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-500/10 text-5xl shadow-inner">📅</div>
               <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic">No tenés clases creadas</h3>
               <p className="mt-3 text-brand-100/40 font-medium">Empezá a cargar tu cartelera hoy mismo para verla en tu calendario.</p>
-              <Link
-                href="/dashboard/nueva-clase"
-                className="mt-8 inline-block rounded-full bg-white px-10 py-4 text-xs font-black text-brand-700 uppercase tracking-widest shadow-xl transition-all hover:scale-105"
-              >
-                Cargar mi primer clase
-              </Link>
+              {!isSchool && (
+                <Link
+                  href="/dashboard/nueva-clase"
+                  className="mt-8 inline-block rounded-full bg-white px-10 py-4 text-xs font-black text-brand-700 uppercase tracking-widest shadow-xl transition-all hover:scale-105"
+                >
+                  Cargar mi primer clase
+                </Link>
+              )}
             </div>
           )}
         </div>
