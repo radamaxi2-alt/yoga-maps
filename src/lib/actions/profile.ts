@@ -15,6 +15,7 @@ export type ProfileData = {
   cover_image: string | null;
   avatar_url: string | null;
   cover_position: number | null;
+  whatsapp_number: string | null;
 };
 
 export async function updateTeacherProfile(data: ProfileData) {
@@ -44,6 +45,7 @@ export async function updateTeacherProfile(data: ProfileData) {
     latitude: data.latitude,
     longitude: data.longitude,
     cover_image: data.cover_image,
+    whatsapp_number: data.whatsapp_number,
   };
 
   // Upsert: insert if not exists, update if exists

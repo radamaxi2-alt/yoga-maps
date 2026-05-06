@@ -1,8 +1,5 @@
 /**
  * Yoga Maps — Email Service
- * 
- * Este servicio maneja el envío de notificaciones por correo electrónico.
- * Para producción, se recomienda usar Resend, SendGrid o similar.
  */
 
 export async function sendReservationEmail({
@@ -12,6 +9,7 @@ export async function sendReservationEmail({
   healthInfo,
   classTitle,
   classTime,
+  status = "confirmed"
 }: {
   teacherEmail: string;
   teacherName: string;
@@ -19,42 +17,38 @@ export async function sendReservationEmail({
   healthInfo: string | null;
   classTitle: string;
   classTime: string;
+  status?: "pending" | "confirmed";
 }) {
   console.log(`[Email Simulation] Enviando mail a ${teacherEmail}...`);
   
-  const subject = `Nueva reserva: ${studentName} se unió a ${classTitle}`;
+  const isPending = status === "pending";
+  const subject = isPending 
+    ? `🧘 ¡Nueva Reserva Pendiente en Yoga Maps!` 
+    : `✨ ¡Reserva Confirmada: ${studentName} se unió a ${classTitle}!`;
+
   const body = `
     Hola ${teacherName},
     
-    Tienes una nueva reserva para tu clase "${classTitle}" a las ${classTime} hs.
+    Tienes una nueva reserva de ${studentName} para la clase "${classTitle}" (${classTime}).
     
-    Alumno: ${studentName}
+    ${isPending ? 
+      `EL ALUMNO HA SIDO REDIRIGIDO A WHATSAPP PARA CONCRETAR EL PAGO. 
+      Recuerda entrar a tu Panel de Calendario para marcarla como "Confirmada" una vez que recibas el comprobante.` 
+      : `La reserva ya está confirmada.`
+    }
     
-    📋 Ficha Médica/Salud:
+    📋 Ficha Médica/Salud del Alumno:
     ${healthInfo || "El alumno no proporcionó información de salud específica."}
     
-    Recuerda revisar tu panel para ver la lista completa de alumnos.
+    Recuerda que puedes gestionar todas tus clases desde tu Panel de Yoga Maps.
     
     Namasté,
     El equipo de Yoga Maps
   `;
 
-  // Aquí iría la integración real con Resend:
-  /*
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: 'Yoga Maps <notificaciones@tu-dominio.com>',
-      to: [teacherEmail],
-      subject,
-      text: body,
-    }),
-  });
-  */
+  // Simulación de envío
+  console.log("Subject:", subject);
+  console.log("Body:", body);
 
   return { success: true };
 }

@@ -53,14 +53,20 @@ export default function ReserveButton({
         } else {
           setErrorMsg(result.error);
         }
+      } else if (result?.whatsappUrl) {
+        // Redirigir a WhatsApp
+        window.open(result.whatsappUrl, "_blank");
       }
     });
   };
 
   if (userHasReserved) {
     return (
-      <div className="flex items-center gap-1.5 rounded-full bg-brand-500/10 px-6 py-2.5 text-xs font-bold text-brand-400 ring-1 ring-brand-500/30">
-        <span>✅</span> LUGAR RESERVADO
+      <div className="flex flex-col items-end gap-1.5">
+        <div className="flex items-center gap-1.5 rounded-full bg-brand-500/10 px-6 py-2.5 text-xs font-bold text-brand-400 ring-1 ring-brand-500/30">
+          <span>⏳</span> PENDIENTE DE PAGO
+        </div>
+        <p className="text-[9px] font-medium text-white/30 uppercase tracking-tighter">Confirmá tu cupo por WhatsApp</p>
       </div>
     );
   }

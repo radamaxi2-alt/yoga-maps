@@ -21,6 +21,7 @@ import { ChevronLeft, ChevronRight, Users, MapPin, Video, Filter, Edit2, Trash2,
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import DeleteClassButton from "@/app/dashboard/DeleteClassButton";
+import { updateReservationStatus } from "@/lib/actions/reservations";
 
 interface ClassEvent {
   id: string;
@@ -40,6 +41,15 @@ export default function TeacherCalendar({ classes }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedClass, setSelectedClass] = useState<ClassEvent | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
+
+  const handleConfirmReservation = async (resId: string) => {
+    setIsUpdating(resId);
+    await updateReservationStatus(resId, "confirmed");
+    setIsUpdating(null);
+    // Note: setSelectedClass will still have old data until re-render from server
+    // For a better UX, we could optimistically update local state if needed
+  };
 
   const categories = useMemo(() => {
     const cats = new Set(classes.map(c => c.category).filter(Boolean));
@@ -213,26 +223,46 @@ export default function TeacherCalendar({ classes }: Props) {
 
                 <div className="space-y-3">
                   {selectedClass.class_reservations.length > 0 ? (
-                    selectedClass.class_reservations.map((res) => (
-                      <div key={res.id} className={`flex items-center justify-between p-4 rounded-2xl border ${res.modality === 'online' ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-brand-500/5 border-brand-500/20'}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-surface-dark border border-white/10 flex items-center justify-center font-bold text-white uppercase overflow-hidden">
-                            {res.profiles?.avatar_url ? (
-                              <img src={res.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
-                            ) : res.profiles?.full_name?.[0] || "?"}
+                    selectedClass.class_reservations.map((res) => {
+                      const isPending = res.status === 'pending';
+                      return (
+                        <div key={res.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${isPending ? 'bg-amber-500/5 border-amber-500/20' : res.modality === 'online' ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-brand-500/5 border-brand-500/20'}`}>
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-surface-dark border border-white/10 flex items-center justify-center font-bold text-white uppercase overflow-hidden">
+                              {res.profiles?.avatar_url ? (
+                                <img src={res.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+                              ) : res.profiles?.full_name?.[0] || "?"}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-white">{res.profiles?.full_name}</p>
+                                {isPending && <span className="text-[8px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-black uppercase">Pendiente</span>}
+                              </div>
+                              <span className={`text-[9px] font-black uppercase ${res.modality === 'online' ? 'text-cyan-400' : 'text-brand-400'}`}>
+                                {res.modality === 'online' ? '💻 Online' : '📍 Sala'}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-white">{res.profiles?.full_name}</p>
-                            <span className={`text-[9px] font-black uppercase ${res.modality === 'online' ? 'text-cyan-400' : 'text-brand-400'}`}>
-                              {res.modality === 'online' ? '💻 Online' : '📍 Sala'}
-                            </span>
+                          
+                          <div className="flex items-center gap-3">
+                            {isPending ? (
+                              <button
+                                onClick={() => handleConfirmReservation(res.id)}
+                                disabled={isUpdating === res.id}
+                                className="rounded-lg bg-amber-500 px-3 py-1.5 text-[9px] font-black text-brand-900 uppercase tracking-widest transition-all hover:scale-105 disabled:opacity-50"
+                              >
+                                {isUpdating === res.id ? '...' : 'Confirmar Pago'}
+                              </button>
+                            ) : (
+                              <span className="text-green-500 text-xs">✅</span>
+                            )}
+                            {res.profiles?.student_details?.health_info && (
+                              <div className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" title="Alerta Médica" />
+                            )}
                           </div>
                         </div>
-                        {res.profiles?.student_details?.health_info && (
-                          <div className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" title="Alerta Médica" />
-                        )}
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-8 bg-white/5 rounded-3xl border border-dashed border-white/10">
                       <p className="text-xs font-medium text-white/30 italic">No hay alumnos inscriptos aún</p>

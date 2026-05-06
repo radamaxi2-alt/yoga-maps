@@ -22,7 +22,7 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
   // Verificar si hay cupo disponible
   const { data: classData, error: classError } = await supabase
     .from("classes")
-    .select("*, teacher_details(id, profiles(full_name))")
+    .select("*, teacher_details(id, whatsapp_number, profiles(full_name))")
     .eq("id", classId)
     .single();
 
@@ -30,20 +30,20 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
     return { error: "No se encontró la clase." };
   }
 
-  // 1. Verificar Cupo Total Compartido
-  const { count: totalConfirmed, error: totalError } = await supabase
+  // 1. Verificar Cupo Total (incluyendo pendientes)
+  const { count: totalReserved, error: totalError } = await supabase
     .from("class_reservations")
     .select("*", { count: "exact", head: true })
     .eq("class_id", classId)
-    .eq("status", "confirmed");
+    .neq("status", "cancelled");
 
   const totalCapacity = classData.total_capacity ?? 20;
 
-  if (!totalError && totalConfirmed !== null && totalConfirmed >= totalCapacity) {
+  if (!totalError && totalReserved !== null && totalReserved >= totalCapacity) {
     return { error: "Lo sentimos, la clase ha alcanzado su capacidad total máxima." };
   }
 
-  // 2. Verificar Cupo por Modalidad (si aplica)
+  // 2. Verificar Cupo por Modalidad
   const maxModalityCapacity = modality === 'presential' 
     ? (classData.capacity_presential ?? 20) 
     : (classData.capacity_online ?? 20);
@@ -53,38 +53,43 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
     .select("*", { count: "exact", head: true })
     .eq("class_id", classId)
     .eq("modality", modality)
-    .eq("status", "confirmed");
+    .neq("status", "cancelled");
 
   if (!modError && modalityCount !== null && modalityCount >= maxModalityCapacity) {
     return { error: `Lo sentimos, ya no quedan cupos ${modality === 'presential' ? 'presenciales' : 'online'} para esta clase.` };
   }
 
-  // Crear la reserva
+  // Crear la reserva como PENDIENTE
   const { error } = await supabase
     .from("class_reservations")
     .insert({
       class_id: classId,
       student_id: user.id,
       modality: modality,
-      status: "confirmed",
+      status: "pending",
     });
 
   if (error) {
-    if (error.code === "23505") return { error: "Ya tienes una reserva para esta clase." };
+    if (error.code === "23505") return { error: "Ya tienes una reserva (o solicitud) para esta clase." };
     return { error: error.message };
   }
 
-  // Trigger notification
-  const teacherEmail = `${classData.teacher_id}@yoga-maps-temp.com`;
   const teacherName = (classData.teacher_details as any)?.profiles?.full_name || "Profesor";
+  const studentName = studentProfile?.full_name || "Un alumno";
+  const classDate = new Date(classData.scheduled_at);
+  const formattedDate = classDate.toLocaleDateString("es-AR", { day: 'numeric', month: 'long' });
+  const formattedTime = classDate.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' });
 
+  // Trigger notification (Email)
+  const teacherEmail = `${classData.teacher_id}@yoga-maps-temp.com`;
   await sendReservationEmail({
     teacherEmail,
     teacherName,
-    studentName: studentProfile?.full_name || "Un alumno",
+    studentName,
     healthInfo: (studentProfile?.student_details as any)?.health_info || null,
     classTitle: classData.title,
-    classTime: classData.start_time,
+    classTime: `${formattedDate} a las ${formattedTime}`,
+    status: "pending"
   });
 
   revalidatePath("/clases");
@@ -93,8 +98,28 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
 
   return { 
     success: true, 
-    message: "¡Reserva confirmada! El profesor ha sido notificado y tiene acceso a tu ficha médica para cuidarte en clase." 
+    whatsappUrl: `https://wa.me/${(classData.teacher_details as any)?.whatsapp_number || '542231234567'}?text=${encodeURIComponent(
+      `Hola ${teacherName}, soy ${studentName}. Acabo de solicitar una reserva para la clase de ${classData.title} el día ${formattedDate} a las ${formattedTime}. ¿Me podrías pasar los datos de pago para confirmar mi lugar? Gracias.`
+    )}`,
+    message: "¡Lugar pre-reservado! Por favor, enviá el comprobante de pago por WhatsApp al profesor para confirmar tu cupo." 
   };
+}
+
+export async function updateReservationStatus(reservationId: string, newStatus: 'confirmed' | 'cancelled') {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: "No autorizado." };
+
+  const { error } = await supabase
+    .from("class_reservations")
+    .update({ status: newStatus })
+    .eq("id", reservationId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return { success: true };
 }
 
 export async function reserveMonthlyPack(baseClassId: string) {
