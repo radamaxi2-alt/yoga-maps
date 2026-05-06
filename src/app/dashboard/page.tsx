@@ -53,14 +53,18 @@ export default async function DashboardPage() {
     .order("scheduled_at", { ascending: true });
 
   // Fetch low credit notifications (students with 1 credit left)
-  const { data: lowCredits } = await supabase
+  const { data: lowCredits, error: lowCreditsError } = await supabase
     .from("teacher_credits")
     .select("*, profiles!teacher_credits_student_id_fkey(full_name, username)")
     .eq("teacher_id", user.id)
     .eq("credits", 1);
 
+  if (lowCreditsError) {
+    console.error("Error fetching low credits:", lowCreditsError);
+  }
+
   const now = new Date();
-  const name = profile.full_name || "Profesor";
+  const name = profile?.full_name || "Profesor";
   const isSchool = teacher?.teacher_type === "escuela";
 
   return (
@@ -208,12 +212,12 @@ export default async function DashboardPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               {lowCredits.map((lc: any) => (
                 <div key={lc.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
-                  <div className="flex items-center gap-3">
+                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
-                      {lc.profiles?.full_name?.[0]}
+                      {lc.profiles?.full_name?.[0] || "?"}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">{lc.profiles?.full_name}</p>
+                      <p className="text-sm font-bold text-white">{lc.profiles?.full_name || "Alumno desconocido"}</p>
                       <p className="text-[10px] text-amber-400 font-black uppercase">Último crédito disponible</p>
                     </div>
                   </div>
