@@ -60,9 +60,8 @@ export default function EventListView({
           {events.length > 0 ? (
             <div className="grid gap-12 lg:grid-cols-2">
               {events.map((event) => {
-                const teacherInfo = Array.isArray(event.teacher_details) 
-                  ? event.teacher_details[0] 
-                  : event.teacher_details;
+                const tData = event.teacher_details;
+                const teacherInfo = Array.isArray(tData) ? tData[0] : tData;
                 const profile = teacherInfo?.profiles;
                 const username = profile?.username;
                 const fullName = profile?.full_name || event.instructor_name || "Profesor";

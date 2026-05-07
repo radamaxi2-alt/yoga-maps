@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   if (!profile) redirect("/");
 
   if (profile.role === "alumno") {
-    redirect("/student-profile");
+    redirect("/perfil/editar");
   }
 
   // Fetch teacher details for the landing page look

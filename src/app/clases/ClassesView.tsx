@@ -62,14 +62,15 @@ export default function ClassesView({ initialClasses, userReservations, reservat
         {filteredClasses.length > 0 ? (
           <div className="space-y-6">
             {filteredClasses.map((cls) => {
-              // teacher_details is often an array in the query result
-              const teacherInfo = Array.isArray(cls.teacher_details) 
-                ? cls.teacher_details[0] 
-                : cls.teacher_details;
+              // Extremely robust extraction of teacher and profile info
+              const tData = cls.teacher_details;
+              const teacherInfo = Array.isArray(tData) ? tData[0] : tData;
+              const profile = teacherInfo?.profiles;
               
-              const profile = teacherInfo?.profiles as any;
-              const name = profile?.full_name || "Profesor";
+              const name = profile?.full_name || cls.instructor_name || "Profesor";
               const username = profile?.username;
+              const avatarUrl = profile?.avatar_url;
+              
               const date = parseISO(cls.scheduled_at);
               const isFull = cls.is_full;
               const hasReserved = userReservations.has(cls.id);
