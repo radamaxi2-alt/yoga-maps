@@ -8,7 +8,7 @@ export default async function FormacionesPage() {
   
   const { data: events } = await supabase
     .from("classes")
-    .select("*")
+    .select("*, teacher_details(profiles(full_name, username, avatar_url))")
     .eq("category", "Formación")
     .order("scheduled_at", { ascending: true });
 
@@ -17,6 +17,7 @@ export default async function FormacionesPage() {
       events={events || []} 
       title="Formaciones" 
       subtitle="Profesorados y certificaciones para llevar tu conocimiento de yoga al siguiente nivel."
+      badge="🎓 Formaciones"
     />
   );
 }

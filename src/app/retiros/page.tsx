@@ -8,7 +8,7 @@ export default async function RetirosPage() {
   
   const { data: events } = await supabase
     .from("classes")
-    .select("*")
+    .select("*, teacher_details(profiles(full_name, username, avatar_url))")
     .eq("category", "Retiro")
     .order("scheduled_at", { ascending: true });
 
