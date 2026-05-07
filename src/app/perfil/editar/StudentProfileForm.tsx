@@ -8,15 +8,18 @@ import type { StudentDetail } from "@/lib/database.types";
 
 type FormData = {
   full_name: string;
+  username: string;
   bio: string;
   health_info: string;
 };
 
 export default function StudentProfileForm({
   fullName,
+  username,
   details,
 }: {
   fullName: string;
+  username: string;
   details: StudentDetail | null;
 }) {
   const [errorMsg, setErrorMsg] = useState("");
@@ -25,6 +28,7 @@ export default function StudentProfileForm({
   const { register, handleSubmit } = useForm<FormData>({
     defaultValues: {
       full_name: fullName,
+      username: username || "",
       bio: details?.bio || "",
       health_info: details?.health_info || "",
     },
@@ -69,6 +73,21 @@ export default function StudentProfileForm({
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <fieldset>
+            <label className="mb-1 block text-sm font-medium text-foreground/80">
+              Nombre de usuario (@username)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-500 font-bold">@</span>
+              <input
+                type="text"
+                {...register("username", { required: true })}
+                className="w-full rounded-xl border border-brand-200/60 bg-white/60 p-3 pl-8 text-sm text-foreground backdrop-blur-sm transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-surface-dark-alt dark:bg-surface-dark/50"
+                placeholder="tu_usuario"
+              />
+            </div>
+          </fieldset>
+
           <fieldset>
             <label className="mb-1 block text-sm font-medium text-foreground/80">
               Nombre completo

@@ -47,10 +47,13 @@ export default async function TeacherProfilePage({ params }: Props) {
   const isSchool = details?.teacher_type === "escuela";
 
   // Fetch teacher's (or school's linked) upcoming classes
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   let classesQuery = supabase
     .from("classes")
-    .select("*, profiles!classes_teacher_id_fkey(full_name, username, avatar_url)")
-    .gte("scheduled_at", new Date().toISOString())
+    .select("*, teacher_details(profiles(full_name, username, avatar_url))")
+    .gte("scheduled_at", today.toISOString())
     .order("scheduled_at", { ascending: true })
     .limit(20);
 
@@ -179,13 +182,24 @@ export default async function TeacherProfilePage({ params }: Props) {
             <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl drop-shadow-sm">
               {name}
             </h1>
+            {profileRaw.username && (
+              <p className="mt-1 text-xl font-bold text-brand-400">@{profileRaw.username}</p>
+            )}
             <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-black text-brand-400 uppercase tracking-widest">
               {details?.address && (
                 <span className="flex items-center gap-1">📍 {details.address}</span>
               )}
               <span className="flex items-center gap-1 bg-brand-500/10 text-brand-400 px-3 py-1 rounded-full ring-1 ring-brand-500/30">
-                {isSchool ? "Centro / Escuela" : "Instructor"}
+                {isSchool ? "Centro / Escuela" : "Profesor"}
               </span>
+              {user?.id === id && (
+                <Link
+                  href="/perfil/editar"
+                  className="rounded-full bg-white/10 px-3 py-1 text-[10px] text-white hover:bg-white/20 transition-colors"
+                >
+                  ✏️ Editar Perfil
+                </Link>
+              )}
             </div>
           </div>
         </div>

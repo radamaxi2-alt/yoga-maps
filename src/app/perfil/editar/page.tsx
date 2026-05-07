@@ -35,6 +35,7 @@ export default async function PerfilEditarPage() {
     return (
       <StudentProfileForm
         fullName={profile.full_name || ""}
+        username={profile.username || ""}
         details={details}
       />
     );
