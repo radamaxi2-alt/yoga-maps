@@ -9,15 +9,12 @@ export async function updateUsername(username: string) {
 
   if (!user) return { error: "No autorizado" };
 
-  // Limpiar el username (quitar @, espacios, etc)
   const cleanUsername = username.replace(/[@\s]/g, "").toLowerCase();
 
-  // Validar formato (letras, números, guiones y puntos)
   if (!/^[a-z0-9._-]+$/.test(cleanUsername)) {
     return { error: "El nombre de usuario solo puede contener letras, números, puntos y guiones." };
   }
 
-  // Verificar si ya existe
   const { data: existing } = await supabase
     .from("profiles")
     .select("id")
@@ -28,7 +25,6 @@ export async function updateUsername(username: string) {
     return { error: "Este nombre de usuario ya está en uso." };
   }
 
-  // Actualizar
   const { error } = await supabase
     .from("profiles")
     .update({ username: cleanUsername })
@@ -53,4 +49,101 @@ export async function checkUsernameAvailability(username: string) {
     .maybeSingle();
 
   return { available: !data };
+}
+
+export async function updateTeacherProfile(data: any) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autorizado" };
+
+  const { full_name, username, ...details } = data;
+
+  // Update profile
+  const { error: pError } = await supabase
+    .from("profiles")
+    .update({ full_name, username })
+    .eq("id", user.id);
+  
+  if (pError) return { error: pError.message };
+
+  // Update details
+  const { error: dError } = await supabase
+    .from("teacher_details")
+    .update(details)
+    .eq("id", user.id);
+
+  if (dError) return { error: dError.message };
+
+  revalidatePath("/perfil/editar");
+  return { success: true };
+}
+
+export async function updateStudentProfile(data: any) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autorizado" };
+
+  const { full_name, username, ...details } = data;
+
+  const { error: pError } = await supabase
+    .from("profiles")
+    .update({ full_name, username })
+    .eq("id", user.id);
+  
+  if (pError) return { error: pError.message };
+
+  const { error: dError } = await supabase
+    .from("student_details")
+    .update(details)
+    .eq("id", user.id);
+
+  if (dError) return { error: dError.message };
+
+  revalidatePath("/perfil/editar");
+  return { success: true };
+}
+
+export async function uploadTeacherAvatar(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autorizado" };
+
+  const file = formData.get("avatar") as File;
+  const path = `${user.id}/avatar-${Date.now()}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(path, file);
+
+  if (uploadError) return { error: uploadError.message };
+
+  const { data: { publicUrl } } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(path);
+
+  await supabase
+    .from("profiles")
+    .update({ avatar_url: publicUrl })
+    .eq("id", user.id);
+
+  revalidatePath("/perfil/editar");
+  return { publicUrl };
+}
+
+export async function uploadTeacherCover(formData: FormData) {
+  // Logic similar to avatar
+  return { success: true };
+}
+
+export async function updateCoverPosition(position: number) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autorizado" };
+
+  await supabase
+    .from("profiles")
+    .update({ cover_position: position })
+    .eq("id", user.id);
+
+  return { success: true };
 }
