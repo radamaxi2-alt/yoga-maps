@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { isSameDay, parseISO } from "date-fns";
+import { isSameDay, parseISO, format } from "date-fns";
 import PageHero from "@/components/PageHero";
 import ClassesFilter from "./ClassesFilter";
 import ReserveButton from "@/components/ReserveButton";
@@ -19,7 +19,11 @@ export default function ClassesView({ initialClasses, userReservations, reservat
 
   const filteredClasses = useMemo(() => {
     if (!selectedDate) return initialClasses;
-    return initialClasses.filter(cls => isSameDay(parseISO(cls.scheduled_at), selectedDate));
+    const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
+    return initialClasses.filter(cls => {
+      const classDateStr = format(parseISO(cls.scheduled_at), "yyyy-MM-dd");
+      return classDateStr === selectedDateStr;
+    });
   }, [initialClasses, selectedDate]);
 
   return (

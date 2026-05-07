@@ -12,6 +12,17 @@ export default async function BlogPage() {
     .select("id, title, content, created_at, profiles!author_id(full_name, avatar_url)")
     .order("created_at", { ascending: false });
 
+  const { data: { user } } = await supabase.auth.getUser();
+  let isProfesor = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isProfesor = profile?.role === "profesor";
+  }
+
   if (error) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-20 text-center">
@@ -22,13 +33,24 @@ export default async function BlogPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mb-16 max-w-2xl">
-        <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-          Yoga Blog
-        </h1>
-        <p className="mt-4 text-lg text-foreground/60">
-          Reflexiones, consejos y motivación para tu práctica diaria.
-        </p>
+      <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="max-w-2xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+            Yoga Blog
+          </h1>
+          <p className="mt-4 text-lg text-foreground/60">
+            Reflexiones, consejos y motivación para tu práctica diaria.
+          </p>
+        </div>
+        
+        {isProfesor && (
+          <Link 
+            href="/dashboard" 
+            className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-4 text-xs font-black text-white shadow-xl shadow-brand-500/20 transition-all hover:bg-brand-700 hover:-translate-y-1"
+          >
+            ✍️ NUEVA PUBLICACIÓN
+          </Link>
+        )}
       </div>
 
       {posts && posts.length > 0 ? (
@@ -45,7 +67,7 @@ export default async function BlogPage() {
                     {post.profiles?.full_name?.[0]?.toUpperCase() || "Y"}
                   </div>
                   <span className="text-xs font-bold text-brand-600 uppercase tracking-widest">
-                    {post.profiles?.full_name || "Instructor"}
+                    {post.profiles?.full_name || "Profesor"}
                   </span>
                 </div>
                 
