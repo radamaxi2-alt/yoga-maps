@@ -102,7 +102,6 @@ export default function ProfileEditForm({
       address: details?.address || "",
       cover_image: details?.cover_image || "",
       avatar_url: avatarUrl || "",
-      whatsapp_number: details?.whatsapp_number || "",
       username: username || "",
     },
   });
@@ -125,7 +124,6 @@ export default function ProfileEditForm({
         longitude: lng || null,
         cover_image: data.cover_image || null,
         avatar_url: data.avatar_url || null,
-        whatsapp_number: data.whatsapp_number || null,
         username: data.username || null,
       };
 
@@ -284,11 +282,6 @@ export default function ProfileEditForm({
               ) : (
                 <input {...register("address")} className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
               )}
-            </div>
-            <div>
-              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Número de WhatsApp (con código de país)</label>
-              <input {...register("whatsapp_number")} placeholder="Ej: 5492231234567" className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
-              <p className="mt-1.5 text-[9px] text-white/20">Necesario para que los alumnos te contacten al reservar.</p>
             </div>
           </div>
 

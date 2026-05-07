@@ -56,9 +56,10 @@ export async function updateTeacherProfile(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autorizado" };
 
-  const { full_name, username, avatar_url, ...details } = data;
+  // Explicitly destructure fields that are NOT in teacher_details
+  const { full_name, username, avatar_url, whatsapp_number, ...details } = data;
 
-  // Update profile
+  // Update profile (Only standard columns)
   const { error: pError } = await supabase
     .from("profiles")
     .update({ full_name, username, avatar_url })
@@ -66,7 +67,7 @@ export async function updateTeacherProfile(data: any) {
   
   if (pError) return { error: pError.message };
 
-  // Update details
+  // Update details (Everything else)
   const { error: dError } = await supabase
     .from("teacher_details")
     .update(details)
@@ -83,7 +84,7 @@ export async function updateStudentProfile(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autorizado" };
 
-  const { full_name, username, avatar_url, ...details } = data;
+  const { full_name, username, avatar_url, whatsapp_number, ...details } = data;
 
   const { error: pError } = await supabase
     .from("profiles")
