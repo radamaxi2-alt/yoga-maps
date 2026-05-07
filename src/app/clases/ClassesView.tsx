@@ -62,7 +62,12 @@ export default function ClassesView({ initialClasses, userReservations, reservat
         {filteredClasses.length > 0 ? (
           <div className="space-y-6">
             {filteredClasses.map((cls) => {
-              const profile = cls.teacher_details?.profiles as any;
+              // teacher_details is often an array in the query result
+              const teacherInfo = Array.isArray(cls.teacher_details) 
+                ? cls.teacher_details[0] 
+                : cls.teacher_details;
+              
+              const profile = teacherInfo?.profiles as any;
               const name = profile?.full_name || "Profesor";
               const username = profile?.username;
               const date = parseISO(cls.scheduled_at);

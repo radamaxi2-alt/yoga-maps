@@ -43,14 +43,6 @@ export default async function ClasesPage() {
     }
 
     if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, username")
-        .eq("id", user.id)
-        .single();
-      
-      const isProfesor = profile?.role === "profesor";
-
       const { data: myRes } = await supabase
         .from("class_reservations")
         .select("class_id")
