@@ -183,7 +183,7 @@ export default async function TeacherProfilePage({ params }: Props) {
               {name}
             </h1>
             {profileRaw.username && (
-              <p className="mt-1 text-xl font-bold text-brand-400">@{profileRaw.username}</p>
+              <p className="mt-2 text-2xl font-black text-brand-500 tracking-tight italic uppercase">@{profileRaw.username}</p>
             )}
             <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-black text-brand-400 uppercase tracking-widest">
               {details?.address && (

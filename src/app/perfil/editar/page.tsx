@@ -21,16 +21,26 @@ export default async function PerfilEditarPage() {
   }
 
   // Fetch profile with error handling
+  console.log("Fetching profile for user:", user.id);
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role, full_name, avatar_url, cover_position, username")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (profileError || !profile) {
-    console.error("Profile fetch error or no profile found:", profileError);
-    // If no profile, we can't do much, but redirecting to home is what the user reports as "broken"
-    // Let's try to see if we can at least show something or redirect to onboarding
+  if (profileError) {
+    console.error("Profile fetch error:", profileError);
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
+        <h1 className="text-2xl font-black text-white uppercase italic mb-4">Error al cargar el perfil</h1>
+        <p className="text-brand-100/60 mb-8">{profileError.message}</p>
+        <Link href="/" className="rounded-full bg-brand-600 px-8 py-3 text-sm font-black text-white">Volver al Inicio</Link>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    console.warn("No profile found for user:", user.id);
     redirect("/");
   }
 

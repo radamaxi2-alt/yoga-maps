@@ -132,7 +132,7 @@ export default function ClassesView({ initialClasses, userReservations, reservat
                     </div>
 
                     <h3 className="mt-4 text-2xl font-black text-white uppercase tracking-tight italic">
-                      {cls.title} <span className="text-brand-500/40 text-lg not-italic lowercase font-medium ml-2">de @{username || cls.instructor_name || "profesor"}</span>
+                      {cls.title} <span className="text-brand-500 text-lg not-italic lowercase font-bold ml-2">de @{username || cls.instructor_name || "profesor"}</span>
                     </h3>
 
                     {cls.description && (
