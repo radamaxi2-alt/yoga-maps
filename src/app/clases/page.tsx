@@ -16,7 +16,7 @@ export default async function ClasesPage() {
 
   const { data: classes } = await supabase
     .from("classes")
-    .select("*, teacher_details(profiles(full_name, avatar_url))")
+    .select("*, teacher_details(profiles(full_name, avatar_url, username))")
     .eq("category", "Clase")
     .gte("scheduled_at", today.toISOString())
     .order("scheduled_at", { ascending: true });
@@ -49,7 +49,7 @@ export default async function ClasesPage() {
         .eq("id", user.id)
         .single();
       
-      isProfesor = profile?.role === "profesor";
+      const isProfesor = profile?.role === "profesor";
 
       const { data: myRes } = await supabase
         .from("class_reservations")

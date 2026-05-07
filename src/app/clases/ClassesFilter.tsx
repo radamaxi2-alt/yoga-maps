@@ -1,57 +1,76 @@
 "use client";
 
 import React from "react";
-import { format, addDays, startOfToday, isSameDay, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
+import { Calendar, Clock, X } from "lucide-react";
 
 interface ClassesFilterProps {
-  selectedDate: Date | null;
-  onDateSelect: (date: Date | null) => void;
+  selectedDate: string; // "YYYY-MM-DD"
+  onDateSelect: (date: string) => void;
+  selectedTimeRange: string; // "all", "morning", "afternoon", "evening"
+  onTimeRangeSelect: (range: string) => void;
 }
 
-export default function ClassesFilter({ selectedDate, onDateSelect }: ClassesFilterProps) {
-  const today = startOfToday();
-  const next7Days = Array.from({ length: 14 }).map((_, i) => addDays(today, i));
-
+export default function ClassesFilter({ 
+  selectedDate, 
+  onDateSelect, 
+  selectedTimeRange, 
+  onTimeRangeSelect 
+}: ClassesFilterProps) {
+  
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">Filtrar por fecha</h3>
-        {selectedDate && (
-          <button 
-            onClick={() => onDateSelect(null)}
-            className="text-[10px] font-bold text-brand-400 hover:text-brand-300 transition-colors uppercase tracking-widest"
-          >
-            Limpiar filtro
-          </button>
-        )}
-      </div>
-      
-      <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide no-scrollbar">
-        {next7Days.map((day) => {
-          const isSelected = selectedDate && isSameDay(day, selectedDate);
-          return (
-            <button
-              key={day.toISOString()}
-              onClick={() => onDateSelect(isSelected ? null : day)}
-              className={`flex flex-col items-center justify-center min-w-[70px] h-[90px] rounded-2xl border transition-all ${
-                isSelected 
-                  ? 'bg-brand-500 border-brand-400 shadow-lg shadow-brand-500/20 scale-105' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/40 hover:text-white'
-              }`}
+    <div className="mb-12 glass rounded-[2.5rem] p-6 border border-white/5 shadow-2xl">
+      <div className="flex flex-col md:flex-row gap-6 items-center">
+        
+        {/* Date Selector */}
+        <div className="flex-1 w-full">
+          <label className="text-[10px] font-black text-brand-400 uppercase tracking-[0.2em] mb-2 block">
+            Seleccionar Fecha
+          </label>
+          <div className="relative">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+            <input 
+              type="date" 
+              value={selectedDate}
+              onChange={(e) => onDateSelect(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 appearance-none font-bold"
+            />
+          </div>
+        </div>
+
+        {/* Time Range Selector */}
+        <div className="flex-1 w-full">
+          <label className="text-[10px] font-black text-brand-400 uppercase tracking-[0.2em] mb-2 block">
+            Rango Horario
+          </label>
+          <div className="relative">
+            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+            <select 
+              value={selectedTimeRange}
+              onChange={(e) => onTimeRangeSelect(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 appearance-none font-bold cursor-pointer"
             >
-              <span className={`text-[10px] font-bold uppercase tracking-tighter mb-1 ${isSelected ? 'text-white/80' : ''}`}>
-                {format(day, "EEE", { locale: es })}
-              </span>
-              <span className={`text-2xl font-black ${isSelected ? 'text-white' : 'text-white/80'}`}>
-                {format(day, "d")}
-              </span>
-              <span className={`text-[9px] font-medium ${isSelected ? 'text-white/60' : 'text-white/20'}`}>
-                {format(day, "MMM", { locale: es })}
-              </span>
+              <option value="all" className="bg-surface-dark">Cualquier horario</option>
+              <option value="morning" className="bg-surface-dark">Mañana (06:00 - 12:00)</option>
+              <option value="afternoon" className="bg-surface-dark">Tarde (12:00 - 18:00)</option>
+              <option value="evening" className="bg-surface-dark">Noche (18:00 - 23:59)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Clear Filters */}
+        {(selectedDate || selectedTimeRange !== "all") && (
+          <div className="md:pt-6">
+            <button 
+              onClick={() => {
+                onDateSelect("");
+                onTimeRangeSelect("all");
+              }}
+              className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all text-xs font-black uppercase tracking-widest border border-white/5"
+            >
+              <X size={14} /> Limpiar
             </button>
-          );
-        })}
+          </div>
+        )}
       </div>
     </div>
   );

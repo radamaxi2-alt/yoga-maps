@@ -119,9 +119,9 @@ export default function Navbar({
           {user && !isProfesor && (
             <li>
               <Link
-                href="/student-profile"
+                href="/perfil/editar"
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                  pathname.startsWith("/student-profile")
+                  pathname.startsWith("/perfil/editar")
                     ? "bg-brand-100 text-brand-700 shadow-sm"
                     : "text-foreground/70 hover:bg-brand-50 hover:text-brand-600"
                 }`}
@@ -214,7 +214,7 @@ export default function Navbar({
                 </div>
 
                 <Link
-                  href={isProfesor ? "/dashboard" : "/student-profile"}
+                  href={isProfesor ? "/dashboard" : "/perfil/editar"}
                   onClick={() => setMobileOpen(false)}
                   className="flex w-full items-center justify-center gap-3 rounded-2xl bg-brand-600 px-4 py-5 text-lg font-black text-white shadow-xl shadow-brand-500/20 mb-3 hover:scale-[1.02] transition-transform"
                 >
