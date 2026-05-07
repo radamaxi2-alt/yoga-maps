@@ -14,7 +14,10 @@ export default function UsernameGuard({ user, profile }: UsernameGuardProps) {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (user && !profile?.username && pathname !== "/perfil/editar" && pathname !== "/onboarding") {
+    // Avoid showing on the edit page or onboarding to prevent blocks
+    const isEditPage = pathname?.startsWith("/perfil/editar") || pathname?.startsWith("/onboarding");
+    
+    if (user && !profile?.username && !isEditPage) {
       setShowModal(true);
     } else {
       setShowModal(false);
@@ -29,7 +32,7 @@ export default function UsernameGuard({ user, profile }: UsernameGuardProps) {
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-500/20 text-4xl shadow-inner">🆔</div>
         <h2 className="text-3xl font-black text-white uppercase tracking-tight italic mb-4">¡Tu Identidad Yogi!</h2>
         <p className="text-brand-100/60 font-medium mb-8">
-          Para interactuar con la comunidad y ser etiquetado en retiros, necesitas crear tu <span className="text-brand-400">@username</span> único.
+          Para interactuar con la comunidad y ser etiquetado, necesitas crear tu <span className="text-brand-400">@username</span> único.
         </p>
         <button
           onClick={() => router.push("/perfil/editar")}
