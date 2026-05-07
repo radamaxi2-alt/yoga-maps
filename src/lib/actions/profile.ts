@@ -1,188 +1,56 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
-export type ProfileData = {
-  teacher_type: string;
-  full_name: string;
-  bio: string | null;
-  specialties: string[];
-  address: string | null;
-  average_price: number | null;
-  latitude: number | null;
-  longitude: number | null;
-  cover_image: string | null;
-  avatar_url: string | null;
-  cover_position: number | null;
-  whatsapp_number: string | null;
-  username: string | null;
-};
-
-export async function updateTeacherProfile(data: ProfileData) {
+export async function updateUsername(username: string) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) return { error: "No estás autenticado." };
+  if (!user) return { error: "No autorizado" };
 
-  // Update profile name, avatar, position and username
-  await supabase
-    .from("profiles")
-    .update({ 
-      full_name: data.full_name,
-      avatar_url: data.avatar_url,
-      cover_position: data.cover_position ?? 50,
-      username: data.username ? data.username.replace('@', '').toLowerCase() : null
-    })
-    .eq("id", user.id);
+  // Limpiar el username (quitar @, espacios, etc)
+  const cleanUsername = username.replace(/[@\s]/g, "").toLowerCase();
 
-  const updateData = {
-    teacher_type: data.teacher_type,
-    bio: data.bio || null,
-    specialties: data.specialties.length > 0 ? data.specialties : null,
-    address: data.address || null,
-    average_price: data.average_price,
-    latitude: data.latitude,
-    longitude: data.longitude,
-    cover_image: data.cover_image,
-    whatsapp_number: data.whatsapp_number,
-  };
+  // Validar formato (letras, números, guiones y puntos)
+  if (!/^[a-z0-9._-]+$/.test(cleanUsername)) {
+    return { error: "El nombre de usuario solo puede contener letras, números, puntos y guiones." };
+  }
 
-  // Upsert: insert if not exists, update if exists
+  // Verificar si ya existe
   const { data: existing } = await supabase
-    .from("teacher_details")
-    .select("id")
-    .eq("id", user.id)
-    .single();
-
-  if (existing) {
-    const { error } = await supabase
-      .from("teacher_details")
-      .update(updateData)
-      .eq("id", user.id);
-    if (error) return { error: error.message };
-  } else {
-    const { error } = await supabase
-      .from("teacher_details")
-      .insert({ id: user.id, ...updateData });
-    if (error) return { error: error.message };
-  }
-
-  redirect("/dashboard");
-}
-
-export async function uploadTeacherAvatar(formData: FormData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return { error: "No estás autenticado." };
-
-  const file = formData.get("file") as File;
-  if (!file || file.size === 0) return { error: "No se seleccionó ningún archivo." };
-
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
-
-  // Upload to 'avatars' bucket (assuming it exists or using public bucket)
-  const { error: uploadError } = await supabase.storage
-    .from("teacher-covers") // reusing bucket for simplicity if not separate
-    .upload(fileName, file, { upsert: true });
-
-  if (uploadError) return { error: `Error al subir: ${uploadError.message}` };
-
-  const { data: { publicUrl } } = supabase.storage
-    .from("teacher-covers")
-    .getPublicUrl(fileName);
-
-  // Update profiles table
-  const { error: updateError } = await supabase
     .from("profiles")
-    .update({ avatar_url: publicUrl })
-    .eq("id", user.id);
-
-  if (updateError) return { error: updateError.message };
-
-  return { url: publicUrl };
-}
-
-export type StudentProfileData = {
-  full_name: string;
-  bio: string | null;
-  health_info: string | null;
-};
-
-export async function updateStudentProfile(data: StudentProfileData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return { error: "No estás autenticado." };
-
-  if (data.full_name) {
-    await supabase
-      .from("profiles")
-      .update({ full_name: data.full_name })
-      .eq("id", user.id);
-  }
-
-  const updateData = {
-    bio: data.bio || null,
-    health_info: data.health_info || null,
-  };
-
-  const { data: existing } = await supabase
-    .from("student_details")
     .select("id")
-    .eq("id", user.id)
-    .single();
+    .eq("username", cleanUsername)
+    .maybeSingle();
 
-  if (existing) {
-    const { error } = await supabase
-      .from("student_details")
-      .update(updateData)
-      .eq("id", user.id);
-    if (error) return { error: error.message };
-  } else {
-    const { error } = await supabase
-      .from("student_details")
-      .insert({ id: user.id, ...updateData });
-    if (error) return { error: error.message };
+  if (existing && existing.id !== user.id) {
+    return { error: "Este nombre de usuario ya está en uso." };
   }
 
-  redirect("/dashboard");
-}
-
-export async function uploadTeacherCover(formData: FormData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return { error: "No estás autenticado." };
-
-  const file = formData.get("file") as File;
-  if (!file || file.size === 0) return { error: "No se seleccionó ningún archivo." };
-
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${user.id}/cover-${Date.now()}.${fileExt}`;
-
-  // Upload to 'teacher-covers' bucket
-  const { error: uploadError } = await supabase.storage
-    .from("teacher-covers")
-    .upload(fileName, file, { upsert: true });
-
-  if (uploadError) return { error: `Error al subir: ${uploadError.message}` };
-
-  const { data: { publicUrl } } = supabase.storage
-    .from("teacher-covers")
-    .getPublicUrl(fileName);
-
-  // Update teacher_details
-  const { error: updateError } = await supabase
-    .from("teacher_details")
-    .update({ cover_image: publicUrl })
+  // Actualizar
+  const { error } = await supabase
+    .from("profiles")
+    .update({ username: cleanUsername })
     .eq("id", user.id);
 
-  if (updateError) return { error: updateError.message };
+  if (error) return { error: error.message };
 
-  return { url: publicUrl };
+  revalidatePath("/", "layout");
+  return { success: true, username: cleanUsername };
+}
+
+export async function checkUsernameAvailability(username: string) {
+  const supabase = await createClient();
+  const cleanUsername = username.replace(/[@\s]/g, "").toLowerCase();
+  
+  if (cleanUsername.length < 3) return { available: false };
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", cleanUsername)
+    .maybeSingle();
+
+  return { available: !data };
 }
