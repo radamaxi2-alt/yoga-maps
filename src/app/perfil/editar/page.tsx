@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import type { Metadata } from "next";
 import ProfileEditForm from "./ProfileEditForm";
 import StudentProfileForm from "./StudentProfileForm";
