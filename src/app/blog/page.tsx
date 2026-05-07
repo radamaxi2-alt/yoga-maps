@@ -45,7 +45,7 @@ export default async function BlogPage() {
         
         {isProfesor && (
           <Link 
-            href="/dashboard" 
+            href="/blog/nuevo" 
             className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-4 text-xs font-black text-white shadow-xl shadow-brand-500/20 transition-all hover:bg-brand-700 hover:-translate-y-1"
           >
             ✍️ NUEVA PUBLICACIÓN

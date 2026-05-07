@@ -42,17 +42,27 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
     .eq("id", user.id)
     .single();
 
-  // Verificar si hay cupo disponible
+  // Fetch class data first
   const { data: classData, error: classError } = await supabase
     .from("classes")
-    .select("*, teacher_details(*)")
+    .select("*")
     .eq("id", classId)
-    .maybeSingle();
+    .single();
 
   if (classError || !classData) {
-    console.error("Error fetching class or class not found:", classError);
-    return { error: "No se encontró la clase o el profesor no ha completado su perfil." };
+    console.error("Error fetching class:", classError);
+    return { error: "Clase no encontrada. Por favor, intentá de nuevo o contactá al soporte." };
   }
+
+  // Fetch teacher details separately for robustness
+  const { data: teacherDetails } = await supabase
+    .from("teacher_details")
+    .select("*")
+    .eq("id", classData.teacher_id)
+    .maybeSingle();
+
+  // Attach details for the rest of the function
+  (classData as any).teacher_details = teacherDetails;
 
   // 1. Verificar Cupo Total (incluyendo pendientes)
   const { count: totalReserved, error: totalError } = await supabase

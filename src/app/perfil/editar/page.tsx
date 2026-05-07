@@ -41,7 +41,32 @@ export default async function PerfilEditarPage() {
   }
 
   if (!profile) {
-    redirect("/");
+    console.warn("No profile found for user:", user.id, "Attempting auto-creation...");
+    
+    // Attempt auto-creation from session metadata
+    const { data: newProfile, error: createError } = await supabase
+      .from("profiles")
+      .insert({
+        id: user.id,
+        full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
+        role: user.user_metadata?.role || "alumno", // Default to student
+      })
+      .select()
+      .single();
+
+    if (createError || !newProfile) {
+      console.error("Failed to auto-create profile:", createError);
+      redirect("/");
+    }
+    
+    // Continue with the newly created profile
+    return (
+      <StudentProfileForm
+        fullName={newProfile.full_name || ""}
+        username=""
+        details={null}
+      />
+    );
   }
 
   // 3. Renderizado Condicional por Rol
