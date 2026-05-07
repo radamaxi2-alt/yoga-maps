@@ -63,8 +63,6 @@ type FormValues = {
   address: string;
   cover_image: string;
   avatar_url: string;
-  cover_position: number;
-  whatsapp_number: string;
   username: string;
 };
 
@@ -77,7 +75,6 @@ export default function ProfileEditForm({
 }: {
   fullName: string;
   avatarUrl: string;
-  coverPosition: number;
   username: string;
   details: TeacherDetail | null;
 }) {
@@ -103,7 +100,6 @@ export default function ProfileEditForm({
       address: details?.address || "",
       cover_image: details?.cover_image || "",
       avatar_url: avatarUrl || "",
-      cover_position: coverPosition || 50,
       whatsapp_number: details?.whatsapp_number || "",
       username: username || "",
     },
@@ -112,7 +108,6 @@ export default function ProfileEditForm({
   const selectedType = watch("teacher_type");
   const currentCover = watch("cover_image");
   const currentAvatar = watch("avatar_url");
-  const currentPos = watch("cover_position");
 
   const onSubmit = (data: FormValues) => {
     setErrorMsg("");
@@ -128,7 +123,6 @@ export default function ProfileEditForm({
         longitude: lng || null,
         cover_image: data.cover_image || null,
         avatar_url: data.avatar_url || null,
-        cover_position: data.cover_position,
         whatsapp_number: data.whatsapp_number || null,
         username: data.username || null,
       };
@@ -214,29 +208,15 @@ export default function ProfileEditForm({
                 <img 
                   src={currentCover} 
                   className="h-full w-full object-cover transition-all duration-300" 
-                  style={{ objectPosition: `center ${currentPos}%` }}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-white/10 text-xl font-bold italic uppercase tracking-widest">Sin Portada</div>
-              )}
-              {currentCover && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Ajustá el encuadre con el slider ↓</p>
-                </div>
               )}
             </div>
 
             {currentCover && (
               <div className="space-y-3 px-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-black text-white/30 uppercase tracking-widest italic">Ajuste Vertical ({currentPos}%)</label>
-                  <button type="button" onClick={() => setValue("cover_position", 50)} className="text-[10px] font-bold text-brand-400 hover:text-white transition-colors">Resetear Centro</button>
-                </div>
-                <input 
-                  type="range" min="0" max="100" 
-                  {...register("cover_position")}
-                  className="w-full accent-brand-500 bg-white/5 rounded-full h-2 appearance-none cursor-pointer"
-                />
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest italic text-center">Portada cargada correctamente</p>
               </div>
             )}
 
