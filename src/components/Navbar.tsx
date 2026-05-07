@@ -208,7 +208,7 @@ export default function Navbar({
                 <div className="flex items-center gap-4 px-4 mb-8">
                   <div className="h-12 w-12 rounded-full bg-brand-500/20 flex items-center justify-center text-2xl border border-brand-500/30">👤</div>
                   <div className="flex-1">
-                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Sesión de {isProfesor ? 'Instructor' : 'Alumno'}</p>
+                    <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Sesión de {isProfesor ? 'Profesor' : 'Alumno'}</p>
                     <p className="text-lg font-black text-white truncate">{displayName}</p>
                   </div>
                 </div>

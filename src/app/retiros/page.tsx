@@ -9,7 +9,7 @@ export default async function RetirosPage() {
   const { data: events } = await supabase
     .from("classes")
     .select("*")
-    .eq("category", "retiro")
+    .eq("category", "Retiro")
     .order("scheduled_at", { ascending: true });
 
   return (

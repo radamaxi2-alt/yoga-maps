@@ -15,7 +15,6 @@ const YOGA_SPECIALTIES = [
   "Yoga Nidra",
   "Iyengar",
   "Restaurativo",
-  "Pranayama",
   "Meditación",
   "Otro"
 ];

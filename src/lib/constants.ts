@@ -2,13 +2,12 @@ export const YOGA_SPECIALTIES = [
   "Hatha",
   "Vinyasa",
   "Ashtanga",
+  "Yin",
   "Kundalini",
   "Iyengar",
-  "Yin",
   "Restaurativo",
   "Power Yoga",
   "Meditación",
-  "Pranayama",
   "Yoga Nidra",
   "Otro"
 ];

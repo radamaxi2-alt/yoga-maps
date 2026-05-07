@@ -117,7 +117,7 @@ export default async function DashboardPage() {
             <div className="text-white">
               <h1 className="text-2xl font-bold sm:text-3xl">{name}</h1>
               <p className="text-sm font-medium opacity-90">
-                {isSchool ? "Administrando Centro" : "Panel de Instructor"}
+                {isSchool ? "Administrando Centro" : "Panel de Profesor"}
               </p>
             </div>
           </div>

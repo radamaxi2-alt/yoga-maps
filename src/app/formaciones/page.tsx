@@ -9,7 +9,7 @@ export default async function FormacionesPage() {
   const { data: events } = await supabase
     .from("classes")
     .select("*")
-    .eq("category", "formacion")
+    .eq("category", "Formación")
     .order("scheduled_at", { ascending: true });
 
   return (
