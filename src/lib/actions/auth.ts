@@ -51,7 +51,7 @@ export async function login(
     }
 
     if (profile?.role === "alumno") {
-      redirect("/student-profile");
+      redirect("/perfil/editar");
     }
   }
 
@@ -99,7 +99,7 @@ export async function signup(
   if (role === "profesor") {
     redirect("/onboarding/profesor");
   } else if (role === "alumno") {
-    redirect("/student-profile");
+    redirect("/perfil/editar");
   }
 
   redirect("/");
