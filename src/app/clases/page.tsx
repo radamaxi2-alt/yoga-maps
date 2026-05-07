@@ -11,11 +11,14 @@ export default async function ClasesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const { data: classes } = await supabase
     .from("classes")
     .select("*, teacher_details(profiles(full_name, avatar_url))")
     .eq("category", "Clase")
-    .gte("scheduled_at", new Date().toISOString())
+    .gte("scheduled_at", today.toISOString())
     .order("scheduled_at", { ascending: true });
 
   let userReservations: Set<string> = new Set();
@@ -40,6 +43,14 @@ export default async function ClasesPage() {
     }
 
     if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, username")
+        .eq("id", user.id)
+        .single();
+      
+      isProfesor = profile?.role === "profesor";
+
       const { data: myRes } = await supabase
         .from("class_reservations")
         .select("class_id")

@@ -328,6 +328,7 @@ export default function TeacherCalendar({ classes, isSchool = false }: Props) {
                   <div className="flex items-center gap-2">
                     <Users size={16} className="text-brand-400" />
                     <h4 className="text-xs font-black text-white uppercase tracking-widest">Alumnos Inscriptos</h4>
+                    <p className="text-xs font-black text-white uppercase tracking-tighter">{selectedClass.instructor_name || "Profesor"}</p>
                   </div>
                   {!isSchool && (
                     <button 

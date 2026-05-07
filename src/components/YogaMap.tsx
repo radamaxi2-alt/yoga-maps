@@ -69,7 +69,7 @@ const TeacherMarker = memo(({
           <div className="max-w-[200px] p-1 font-sans">
             <p className="font-bold text-brand-900">{name}</p>
             <p className="text-xs font-semibold text-brand-600 mb-1">
-              {isSchool ? "Centro / Escuela" : "Instructor"}
+              {isSchool ? "Centro / Escuela" : "Profesor"}
             </p>
             <Link
               href={`/profesores/${teacher.id}`}

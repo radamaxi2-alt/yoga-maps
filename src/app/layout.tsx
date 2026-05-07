@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import UsernameGuard from "@/components/UsernameGuard";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -41,13 +42,15 @@ export default async function RootLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
+  let profile = null;
   let isProfesor = false;
   if (user) {
-    const { data: profile } = await supabase
+    const { data: p } = await supabase
       .from("profiles")
-      .select("role")
+      .select("*")
       .eq("id", user.id)
       .single();
+    profile = p;
     isProfesor = profile?.role === "profesor";
   }
 
@@ -57,6 +60,7 @@ export default async function RootLayout({
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground font-sans">
+        <UsernameGuard user={user} profile={profile} />
         {/* Soft background image overlay */}
         <div className="fixed inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-5 dark:opacity-10 mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
         <Navbar initialUser={user} initialIsProfesor={isProfesor} />

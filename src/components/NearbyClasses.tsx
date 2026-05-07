@@ -89,6 +89,7 @@ export default function NearbyClasses() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
             <span className="mb-4 inline-block rounded-full border border-brand-400/30 bg-brand-500/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-brand-300 backdrop-blur-xl">
+              <h2 className="mb-4 text-sm font-black uppercase tracking-[0.2em] text-brand-400 italic">Estilos de Yoga</h2>
               📍 Ubicación Real
             </span>
             <h2 className="font-serif text-4xl font-black text-white">Clases Cerca Tuyo</h2>
@@ -126,6 +127,7 @@ export default function NearbyClasses() {
                 🏠 {cls.address || "Mar del Plata"}
               </p>
               <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                <p className="text-xs font-black text-white uppercase tracking-tighter">{cls.instructor_name || "Profesor"}</p>
                 <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">
                   {new Date(cls.scheduled_at).toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })}
                 </span>
