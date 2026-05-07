@@ -56,8 +56,7 @@ export async function updateTeacherProfile(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autorizado" };
 
-  // Explicitly destructure fields that are NOT in teacher_details
-  const { full_name, username, avatar_url, whatsapp_number, ...details } = data;
+  const { full_name, username, avatar_url, ...details } = data;
 
   // Update profile (Only standard columns)
   const { error: pError } = await supabase

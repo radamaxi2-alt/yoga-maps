@@ -45,12 +45,13 @@ export async function reserveClass(classId: string, modality: 'presential' | 'on
   // Verificar si hay cupo disponible
   const { data: classData, error: classError } = await supabase
     .from("classes")
-    .select("*, teacher_details(id, whatsapp_number, profiles(full_name))")
+    .select("*, teacher_details(*)")
     .eq("id", classId)
-    .single();
+    .maybeSingle();
 
   if (classError || !classData) {
-    return { error: "No se encontró la clase." };
+    console.error("Error fetching class or class not found:", classError);
+    return { error: "No se encontró la clase o el profesor no ha completado su perfil." };
   }
 
   // 1. Verificar Cupo Total (incluyendo pendientes)

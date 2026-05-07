@@ -65,6 +65,7 @@ type FormValues = {
   cover_image: string;
   avatar_url: string;
   username: string;
+  whatsapp_number: string;
 };
 
 export default function ProfileEditForm({
@@ -103,6 +104,7 @@ export default function ProfileEditForm({
       cover_image: details?.cover_image || "",
       avatar_url: avatarUrl || "",
       username: username || "",
+      whatsapp_number: details?.whatsapp_number || "",
     },
   });
 
@@ -125,6 +127,7 @@ export default function ProfileEditForm({
         cover_image: data.cover_image || null,
         avatar_url: data.avatar_url || null,
         username: data.username || null,
+        whatsapp_number: data.whatsapp_number || null,
       };
 
       const result = await updateTeacherProfile(payload);
@@ -184,7 +187,7 @@ export default function ProfileEditForm({
                     const file = e.target.files?.[0];
                     if (!file) return;
                     const formData = new FormData();
-                    formData.append("file", file);
+                    formData.append("avatar", file);
                     const result = await uploadTeacherAvatar(formData);
                     if (result.url) setValue("avatar_url", result.url);
                   }}
