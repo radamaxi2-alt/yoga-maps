@@ -116,7 +116,7 @@ export default function Navbar({
               </Link>
             </li>
           )}
-          {user && (
+          {user && !isProfesor && (
             <li>
               <Link
                 href="/perfil/editar"
