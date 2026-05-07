@@ -65,7 +65,7 @@ export default function ClassesView({ initialClasses, userReservations, reservat
               // Extremely robust extraction of teacher and profile info
               const tData = cls.teacher_details;
               const teacherInfo = Array.isArray(tData) ? tData[0] : tData;
-              const profile = teacherInfo?.profiles;
+              const profile = teacherInfo?.profiles || teacherInfo;
               
               const name = profile?.full_name || cls.instructor_name || "Profesor";
               const username = profile?.username;
@@ -132,7 +132,7 @@ export default function ClassesView({ initialClasses, userReservations, reservat
                     </div>
 
                     <h3 className="mt-4 text-2xl font-black text-white uppercase tracking-tight italic">
-                      {cls.title} <span className="text-brand-500/40 text-lg not-italic lowercase font-medium ml-2">de @{username || "profesor"}</span>
+                      {cls.title} <span className="text-brand-500/40 text-lg not-italic lowercase font-medium ml-2">de @{username || cls.instructor_name || "profesor"}</span>
                     </h3>
 
                     {cls.description && (

@@ -62,7 +62,7 @@ export default function EventListView({
               {events.map((event) => {
                 const tData = event.teacher_details;
                 const teacherInfo = Array.isArray(tData) ? tData[0] : tData;
-                const profile = teacherInfo?.profiles;
+                const profile = teacherInfo?.profiles || teacherInfo; // Try both
                 const username = profile?.username;
                 const fullName = profile?.full_name || event.instructor_name || "Profesor";
 
