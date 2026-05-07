@@ -56,12 +56,12 @@ export async function updateTeacherProfile(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autorizado" };
 
-  const { full_name, username, ...details } = data;
+  const { full_name, username, avatar_url, ...details } = data;
 
   // Update profile
   const { error: pError } = await supabase
     .from("profiles")
-    .update({ full_name, username })
+    .update({ full_name, username, avatar_url })
     .eq("id", user.id);
   
   if (pError) return { error: pError.message };
@@ -83,11 +83,11 @@ export async function updateStudentProfile(data: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autorizado" };
 
-  const { full_name, username, ...details } = data;
+  const { full_name, username, avatar_url, ...details } = data;
 
   const { error: pError } = await supabase
     .from("profiles")
-    .update({ full_name, username })
+    .update({ full_name, username, avatar_url })
     .eq("id", user.id);
   
   if (pError) return { error: pError.message };

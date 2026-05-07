@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { updateStudentProfile } from "@/lib/actions/profile";
@@ -22,6 +23,7 @@ export default function StudentProfileForm({
   username: string;
   details: StudentDetail | null;
 }) {
+  const router = useRouter();
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,6 +45,9 @@ export default function StudentProfileForm({
     if (result?.error) {
       setErrorMsg(result.error);
       setIsSubmitting(false);
+    } else {
+      router.push("/");
+      router.refresh();
     }
   };
 

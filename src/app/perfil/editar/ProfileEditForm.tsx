@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback, useTransition } from "react";
+import { useRef, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { updateTeacherProfile, uploadTeacherCover, uploadTeacherAvatar, type ProfileData } from "@/lib/actions/profile";
 import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
@@ -78,6 +79,7 @@ export default function ProfileEditForm({
   username: string;
   details: TeacherDetail | null;
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState("");
   const [lat, setLat] = useState(details?.latitude || 0);
@@ -128,7 +130,12 @@ export default function ProfileEditForm({
       };
 
       const result = await updateTeacherProfile(payload);
-      if (result?.error) setErrorMsg(result.error);
+      if (result?.error) {
+        setErrorMsg(result.error);
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
     });
   };
 
