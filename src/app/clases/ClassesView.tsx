@@ -67,7 +67,7 @@ export default function ClassesView({ initialClasses, userReservations, reservat
               const teacherInfo = Array.isArray(tData) ? tData[0] : tData;
               const profile = teacherInfo?.profiles || teacherInfo;
               
-              const name = profile?.full_name || cls.instructor_name || "Profesor";
+              const name = (profile?.full_name || cls.instructor_name || "Profesor").trim();
               const username = profile?.username;
               const avatarUrl = profile?.avatar_url;
               

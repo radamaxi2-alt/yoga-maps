@@ -17,7 +17,7 @@ export default async function ClasesPage() {
   const { data: classes } = await supabase
     .from("classes")
     .select("*, teacher_details(profiles(full_name, avatar_url, username))")
-    .eq("category", "Clase")
+    .eq("category", "clase")
     .gte("scheduled_at", today.toISOString())
     .order("scheduled_at", { ascending: true });
 
