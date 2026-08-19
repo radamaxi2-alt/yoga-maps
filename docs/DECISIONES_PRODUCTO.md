@@ -40,3 +40,21 @@ En la interfaz usar `Clases disponibles`, `Cargar abono` e `Historial de asisten
 ### Prioridad
 
 Conservar las tablas durante Fase 1 y cerrar inmediatamente sus permisos. Completar la experiencia después de estabilizar mapa, clases y perfiles.
+
+## Identidad visual
+
+**Estado:** aprobada para extender a toda la web.
+
+**Fecha:** 19/08/2026.
+
+La interfaz utilizará una paleta suave de lavanda, lila y magenta empolvado. Los fondos combinarán estos tonos con imágenes naturales visibles, sin blancos puros que encandilen ni violetas excesivamente oscuros en acciones principales.
+
+Reglas acordadas:
+
+- Fondo general en degradados lavanda y rosa empolvado.
+- Imágenes naturales visibles con tratamiento suave.
+- Títulos y texto principal en ciruela.
+- Botones en lila medio, con contraste suficiente y sin violeta casi negro.
+- Tarjetas en marfil lavanda translúcido.
+- Mantener la estética tranquila y limpia, sin sobrecargar de recursos místicos.
+- No alternar automáticamente a un tema oscuro según el dispositivo: la identidad debe ser consistente.
