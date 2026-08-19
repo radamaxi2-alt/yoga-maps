@@ -106,6 +106,16 @@ Se publicó la rama `codex/fase-1-recuperacion` y Vercel generó correctamente u
 
 Se preparó `supabase/staging/003_fix_web_grants.sql` para corregir el primer problema sin debilitar RLS. El bootstrap se actualizó también para futuras instalaciones limpias.
 
+El 19/08/2026 se ejecutó `003_fix_web_grants.sql` en Staging. El blog volvió a cargar correctamente y mostró su estado vacío (`Aún no hay publicaciones en el blog`), confirmando que la lectura pública funciona y que RLS permanece activo. La incidencia queda resuelta en Staging.
+
+La revisión del código confirmó que el mapa y los formularios de ubicación necesitan Google Maps JavaScript API y Places API. La autenticación por correo y Google utiliza la ruta `/auth/callback`, dato que debe contemplarse en las URLs permitidas de Supabase Auth.
+
+El registro de prueba de profesor completó confirmación por correo, creación de username, asignación de rol y acceso al panel. Durante el recorrido se corrigieron contrastes ilegibles y se retiraron precios, límites, alias y WhatsApp ficticios que no habían sido aprobados como decisiones comerciales.
+
+Max y Delfina aprobaron una nueva dirección visual en lavandas, lilas y magentas empolvados. Se inició su aplicación global y se desactivó el cambio automático a tema oscuro, identificado como causa sistémica de varios problemas de contraste.
+
+Google Maps queda pendiente porque la prueba gratuita de la cuenta de facturación finalizó. El código, la clave y las APIs requeridas están presentes; la reactivación se posterga para evitar solicitar una tarjeta en esta etapa.
+
 ## Acceso requerido
 
 El acceso debe hacerse mediante las sesiones oficiales de Supabase y Vercel. Nunca mediante contraseñas o secretos copiados en mensajes.
