@@ -59,7 +59,7 @@ export default async function BlogPage() {
             <Link 
               key={post.id} 
               href={`/blog/${post.id}`} 
-              className="group glass flex flex-col overflow-hidden rounded-[2rem] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+              className="group glass-light flex flex-col overflow-hidden rounded-[2rem] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
             >
               <div className="p-8">
                 <div className="mb-4 flex items-center gap-3">
