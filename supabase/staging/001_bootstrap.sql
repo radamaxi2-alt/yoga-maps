@@ -349,6 +349,32 @@ create policy "Teachers create managed credit transactions"
   on public.credit_transactions for insert to authenticated
   with check (teacher_id = auth.uid());
 
+-- RLS decide qué filas puede usar cada rol, pero Postgres también requiere
+-- privilegios base sobre las tablas. Se declaran explícitamente para que la
+-- instalación sea reproducible sin depender de default privileges del dueño.
+grant usage on schema public to anon, authenticated;
+
+grant select on
+  public.profiles,
+  public.teacher_details,
+  public.classes,
+  public.posts,
+  public.post_likes
+to anon;
+
+grant select on all tables in schema public to authenticated;
+
+grant update (full_name, avatar_url, username, cover_position)
+  on public.profiles to authenticated;
+grant update on public.teacher_details, public.student_details
+  to authenticated;
+grant insert, update, delete on public.classes to authenticated;
+grant insert, update on public.class_reservations to authenticated;
+grant insert, update, delete on public.posts to authenticated;
+grant insert, delete on public.post_likes to authenticated;
+grant insert, update on public.teacher_credits to authenticated;
+grant insert on public.credit_transactions to authenticated;
+
 -- ============================================================
 -- Storage
 -- ============================================================

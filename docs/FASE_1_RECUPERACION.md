@@ -97,6 +97,15 @@ El 19/08/2026 se ejecutó `001_bootstrap.sql` en `Yoga Maps Staging` con resulta
 
 Staging ya cuenta con una base reproducible y segura. El próximo paso es conectar un despliegue web de prueba a este proyecto y realizar recorridos funcionales con cuentas ficticias de alumno y profesor.
 
+### Primer recorrido del Preview
+
+Se publicó la rama `codex/fase-1-recuperacion` y Vercel generó correctamente un Preview conectado a Staging. Inicio, mapa, profesores, clases y retiros respondieron, pero el recorrido visual detectó dos incidencias:
+
+- El blog devolvió `permission denied for table posts`. La causa es que RLS estaba configurado, pero el bootstrap no declaraba privilegios SQL base para `anon` y `authenticated`.
+- Google Maps cargó con la marca `For development purposes only`, lo que requiere revisar autorización del dominio Preview, restricciones de la API y/o facturación de Google Maps.
+
+Se preparó `supabase/staging/003_fix_web_grants.sql` para corregir el primer problema sin debilitar RLS. El bootstrap se actualizó también para futuras instalaciones limpias.
+
 ## Acceso requerido
 
 El acceso debe hacerse mediante las sesiones oficiales de Supabase y Vercel. Nunca mediante contraseñas o secretos copiados en mensajes.
