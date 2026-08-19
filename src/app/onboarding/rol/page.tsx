@@ -55,7 +55,7 @@ export default function RoleSelectionPage() {
   return (
     <section className="flex flex-1 items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
-        <div className="glass rounded-3xl p-8 shadow-xl">
+        <div className="glass-light rounded-3xl p-8 shadow-xl">
           <div className="mb-8 text-center">
             <span className="text-4xl">✨</span>
             <h1 className="mt-4 font-serif text-2xl font-bold text-foreground">

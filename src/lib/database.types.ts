@@ -20,6 +20,10 @@ export interface Database {
           full_name: string | null;
           avatar_url: string | null;
           username: string | null;
+          cover_position: number;
+          subscription_plan: string;
+          trial_expires_at: string | null;
+          community_score: number;
           created_at: string;
         };
         Insert: {
@@ -28,6 +32,10 @@ export interface Database {
           full_name?: string | null;
           avatar_url?: string | null;
           username?: string | null;
+          cover_position?: number;
+          subscription_plan?: string;
+          trial_expires_at?: string | null;
+          community_score?: number;
           created_at?: string;
         };
         Update: {
@@ -36,6 +44,10 @@ export interface Database {
           full_name?: string | null;
           avatar_url?: string | null;
           username?: string | null;
+          cover_position?: number;
+          subscription_plan?: string;
+          trial_expires_at?: string | null;
+          community_score?: number;
           created_at?: string;
         };
         Relationships: [
@@ -115,6 +127,7 @@ export interface Database {
           jitsi_room_link: string | null;
           style: string | null;
           instructor_name: string | null;
+          max_capacity: number | null;
           capacity_presential: number | null;
           capacity_online: number | null;
           total_capacity: number | null;
@@ -123,6 +136,7 @@ export interface Database {
           longitude: number | null;
           address: string | null;
           category: string | null;
+          certification_title: string | null;
           series_id: string | null;
           guest_teacher_ids: string[] | null;
           school_id: string | null;
@@ -139,6 +153,7 @@ export interface Database {
           jitsi_room_link?: string | null;
           style?: string | null;
           instructor_name?: string | null;
+          max_capacity?: number | null;
           capacity_presential?: number | null;
           capacity_online?: number | null;
           total_capacity?: number | null;
@@ -147,6 +162,7 @@ export interface Database {
           longitude?: number | null;
           address?: string | null;
           category?: string | null;
+          certification_title?: string | null;
           series_id?: string | null;
           guest_teacher_ids?: string[] | null;
           school_id?: string | null;
@@ -163,6 +179,7 @@ export interface Database {
           jitsi_room_link?: string | null;
           style?: string | null;
           instructor_name?: string | null;
+          max_capacity?: number | null;
           capacity_presential?: number | null;
           capacity_online?: number | null;
           total_capacity?: number | null;
@@ -171,7 +188,9 @@ export interface Database {
           longitude?: number | null;
           address?: string | null;
           category?: string | null;
+          certification_title?: string | null;
           series_id?: string | null;
+          guest_teacher_ids?: string[] | null;
           school_id?: string | null;
           created_at?: string;
           updated_at?: string;

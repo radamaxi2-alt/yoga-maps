@@ -91,7 +91,7 @@ export default function HomePage() {
               <Link
                 key={feature.title}
                 href={feature.href}
-                className="glass group rounded-3xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/15"
+                className="glass-light group rounded-3xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/15"
               >
                 <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-3xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
                   {feature.icon}

@@ -50,7 +50,7 @@ function PlacesAutocompleteInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder="Empezá a escribir tu dirección..."
-      className="w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+      className="w-full rounded-xl border border-[#d8b7e8] bg-[#fffaff] px-4 py-3 text-sm text-[#51345f] placeholder:text-[#a37aae] focus:border-[#b56ac9] focus:outline-none focus:ring-4 focus:ring-[#e8c8ef]/70"
     />
   );
 }
@@ -143,15 +143,19 @@ export default function ProfileEditForm({
   const hasApiKey = API_KEY && API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY";
 
   return (
-    <section className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
-      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-white/40 hover:text-brand-400 transition-colors">
+    <div className="relative isolate min-h-screen overflow-hidden bg-gradient-to-br from-[#e6d4f6] via-[#f3d8ea] to-[#d9c8f0]">
+      <div className="absolute inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-multiply" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/15 via-transparent to-[#e9d7f2]/30" />
+    <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm font-bold text-brand-700 transition-colors hover:text-brand-900">
         ← Volver al dashboard
       </Link>
 
-      <div className="mt-6 rounded-[3rem] border border-white/5 bg-surface-dark-alt/40 p-10 shadow-2xl backdrop-blur-2xl">
+      <div className="mt-6 rounded-[2.5rem] border border-white/60 bg-[#fff8ff]/88 p-6 shadow-2xl shadow-[#684576]/15 backdrop-blur-xl sm:p-10">
         <div className="mb-10">
-          <h1 className="text-3xl font-black text-white italic uppercase tracking-tighter">Configuración Visual</h1>
-          <p className="mt-2 text-sm text-brand-100/40 font-medium">Personalizá cómo te ven tus alumnos.</p>
+          <span className="mb-3 inline-flex rounded-full bg-brand-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-700 ring-1 ring-brand-200">Perfil profesional</span>
+          <h1 className="text-3xl font-black italic uppercase tracking-tighter text-[#51345f] sm:text-4xl">Configuración visual</h1>
+          <p className="mt-2 text-sm font-medium text-[#795885]">Personalizá cómo te ven tus alumnos.</p>
         </div>
         
         {errorMsg && <div className="mt-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold animate-shake">{errorMsg}</div>}
@@ -161,7 +165,7 @@ export default function ProfileEditForm({
           <div className="relative group">
             <div className="flex flex-col items-center gap-8 sm:flex-row">
               <div className="relative h-32 w-32 shrink-0">
-                <div className="h-full w-full overflow-hidden rounded-full border-4 border-brand-500/20 bg-white/5 shadow-2xl ring-4 ring-white/5 transition-transform group-hover:scale-105">
+                <div className="h-full w-full overflow-hidden rounded-full border-4 border-white bg-brand-100 shadow-xl ring-2 ring-brand-200 transition-transform group-hover:scale-105">
                   {currentAvatar ? (
                     <img src={currentAvatar} className="h-full w-full object-cover" />
                   ) : (
@@ -173,10 +177,10 @@ export default function ProfileEditForm({
               
               <div className="flex-1 space-y-4">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-black text-brand-400 uppercase tracking-widest">Foto de Perfil</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-brand-800">Foto de perfil</label>
                   <div className="group relative">
                     <span className="cursor-help text-xs opacity-40">ⓘ</span>
-                    <div className="absolute left-0 top-6 hidden w-48 rounded-xl bg-surface-dark-alt p-3 text-[10px] text-white/70 shadow-2xl group-hover:block z-50 border border-white/10">
+                    <div className="absolute left-0 top-6 z-50 hidden w-48 rounded-xl border border-[#d8b7e8] bg-[#51345f] p-3 text-[10px] text-white/85 shadow-2xl group-hover:block">
                       Recomendado: <b>500 x 500px</b> (1:1). Ideal para que tu cara se vea bien en el mapa.
                     </div>
                   </div>
@@ -191,7 +195,7 @@ export default function ProfileEditForm({
                     const result = await uploadTeacherAvatar(formData);
                     if (result.url) setValue("avatar_url", result.url);
                   }}
-                  className="block w-full text-[10px] text-white/40 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20 transition-all cursor-pointer"
+                  className="block w-full cursor-pointer text-[10px] font-medium text-brand-600 file:mr-4 file:rounded-full file:border-0 file:bg-brand-100 file:px-6 file:py-2.5 file:text-[10px] file:font-black file:text-brand-800 transition-all hover:file:bg-brand-200"
                 />
               </div>
             </div>
@@ -201,30 +205,30 @@ export default function ProfileEditForm({
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <label className="text-xs font-black text-brand-400 uppercase tracking-widest">Foto de Portada</label>
+                <label className="text-xs font-black uppercase tracking-widest text-brand-800">Foto de portada</label>
                 <div className="group relative">
                   <span className="cursor-help text-xs opacity-40">ⓘ</span>
-                  <div className="absolute left-0 top-6 hidden w-64 rounded-xl bg-surface-dark-alt p-3 text-[10px] text-white/70 shadow-2xl group-hover:block z-50 border border-white/10">
+                  <div className="absolute left-0 top-6 z-50 hidden w-64 rounded-xl border border-[#d8b7e8] bg-[#51345f] p-3 text-[10px] text-white/85 shadow-2xl group-hover:block">
                     Recomendado: <b>1200 x 400px</b> (Panorámico). Es la primera impresión de tu perfil.
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="relative aspect-[21/9] w-full overflow-hidden rounded-[2rem] border border-white/5 bg-white/5 shadow-2xl group">
+            <div className="group relative aspect-[21/9] w-full overflow-hidden rounded-[2rem] border border-dashed border-brand-300 bg-gradient-to-br from-brand-50 to-brand-100/70 shadow-inner">
               {currentCover ? (
                 <img 
                   src={currentCover} 
                   className="h-full w-full object-cover transition-all duration-300" 
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-white/10 text-xl font-bold italic uppercase tracking-widest">Sin Portada</div>
+                <div className="flex h-full w-full items-center justify-center text-xl font-bold italic uppercase tracking-widest text-brand-400">Sin portada</div>
               )}
             </div>
 
             {currentCover && (
               <div className="space-y-3 px-2">
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest italic text-center">Portada cargada correctamente</p>
+                <p className="text-center text-[10px] font-black italic uppercase tracking-widest text-brand-600">Portada cargada correctamente</p>
               </div>
             )}
 
@@ -238,32 +242,32 @@ export default function ProfileEditForm({
                 const result = await uploadTeacherCover(formData);
                 if (result.url) setValue("cover_image", result.url);
               }}
-              className="block w-full text-[10px] text-white/40 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20 transition-all cursor-pointer"
+              className="block w-full cursor-pointer text-[10px] font-medium text-brand-600 file:mr-4 file:rounded-full file:border-0 file:bg-brand-100 file:px-6 file:py-2.5 file:text-[10px] file:font-black file:text-brand-800 transition-all hover:file:bg-brand-200"
             />
           </div>
 
-          <div className="space-y-8 pt-6 border-t border-white/5">
+          <div className="space-y-8 border-t border-brand-200 pt-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
-                <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Nombre del Perfil</label>
-                <input {...register("full_name")} className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
+                <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-brand-700">Nombre del perfil</label>
+                <input {...register("full_name")} className="w-full rounded-2xl border border-[#d8b7e8] bg-[#fffaff] px-5 py-4 text-sm text-[#51345f] transition-all focus:border-[#b56ac9] focus:outline-none focus:ring-4 focus:ring-[#e8c8ef]/70" />
               </div>
               <div>
-                <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Nombre de Usuario (@username)</label>
+                <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-brand-700">Nombre de usuario (@username)</label>
                 <div className="relative">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 font-bold">@</span>
-                  <input {...register("username")} placeholder="tu_usuario" className="w-full rounded-2xl border border-white/5 bg-white/5 pl-10 pr-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-brand-400">@</span>
+                  <input {...register("username")} placeholder="tu_usuario" className="w-full rounded-2xl border border-[#d8b7e8] bg-[#fffaff] py-4 pl-10 pr-5 text-sm text-[#51345f] placeholder:text-[#a37aae] transition-all focus:border-[#b56ac9] focus:outline-none focus:ring-4 focus:ring-[#e8c8ef]/70" />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Tu Bio</label>
-              <textarea {...register("bio")} rows={4} className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all resize-none" />
+              <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-brand-700">Tu bio</label>
+              <textarea {...register("bio")} rows={4} className="w-full resize-none rounded-2xl border border-[#d8b7e8] bg-[#fffaff] px-5 py-4 text-sm text-[#51345f] transition-all focus:border-[#b56ac9] focus:outline-none focus:ring-4 focus:ring-[#e8c8ef]/70" />
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-black text-white/40 uppercase tracking-widest">Dirección Principal</label>
+              <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-brand-700">Dirección principal</label>
               {hasApiKey ? (
                 <APIProvider apiKey={API_KEY}>
                   <Controller
@@ -283,19 +287,20 @@ export default function ProfileEditForm({
                   />
                 </APIProvider>
               ) : (
-                <input {...register("address")} className="w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all" />
+                <input {...register("address")} className="w-full rounded-2xl border border-[#d8b7e8] bg-[#fffaff] px-5 py-4 text-sm text-[#51345f] transition-all focus:border-[#b56ac9] focus:outline-none focus:ring-4 focus:ring-[#e8c8ef]/70" />
               )}
             </div>
           </div>
 
           <button
             type="submit" disabled={isPending}
-            className="w-full rounded-full bg-gradient-to-r from-brand-600 to-brand-500 py-5 text-xs font-black text-white shadow-2xl shadow-brand-500/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest"
+            className="w-full rounded-full bg-gradient-to-r from-[#a95ec4] to-[#c46ab3] py-5 text-xs font-black uppercase tracking-widest text-white shadow-2xl shadow-[#9f5db8]/20 transition-all hover:-translate-y-1 hover:from-[#9d52b9] hover:to-[#b95da7] active:scale-95 disabled:opacity-50"
           >
             {isPending ? "Procesando..." : "Guardar Configuración"}
           </button>
         </form>
       </div>
     </section>
+    </div>
   );
 }
