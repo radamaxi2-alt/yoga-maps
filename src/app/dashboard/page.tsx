@@ -163,83 +163,44 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Subscription Plan Status */}
-        <div className="mb-12 glass rounded-[2.5rem] p-8 border-brand-500/20 bg-gradient-to-br from-brand-600/5 to-transparent">
+        {/* Account status — pricing and publishing limits are still under product definition. */}
+        <div className="mb-12 rounded-[2.5rem] border border-brand-200 bg-white/90 p-8 shadow-xl shadow-brand-900/5 backdrop-blur-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full ring-1 ring-brand-500/30">Mi Suscripción</span>
+                <span className="rounded-full bg-brand-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-700 ring-1 ring-brand-200">Mi cuenta</span>
               </div>
-              <h2 className="text-3xl font-black text-white capitalize">Plan {profile.subscription_plan}</h2>
-              <p className="text-sm text-brand-100/50 mt-1">
-                Límite de <b>{profile.subscription_plan === 'zen' ? '12' : profile.subscription_plan === 'namaste' ? '80' : 'Ilimitado'}</b> clases por mes de suscripción.
+              <h2 className="text-3xl font-black text-brand-950">Perfil gratuito de profesor</h2>
+              <p className="mt-2 max-w-2xl text-sm font-medium text-brand-700">
+                Tu perfil profesional está activo. Los planes para publicar clases y experiencias todavía están en preparación.
               </p>
             </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold text-white/40 uppercase">Cupo Mensual</p>
-                <p className="text-lg font-black text-white">
-                  {profile.subscription_plan === 'zen' ? '12' : profile.subscription_plan === 'namaste' ? '80' : '∞'}
-                </p>
-              </div>
-              <Link 
-                href="/dashboard/planes"
-                className="rounded-full bg-white px-8 py-4 text-xs font-black text-brand-700 shadow-xl transition-all hover:bg-brand-50 hover:-translate-y-1 active:scale-95"
-              >
-                GESTIONAR PLAN
-              </Link>
-            </div>
-          </div>
-
-          {/* Transfer Info */}
-          <div className="mt-8 grid sm:grid-cols-3 gap-4 border-t border-white/5 pt-8">
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-              <p className="text-[9px] font-black text-brand-400 uppercase mb-1">Plan Zen</p>
-              <p className="text-lg font-black text-white">$15,000 <span className="text-[10px] opacity-40">/mes</span></p>
-            </div>
-            <div className="bg-brand-500/10 p-4 rounded-2xl border border-brand-500/20 ring-1 ring-brand-500/30">
-              <p className="text-[9px] font-black text-cyan-400 uppercase mb-1">Plan Namasté</p>
-              <p className="text-lg font-black text-white">$50,000 <span className="text-[10px] opacity-40">/mes</span></p>
-            </div>
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-              <p className="text-[9px] font-black text-brand-400 uppercase mb-1">Plan Escuela</p>
-              <p className="text-lg font-black text-white">$100,000 <span className="text-[10px] opacity-40">/mes</span></p>
-            </div>
-          </div>
-          
-          <div className="mt-8 flex flex-col items-center justify-center p-6 rounded-[2rem] bg-brand-500/5 border border-brand-500/10">
-            <p className="text-sm font-bold text-white mb-2">Alias para transferencias:</p>
-            <p className="text-2xl font-black text-brand-400 tracking-tight select-all">minado.runfla.lemon</p>
-            
-            <a 
-              href={`https://wa.me/542231234567?text=${encodeURIComponent(`Hola! Ya transferí para mi Plan ${profile.subscription_plan}. Mi usuario es: ${profile.full_name} (${user.email})`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-3 text-xs font-black text-white shadow-xl hover:scale-105 transition-all"
+            <Link
+              href="/perfil/editar"
+              className="rounded-full bg-brand-700 px-7 py-3.5 text-xs font-black uppercase tracking-wide text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-800"
             >
-              <span>💬</span> ENVIAR COMPROBANTE POR WHATSAPP
-            </a>
+              Completar mi perfil
+            </Link>
           </div>
         </div>
 
         {/* Low Credit Notifications */}
         {lowCredits && lowCredits.length > 0 && (
-          <div className="mb-12 glass rounded-[2.5rem] p-8 border-amber-500/20 bg-amber-500/5">
-            <h3 className="text-xs font-black text-amber-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <div className="mb-12 rounded-[2.5rem] border border-amber-200 bg-amber-50/90 p-8 shadow-lg">
+            <h3 className="mb-6 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-amber-800">
               <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
               Alumnos con Créditos Bajos
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               {lowCredits.map((lc: any) => (
-                <div key={lc.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                <div key={lc.id} className="group flex items-center justify-between rounded-2xl border border-amber-200 bg-white p-4 transition-all hover:border-amber-300">
                    <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
                       {lc.profiles?.full_name?.[0] || "?"}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">{lc.profiles?.full_name || "Alumno desconocido"}</p>
-                      <p className="text-[10px] text-amber-400 font-black uppercase">Último crédito disponible</p>
+                      <p className="text-sm font-bold text-brand-950">{lc.profiles?.full_name || "Alumno desconocido"}</p>
+                      <p className="text-[10px] font-black uppercase text-amber-700">Último crédito disponible</p>
                     </div>
                   </div>
                   <a 
@@ -265,14 +226,14 @@ export default async function DashboardPage() {
           {classes && classes.length > 0 ? (
             <TeacherCalendar classes={classes as any} isSchool={isSchool} />
           ) : (
-            <div className="mt-16 text-center glass rounded-[2.5rem] p-16 border-dashed border-white/10">
+            <div className="mt-16 rounded-[2.5rem] border border-dashed border-brand-300 bg-white/80 p-16 text-center shadow-lg shadow-brand-900/5">
               <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-500/10 text-5xl shadow-inner">📅</div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic">No tenés clases creadas</h3>
-              <p className="mt-3 text-brand-100/40 font-medium">Empezá a cargar tu cartelera hoy mismo para verla en tu calendario.</p>
+              <h3 className="text-2xl font-black italic uppercase tracking-tighter text-brand-950">No tenés clases creadas</h3>
+              <p className="mt-3 font-medium text-brand-700">Cuando habilitemos las publicaciones, tus clases aparecerán acá y en el mapa.</p>
               {!isSchool && (
                 <Link
                   href="/dashboard/nueva-clase"
-                  className="mt-8 inline-block rounded-full bg-white px-10 py-4 text-xs font-black text-brand-700 uppercase tracking-widest shadow-xl transition-all hover:scale-105"
+                  className="mt-8 inline-block rounded-full bg-brand-700 px-10 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl transition-all hover:scale-105 hover:bg-brand-800"
                 >
                   Cargar mi primer clase
                 </Link>
