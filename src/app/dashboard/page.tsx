@@ -89,7 +89,8 @@ export default async function DashboardPage() {
   const isSchool = teacher?.teacher_type === "escuela";
 
   return (
-    <div className="min-h-screen bg-brand-50/30 dark:bg-surface-dark pb-16">
+    <div className="relative isolate min-h-screen overflow-hidden bg-gradient-to-br from-[#e6d4f6] via-[#f3d8ea] to-[#d9c8f0] pb-16">
+      <div className="absolute inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-multiply" />
       {/* Landing Page Header Component */}
       <div className="relative h-48 w-full sm:h-64 lg:h-72">
         {teacher?.cover_image ? (
@@ -164,20 +165,20 @@ export default async function DashboardPage() {
         )}
 
         {/* Account status — pricing and publishing limits are still under product definition. */}
-        <div className="mb-12 rounded-[2.5rem] border border-brand-200 bg-white/90 p-8 shadow-xl shadow-brand-900/5 backdrop-blur-xl">
+        <div className="mb-12 rounded-[2.5rem] border border-white/60 bg-[#fff8ff]/88 p-8 shadow-xl shadow-[#684576]/10 backdrop-blur-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="rounded-full bg-brand-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-700 ring-1 ring-brand-200">Mi cuenta</span>
               </div>
-              <h2 className="text-3xl font-black text-brand-950">Perfil gratuito de profesor</h2>
-              <p className="mt-2 max-w-2xl text-sm font-medium text-brand-700">
+              <h2 className="text-3xl font-black text-[#51345f]">Perfil gratuito de profesor</h2>
+              <p className="mt-2 max-w-2xl text-sm font-medium text-[#795885]">
                 Tu perfil profesional está activo. Los planes para publicar clases y experiencias todavía están en preparación.
               </p>
             </div>
             <Link
               href="/perfil/editar"
-              className="rounded-full bg-brand-700 px-7 py-3.5 text-xs font-black uppercase tracking-wide text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-800"
+              className="rounded-full bg-[#a95ec4] px-7 py-3.5 text-xs font-black uppercase tracking-wide text-white shadow-lg shadow-[#9f5db8]/20 transition-all hover:-translate-y-0.5 hover:bg-[#9950b4]"
             >
               Completar mi perfil
             </Link>
@@ -226,14 +227,14 @@ export default async function DashboardPage() {
           {classes && classes.length > 0 ? (
             <TeacherCalendar classes={classes as any} isSchool={isSchool} />
           ) : (
-            <div className="mt-16 rounded-[2.5rem] border border-dashed border-brand-300 bg-white/80 p-16 text-center shadow-lg shadow-brand-900/5">
+            <div className="mt-16 rounded-[2.5rem] border border-dashed border-[#c99bd9] bg-[#fff8ff]/82 p-16 text-center shadow-lg shadow-[#684576]/10 backdrop-blur-lg">
               <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-500/10 text-5xl shadow-inner">📅</div>
-              <h3 className="text-2xl font-black italic uppercase tracking-tighter text-brand-950">No tenés clases creadas</h3>
-              <p className="mt-3 font-medium text-brand-700">Cuando habilitemos las publicaciones, tus clases aparecerán acá y en el mapa.</p>
+              <h3 className="text-2xl font-black italic uppercase tracking-tighter text-[#51345f]">No tenés clases creadas</h3>
+              <p className="mt-3 font-medium text-[#795885]">Cuando habilitemos las publicaciones, tus clases aparecerán acá y en el mapa.</p>
               {!isSchool && (
                 <Link
                   href="/dashboard/nueva-clase"
-                  className="mt-8 inline-block rounded-full bg-brand-700 px-10 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl transition-all hover:scale-105 hover:bg-brand-800"
+                  className="mt-8 inline-block rounded-full bg-[#a95ec4] px-10 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#9f5db8]/20 transition-all hover:scale-105 hover:bg-[#9950b4]"
                 >
                   Cargar mi primer clase
                 </Link>
