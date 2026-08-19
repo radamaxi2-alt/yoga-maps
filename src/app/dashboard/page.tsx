@@ -200,7 +200,7 @@ export default async function DashboardPage() {
                       {lc.profiles?.full_name?.[0] || "?"}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-brand-950">{lc.profiles?.full_name || "Alumno desconocido"}</p>
+                      <p className="text-sm font-bold text-brand-900">{lc.profiles?.full_name || "Alumno desconocido"}</p>
                       <p className="text-[10px] font-black uppercase text-amber-700">Último crédito disponible</p>
                     </div>
                   </div>
