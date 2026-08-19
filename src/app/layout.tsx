@@ -62,7 +62,7 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col bg-background text-foreground font-sans">
         <UsernameGuard user={user} profile={profile} />
         {/* Soft background image overlay */}
-        <div className="fixed inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-5 dark:opacity-10 mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
+        <div className="pointer-events-none fixed inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-15 mix-blend-multiply" />
         <Navbar initialUser={user} initialIsProfesor={isProfesor} />
         <main className="flex-1">{children}</main>
         <Footer />
