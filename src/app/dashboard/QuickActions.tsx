@@ -18,11 +18,11 @@ export default function QuickActions({ userId, isSchool }: QuickActionsProps) {
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-      <h2 className="text-2xl font-black text-white tracking-tight italic uppercase">Gestión de Clases</h2>
+      <h2 className="text-2xl font-black text-brand-950 tracking-tight italic uppercase">Gestión de Clases</h2>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           onClick={copyProfileLink}
-          className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-[10px] font-black text-brand-400 shadow-xl transition-all hover:bg-white/10 hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-6 py-3.5 text-[10px] font-black text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
         >
           🔗 INVITAR ALUMNOS
         </button>
