@@ -32,7 +32,7 @@ export default async function NuevoPostPage() {
         &larr; Volver al blog
       </Link>
 
-      <div className="glass mt-6 rounded-3xl p-8 sm:p-10 shadow-xl shadow-brand-500/5">
+      <div className="glass-light mt-6 rounded-3xl p-8 sm:p-10 shadow-xl shadow-brand-500/5">
         <div className="mb-8">
           <div className="flex items-center justify-center text-brand-500 text-3xl mb-4">🪷</div>
           <h1 className="text-3xl font-bold text-foreground text-center">Escribir Artículo</h1>
